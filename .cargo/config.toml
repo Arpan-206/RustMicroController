@@ -2,4 +2,13 @@
 target = "riscv32im-unknown-none-elf"
 
 [target.riscv32im-unknown-none-elf]
-rustflags = ["-C", "link-arg=-Tlinker.ld"]
+linker = "riscv64-unknown-elf-gcc"
+rustflags = [
+    "-C", "link-arg=-Tlinker.ld",
+    "-C", "link-arg=-nostdlib",
+    "-C", "link-arg=-mno-relax",
+    "-C", "link-arg=-Wl,--no-gc-sections",   # ← -Wl, prefix
+    "-C", "target-feature=+zicsr",
+    "-C", "link-arg=-march=rv32im_zicsr",
+    "-C", "link-arg=-mabi=ilp32",
+]

@@ -3,9 +3,14 @@ name = "rv32-bare"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "rv32-bare"
+path = "src/main.rs"
+
 [profile.release]
-opt-level = "s"    # optimise for size — sensible on bare metal
+opt-level = "s"
 lto = true
+panic = "abort"
 
 [build-dependencies]
 cc = "1.0"

@@ -1,15 +1,19 @@
+ENTRY(init)
+
 MEMORY {
-    RAM (rwx) : ORIGIN = 0x00000000, LENGTH = 16K
+    MMODE (rwx) : ORIGIN = 0x00000000, LENGTH = 256K
+    UMODE (rwx) : ORIGIN = 0x00040000, LENGTH = 256K
 }
 
 SECTIONS {
     . = 0x00000000;
-    .text : {
-        *(.text.start)   /* _start must be first */
-        *(.text*)
-    } > RAM
-    .rodata : { *(.rodata*) } > RAM
-    .data   : { *(.data*)   } > RAM
-    .bss    : { *(.bss*)    } > RAM
+    .text.start : { KEEP(*(.text.start)) } > MMODE
+    .text       : { KEEP(*(.text*))      } > MMODE
+    .rodata     : { *(.rodata*)           } > MMODE
+    .bss        : { *(.bss*) *(COMMON)    } > MMODE
     _bss_end = .;
+
+    . = 0x00040000;
+    .utext   : { KEEP(*(.utext*))  } > UMODE
+    .urodata : { *(.urodata*)      } > UMODE
 }

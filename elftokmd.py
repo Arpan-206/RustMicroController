@@ -1,53 +1,60 @@
-#!/bin/python3
+#!/usr/bin/env python3
+import re
 import subprocess
-import sys 
+import sys
+
 
 def main():
-    file = sys.argv[1] 
-    parse(file) 
-    pass
+    if len(sys.argv) < 2:
+        print("Usage: elftokmd.py <elf>", file=sys.stderr)
+        sys.exit(1)
 
-def parse(inFilePath : str):
-    file_contents = get_obj_dump(inFilePath) 
+    elf = sys.argv[1]
 
-    initLine = True
-    commentBuffer = []
-    address = 0
-    split_line = file_contents.splitlines() 
-    print("KMD")
-    for line in split_line:
-           
-        if (initLine is True):
-            initLine = False
-            commentBuffer = []
+    result = subprocess.run(
+        ["riscv64-unknown-elf-objdump", "-d", "--no-show-raw-insn", elf],
+        capture_output=True,
+        text=True,
+    )
+
+    # Regex: lines like "   1a4:   li   a0, 1"
+    insn_re = re.compile(r"^\s*([0-9a-f]+):\s+(.+)$")
+
+    entries = []  # list of (address, instruction_string)
+
+    for line in result.stdout.splitlines():
+        m = insn_re.match(line)
+        if not m:
             continue
-
-        if (line.startswith("Dissasembly")):
-            initLine = True 
+        addr_str, insn = m.group(1), m.group(2).strip()
+        # Skip lines where the "instruction" is raw hex bytes (no-show-raw-insn
+        # already removes them, but guard anyway)
+        if not insn:
             continue
+        entries.append((int(addr_str, 16), insn))
 
-        if (line == ""):
-            initLine = True 
+    if not entries:
+        print("No instructions found — is the ELF empty?", file=sys.stderr)
+        sys.exit(1)
+
+    # Emit KMD format: one instruction per line, address in hex
+    # Use objdump WITH raw hex for the actual KMD encoding
+    result2 = subprocess.run(
+        ["riscv64-unknown-elf-objdump", "-d", elf], capture_output=True, text=True
+    )
+
+    insn_raw_re = re.compile(r"^\s*([0-9a-f]+):\s+([0-9a-f]+)\s+(.+)$")
+
+    for line in result2.stdout.splitlines():
+        m = insn_raw_re.match(line)
+        if not m:
             continue
+        addr = int(m.group(1), 16)
+        hexval = m.group(2).strip()
+        mnemonic = m.group(3).strip()
+        # Pad hex to 8 digits
+        print(f"0x{addr:x} : {hexval.zfill(8)} ; {mnemonic}")
 
 
-        if (line.startswith("SRCSRC")):
-            commentBuffer.append(line.removeprefix("SRCSRC:")) 
-            continue
-           
-        
-        address = int(line.split(':')[0], base=16)
-        data = line.split(':')[1].split()[0]
-        assembly = "".join(line.split(':')[1].split()[1:])
-
-        print(f"{hex(address)} : {data} ; {assembly}")
-        for comment in commentBuffer:
-            print(f"{hex(address)} :  ; {comment}")
-
-        commentBuffer = []
-        
-
-def get_obj_dump(path) -> str:
-    return subprocess.check_output(['./elftokmd.sh', path]).decode('utf-8')
-
-main()
+if __name__ == "__main__":
+    main()
