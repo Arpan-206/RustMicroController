@@ -1,0 +1,26 @@
+   0.046640833s  INFO prepare_target{force=false package_id=rv32-bare v0.1.0 (/Users/arpanpandey/Code/University/RustMicro) target="rv32-bare"}: cargo::core::compiler::fingerprint: fingerprint error for rv32-bare v0.1.0 (/Users/arpanpandey/Code/University/RustMicro)/Check { test: true }/TargetInner { name: "rv32-bare", doc: true, ..: with_path("/Users/arpanpandey/Code/University/RustMicro/src/main.rs", Edition2021) }
+   0.046680250s  INFO prepare_target{force=false package_id=rv32-bare v0.1.0 (/Users/arpanpandey/Code/University/RustMicro) target="rv32-bare"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/arpanpandey/Code/University/RustMicro/target/riscv32im-unknown-none-elf/debug/.fingerprint/rv32-bare-c74c003fe061a9e3/test-bin-rv32-bare`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: std::backtrace::Backtrace::create
+   1: cargo_util::paths::read_bytes
+   2: cargo_util::paths::read
+   3: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   4: cargo::core::compiler::fingerprint::prepare_target
+   5: cargo::core::compiler::compile
+   6: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   7: cargo::ops::cargo_compile::compile_ws
+   8: cargo::ops::cargo_compile::compile_with_exec
+   9: cargo::ops::cargo_compile::compile
+  10: cargo::commands::check::exec
+  11: <cargo::cli::Exec>::exec
+  12: cargo::main
+  13: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  14: std::rt::lang_start::<()>::{closure#0}
+  15: std::rt::lang_start_internal
+  16: _main
+    Checking rv32-bare v0.1.0 (/Users/arpanpandey/Code/University/RustMicro)
+error: could not compile `rv32-bare` (bin "rv32-bare" test) due to 1 previous error

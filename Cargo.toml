@@ -1,0 +1,8 @@
+[package]
+name = "rv32-bare"
+version = "0.1.0"
+edition = "2021"
+
+[profile.release]
+opt-level = "s"    # optimise for size — sensible on bare metal
+lto = true

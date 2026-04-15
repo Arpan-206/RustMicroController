@@ -1,0 +1,10 @@
+KMD
+0x0 : 00004117 ; auipcsp,0x4
+0x4 : 00010113 ; mvsp,sp
+0x8 : 00000097 ; auipcra,0x0
+0xc : 00c080e7 ; jalr12(ra)#14<rust_main>
+0x10 : 0000006f ; j10<_start+0x10>
+0x14 : 00010537 ; luia0,0x10
+0x18 : 00100593 ; lia1,1
+0x1c : 00b52023 ; swa1,0(a0)#10000<_stack_top+0xc000>
+0x20 : 0000006f ; j20<rust_main+0xc>
