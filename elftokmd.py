@@ -38,7 +38,7 @@ def load_instructions(elf):
     insn_re = re.compile(r"^\s*([0-9a-f]+):\s+([0-9a-f]+)\s+(.+)$")
     section_re = re.compile(r"^Disassembly of section (.+):$")
     # Only parse instructions from sections that are actually loaded into memory
-    load_sections = {".text.start", ".text", ".utext"}
+    load_sections = {".ktext.start", ".ktext", ".utext.start", ".text", ".rodata", ".urodata"}
     in_load_section = False
     for line in result.stdout.splitlines():
         sm = section_re.match(line)

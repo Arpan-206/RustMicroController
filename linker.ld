@@ -7,13 +7,15 @@ MEMORY {
 
 SECTIONS {
     . = 0x00000000;
-    .text.start : { KEEP(*(.text.start)) } > MMODE
-    .text       : { KEEP(*(.text*))      } > MMODE
-    .rodata     : { *(.rodata*)           } > MMODE
-    .bss        : { *(.bss*) *(COMMON)    } > MMODE
+    .ktext.start : { KEEP(*(.ktext.start)) } > MMODE
+    .ktext       : { KEEP(*(.ktext))       } > MMODE
+    .krodata     : { *(.krodata*)          } > MMODE
+    .bss         : { *(.bss*) *(COMMON)    } > MMODE
     _bss_end = .;
 
     . = 0x00040000;
-    .utext   : { KEEP(*(.utext.start)) KEEP(*(.utext*))  } > UMODE
-    .urodata : { *(.urodata*)      } > UMODE
+    .utext.start : { KEEP(*(.utext.start)) } > UMODE
+    .text        : { *(.text*)             } > UMODE
+    .rodata      : { *(.rodata*)           } > UMODE
+    .urodata     : { *(.urodata*)          } > UMODE
 }

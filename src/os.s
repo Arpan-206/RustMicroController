@@ -35,7 +35,7 @@
         # ================================================================
         # M-MODE
         # ================================================================
-        .section .text.start
+        .section .ktext.start, "ax"
 
 init:
         la      sp, os_stack_top
@@ -52,7 +52,7 @@ init:
         csrw    MEPC, t0
         mret
 
-        .section .text
+        .section .ktext, "ax"
 
 trap_entry:
         csrrw   sp, MSCRATCH, sp
@@ -233,7 +233,7 @@ delay:
         bnez    t4, 1b
         ret
 
-        .section .bss
+        .section .bss, "aw"
         .balign 4
         .space  OS_STACK_SIZE
 os_stack_top:
@@ -241,7 +241,7 @@ os_stack_top:
         # ================================================================
         # U-MODE (0x00040000)
         # ================================================================
-        .section .utext.start
+        .section .utext.start, "ax"
         .balign 4
         .space  256
 user_stack_top:
