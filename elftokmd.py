@@ -29,14 +29,24 @@ def load_raw_bytes(elf):
 
 def load_instructions(elf):
     """Return dict {addr: (hexword, mnemonic)} for real instructions via -D,
-    excluding .insn pseudo-ops (which objdump emits for non-instruction bytes)."""
+    excluding .insn pseudo-ops and non-LOAD sections (.comment, .riscv.attributes, etc.)."""
     result = subprocess.run(
         ["riscv64-unknown-elf-objdump", "-D", elf],
         capture_output=True, text=True,
     )
     insns = {}
     insn_re = re.compile(r"^\s*([0-9a-f]+):\s+([0-9a-f]+)\s+(.+)$")
+    section_re = re.compile(r"^Disassembly of section (.+):$")
+    # Only parse instructions from sections that are actually loaded into memory
+    load_sections = {".text.start", ".text", ".utext"}
+    in_load_section = False
     for line in result.stdout.splitlines():
+        sm = section_re.match(line)
+        if sm:
+            in_load_section = sm.group(1).strip() in load_sections
+            continue
+        if not in_load_section:
+            continue
         m = insn_re.match(line)
         if not m:
             continue

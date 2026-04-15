@@ -1,13 +1,12 @@
 0x0 : 00000117 ; auipc	sp,0x0
 0x4 : 3c410113 ; addi	sp,sp,964 # 3c4 <_bss_end>
-0x8 : 01007663 ; bgeu	zero,a6,14 <delay_short>
+0x8 : 34011073 ; csrw	mscratch,sp
 0xc : 00000297 ; auipc	t0,0x0
 0x10 : 03028293 ; addi	t0,t0,48 # 3c <trap_entry>
 0x14 : 30529073 ; csrw	mtvec,t0
 0x18 : 00000097 ; auipc	ra,0x0
 0x1c : 1bc080e7 ; jalr	444(ra) # 1d4 <lcd_clear>
-0x20 : 00007a5f ; 6369 7273      	.insn	6, 0x727363697a5f
-0x22 : 69 63
+0x20 : 000022b7 ; lui	t0,0x2
 0x24 : 80028293 ; addi	t0,t0,-2048 # 1800 <MPP_MASK>
 0x28 : 3002b073 ; csrc	mstatus,t0
 0x2c : 00040297 ; auipc	t0,0x40
