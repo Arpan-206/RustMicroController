@@ -12,7 +12,7 @@ def main():
     elf = sys.argv[1]
 
     result = subprocess.run(
-        ["riscv64-unknown-elf-objdump", "-d", "--no-show-raw-insn", elf],
+        ["riscv64-unknown-elf-objdump", "-D", "--no-show-raw-insn", elf],
         capture_output=True,
         text=True,
     )
@@ -40,7 +40,7 @@ def main():
     # Emit KMD format: one instruction per line, address in hex
     # Use objdump WITH raw hex for the actual KMD encoding
     result2 = subprocess.run(
-        ["riscv64-unknown-elf-objdump", "-d", elf], capture_output=True, text=True
+        ["riscv64-unknown-elf-objdump", "-D", elf], capture_output=True, text=True
     )
 
     insn_raw_re = re.compile(r"^\s*([0-9a-f]+):\s+([0-9a-f]+)\s+(.+)$")
