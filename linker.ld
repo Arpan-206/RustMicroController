@@ -1,23 +1,15 @@
 MEMORY {
-    SYSRAM (rwx) : ORIGIN = 0x00000000, LENGTH = 16K
+    RAM (rwx) : ORIGIN = 0x00000000, LENGTH = 16K
 }
 
 SECTIONS {
     . = 0x00000000;
-
     .text : {
-        KEEP(*(.text.start))   /* boot entry first */
+        *(.text.start)   /* _start must be first */
         *(.text*)
-    } > SYSRAM
-
-    .rodata : { *(.rodata*) } > SYSRAM
-    .data   : { *(.data*)   } > SYSRAM
-
-    .bss (NOLOAD) : {
-        _bss_start = .;
-        *(.bss*)
-        _bss_end = .;
-    } > SYSRAM
-
-    _stack_top = ORIGIN(SYSRAM) + LENGTH(SYSRAM);
+    } > RAM
+    .rodata : { *(.rodata*) } > RAM
+    .data   : { *(.data*)   } > RAM
+    .bss    : { *(.bss*)    } > RAM
+    _bss_end = .;
 }
