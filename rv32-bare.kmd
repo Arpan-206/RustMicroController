@@ -37,7 +37,7 @@
 0x90 : 00010337 ; lui	t1,0x10
 0x94 : 70030313 ; addi	t1,t1,1792 # 10700 <HALT_PORT>
 0x98 : deadc2b7 ; lui	t0,0xdeadc
-0x9c : eef28293 ; addi	t0,t0,-273 # deadbeef <WORLD+0xdea9bd7c>
+0x9c : eef28293 ; addi	t0,t0,-273 # deadbeef <_ZN9rv32_bare5WORLD17h8ee7ec37961f93b0E+0xdea9bd21>
 0xa0 : 00532023 ; sw	t0,0(t1)
 0xa4 : fedff06f ; j	90 <trap_error>
 0xa8 : 00c12283 ; lw	t0,12(sp)
@@ -241,33 +241,56 @@
 0x400fc : 00 00 00 00
 0x40100 : 00000117 ; auipc	sp,0x0
 0x40104 : 00010113 ; mv	sp,sp
-0x40108 : 00000517 ; auipc	a0,0x0
-0x4010c : 06450513 ; addi	a0,a0,100 # 4016c <HELLO>
-0x40110 : 00000097 ; auipc	ra,0x0
-0x40114 : 024080e7 ; jalr	36(ra) # 40134 <print_str>
-0x40118 : 00000517 ; auipc	a0,0x0
-0x4011c : 05b50513 ; addi	a0,a0,91 # 40173 <WORLD>
-0x40120 : 00000097 ; auipc	ra,0x0
-0x40124 : 014080e7 ; jalr	20(ra) # 40134 <print_str>
-0x40128 : 00000893 ; li	a7,0
-0x4012c : 00000073 ; ecall
-0x40130 : 0000006f ; j	40130 <USER_CODE+0x30>
-0x40134 : ff810113 ; addi	sp,sp,-8 # 400f8 <HALT_PORT+0x2f9f8>
-0x40138 : 00112023 ; sw	ra,0(sp)
-0x4013c : 00812223 ; sw	s0,4(sp)
-0x40140 : 00050413 ; mv	s0,a0
-0x40144 : 00040503 ; lb	a0,0(s0)
-0x40148 : 00050a63 ; beqz	a0,4015c <ps_done>
-0x4014c : 00100893 ; li	a7,1
-0x40150 : 00000073 ; ecall
-0x40154 : 00140413 ; addi	s0,s0,1
-0x40158 : fedff06f ; j	40144 <ps_loop>
-0x4015c : 00412403 ; lw	s0,4(sp)
-0x40160 : 00012083 ; lw	ra,0(sp)
-0x40164 : 00810113 ; addi	sp,sp,8
-0x40168 : 00008067 ; ret
-0x4016c : 41 72 70 61
-0x40170 : 6E 0A 00 57
-0x40174 : 6F 72 6C 64
-0x40178 : 21 0D 48 65
-0x4017c : 6C 6C 6F 00
+0x40108 : 00000097 ; auipc	ra,0x0
+0x4010c : 088080e7 ; jalr	136(ra) # 40190 <user_main>
+0x40110 : 00000893 ; li	a7,0
+0x40114 : 00000073 ; ecall
+0x40118 : 0000006f ; j	40118 <USER_CODE+0x18>
+0x4011c : ff010113 ; addi	sp,sp,-16 # 400f0 <HALT_PORT+0x2f9f0>
+0x40120 : 00112623 ; sw	ra,12(sp)
+0x40124 : 00000097 ; auipc	ra,0x0
+0x40128 : 00c080e7 ; jalr	12(ra) # 40130 <_ZN9rv32_bare7syscall6ecall017h48fd53def3e3c829E>
+0x4012c : ff9ff06f ; j	40124 <_ZN9rv32_bare7syscall4exit17ha8d7595f88e09683E+0x8>
+0x40130 : 00000893 ; li	a7,0
+0x40134 : 00000073 ; ecall
+0x40138 : 00008067 ; ret
+0x4013c : 00100893 ; li	a7,1
+0x40140 : 00000073 ; ecall
+0x40144 : 00008067 ; ret
+0x40148 : ff010113 ; addi	sp,sp,-16
+0x4014c : 00112623 ; sw	ra,12(sp)
+0x40150 : 00812423 ; sw	s0,8(sp)
+0x40154 : 00912223 ; sw	s1,4(sp)
+0x40158 : 00058413 ; mv	s0,a1
+0x4015c : 00054583 ; lbu	a1,0(a0)
+0x40160 : 00150493 ; addi	s1,a0,1
+0x40164 : 00058513 ; mv	a0,a1
+0x40168 : 00000097 ; auipc	ra,0x0
+0x4016c : fd4080e7 ; jalr	-44(ra) # 4013c <_ZN9rv32_bare7syscall6ecall117h644034742966468aE>
+0x40170 : fff40413 ; addi	s0,s0,-1
+0x40174 : 00048513 ; mv	a0,s1
+0x40178 : fe0412e3 ; bnez	s0,4015c <_ZN9rv32_bare7syscall9print_str17hb4e269d9a1fe92e3E+0x14>
+0x4017c : 00c12083 ; lw	ra,12(sp)
+0x40180 : 00812403 ; lw	s0,8(sp)
+0x40184 : 00412483 ; lw	s1,4(sp)
+0x40188 : 01010113 ; addi	sp,sp,16
+0x4018c : 00008067 ; ret
+0x40190 : ff010113 ; addi	sp,sp,-16
+0x40194 : 00112623 ; sw	ra,12(sp)
+0x40198 : 00040537 ; lui	a0,0x40
+0x4019c : 1c850513 ; addi	a0,a0,456 # 401c8 <_ZN9rv32_bare5HELLO17h993a9665184a4b20E>
+0x401a0 : 00600593 ; li	a1,6
+0x401a4 : 00000097 ; auipc	ra,0x0
+0x401a8 : fa4080e7 ; jalr	-92(ra) # 40148 <_ZN9rv32_bare7syscall9print_str17hb4e269d9a1fe92e3E>
+0x401ac : 00040537 ; lui	a0,0x40
+0x401b0 : 1ce50513 ; addi	a0,a0,462 # 401ce <_ZN9rv32_bare5WORLD17h8ee7ec37961f93b0E>
+0x401b4 : 00c00593 ; li	a1,12
+0x401b8 : 00000097 ; auipc	ra,0x0
+0x401bc : f90080e7 ; jalr	-112(ra) # 40148 <_ZN9rv32_bare7syscall9print_str17hb4e269d9a1fe92e3E>
+0x401c0 : 00000097 ; auipc	ra,0x0
+0x401c4 : f5c080e7 ; jalr	-164(ra) # 4011c <_ZN9rv32_bare7syscall4exit17ha8d7595f88e09683E>
+0x401c8 : 41 72 70 61
+0x401cc : 6E 0A 57 6F
+0x401d0 : 72 6C 64 21
+0x401d4 : 0D 48 65 6C
+0x401d8 : 6C 6F

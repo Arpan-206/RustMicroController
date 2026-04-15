@@ -14,6 +14,6 @@ SECTIONS {
     _bss_end = .;
 
     . = 0x00040000;
-    .utext   : { KEEP(*(.utext*))  } > UMODE
+    .utext   : { KEEP(*(.utext.start)) KEEP(*(.utext*))  } > UMODE
     .urodata : { *(.urodata*)      } > UMODE
 }

@@ -241,41 +241,15 @@ os_stack_top:
         # ================================================================
         # U-MODE (0x00040000)
         # ================================================================
-        .section .utext
+        .section .utext.start
         .balign 4
         .space  256
 user_stack_top:
 
+        .global USER_CODE
 USER_CODE:
         la      sp, user_stack_top
-
-        la      a0, HELLO
-        call    print_str
-
-        la      a0, WORLD
-        call    print_str
-
+        call    user_main
         li      a7, SYS_EXIT
         ecall
         j       .
-
-print_str:
-        addi    sp, sp, -8
-        sw      ra, 0(sp)
-        sw      s0, 4(sp)
-        mv      s0, a0
-ps_loop:
-        lb      a0, 0(s0)
-        beqz    a0, ps_done
-        li      a7, SYS_LCD_CHAR
-        ecall
-        addi    s0, s0, 1
-        j       ps_loop
-ps_done:
-        lw      s0, 4(sp)
-        lw      ra, 0(sp)
-        addi    sp, sp, 8
-        ret
-
-HELLO:  .byte 'A','r','p','a','n',0x0a,0
-WORLD:  .byte 'W','o','r','l','d','!',0x0d,'H','e','l','l','o',0
