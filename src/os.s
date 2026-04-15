@@ -33,13 +33,13 @@
         .global USER_CODE
 
         # ================================================================
-        # M-MODE: boot
+        # M-MODE
         # ================================================================
         .section .text.start
 
 init:
         la      sp, os_stack_top
-        csrw    MSCRATCH, sp        # MSCRATCH always holds OS stack top
+        csrw    MSCRATCH, sp
 
         la      t0, trap_entry
         csrw    MTVEC, t0
@@ -47,40 +47,21 @@ init:
         call    lcd_clear
 
         li      t0, MPP_MASK
-        csrc    MSTATUS, t0         # MPP = 00 → U-mode on mret
+        csrc    MSTATUS, t0
         la      t0, USER_CODE
         csrw    MEPC, t0
         mret
 
-        # ================================================================
-        # TRAP HANDLER
-        #
-        # Frame layout (on OS stack, grows down):
-        #   sp+ 0 : ra
-        #   sp+ 4 : t0
-        #   sp+ 8 : a7
-        #   sp+12 : MEPC
-        #   sp+16 : user sp   ← key addition, avoids MSCRATCH corruption
-        #
-        # MSCRATCH invariant: always holds OS stack top.
-        # Never read MSCRATCH at trap_return — user sp is in the frame.
-        # ================================================================
         .section .text
 
 trap_entry:
-        csrrw   sp, MSCRATCH, sp    # sp = OS stack top, MSCRATCH = user sp
-        addi    sp, sp, -20
+        csrrw   sp, MSCRATCH, sp
+        addi    sp, sp, -16
         sw      ra,  0(sp)
         sw      t0,  4(sp)
         sw      a7,  8(sp)
         csrr    t0,  MEPC
         sw      t0, 12(sp)
-        csrr    t0,  MSCRATCH       # MSCRATCH still holds user sp
-        sw      t0, 16(sp)          # save user sp into frame
-
-        # Restore MSCRATCH to OS stack top for nested trap safety
-        addi    t0, sp, 20          # t0 = os_stack_top (before frame alloc)
-        csrw    MSCRATCH, t0        # MSCRATCH = OS stack top again ✓
 
         csrr    t0,  MCAUSE
         li      t1,  CAUSE_ECALL_U
@@ -101,32 +82,26 @@ sys_table:
         .word   sys_lcd_clear
 
 trap_error:
-        li      t0, HALT_PORT
-        li      t1, 0xDEADBEEF
-        sw      t1, 0(t0)
+        li      t1, HALT_PORT
+        li      t0, 0xDEADBEEF
+        sw      t0, 0(t1)
         j       trap_error
 
-        # ── trap_return ──────────────────────────────────────────────
-        # Restores user sp directly from frame — never touches MSCRATCH.
-        # a0 is not restored (syscall return value).
 trap_return:
         lw      t0, 12(sp)
-        addi    t0,  t0, 4          # advance MEPC past ecall
+        addi    t0,  t0, 4
         csrw    MEPC, t0
         lw      a7,  8(sp)
         lw      t0,  4(sp)
         lw      ra,  0(sp)
-        lw      sp, 16(sp)          # restore user sp directly from frame ✓
-        mret                        # MSCRATCH still = OS stack top for next trap
-
-        # ================================================================
-        # SYSCALL HANDLERS
-        # ================================================================
+        addi    sp,  sp, 16
+        csrrw   sp,  MSCRATCH, sp
+        mret
 
 sys_exit:
-        li      t0, HALT_PORT
-        li      t1, 0
-        sw      t1, 0(t0)
+        li      t1, HALT_PORT
+        li      t0, 0
+        sw      t0, 0(t1)
         j       sys_exit
 
 sys_lcd_char:
@@ -145,20 +120,17 @@ sys_lcd_clear:
         addi    sp, sp, 4
         j       trap_return
 
-        # ================================================================
-        # LCD DRIVER
-        # ================================================================
-
 lcd_print_char:
         addi    sp, sp, -4
         sw      ra, 0(sp)
-        li      t0, ascii_lf
-        beq     a0, t0, lpc_newline
-        li      t0, ascii_cr
-        beq     a0, t0, lpc_home
-        li      t0, ascii_ff
-        beq     a0, t0, lpc_clear
-        li      a1, r_output
+        li      t5, ascii_lf
+        beq     a0, t5, lpc_newline
+        li      t5, ascii_cr
+        beq     a0, t5, lpc_home
+        li      t5, ascii_ff
+        beq     a0, t5, lpc_clear
+        li      a2, LCD_BASE
+        li      a3, r_output
         call    lcd_send
         j       lpc_done
 lpc_newline:
@@ -177,8 +149,9 @@ lpc_done:
 lcd_new_line:
         addi    sp, sp, -4
         sw      ra, 0(sp)
+        li      a2, LCD_BASE
         li      a0, lcd_cmd_line2
-        li      a1, lcd_ctrl_cmd
+        li      a3, lcd_ctrl_cmd
         call    lcd_send
         lw      ra, 0(sp)
         addi    sp, sp, 4
@@ -187,8 +160,9 @@ lcd_new_line:
 lcd_home_line:
         addi    sp, sp, -4
         sw      ra, 0(sp)
+        li      a2, LCD_BASE
         li      a0, lcd_cmd_line1
-        li      a1, lcd_ctrl_cmd
+        li      a3, lcd_ctrl_cmd
         call    lcd_send
         lw      ra, 0(sp)
         addi    sp, sp, 4
@@ -197,48 +171,38 @@ lcd_home_line:
 lcd_clear:
         addi    sp, sp, -4
         sw      ra, 0(sp)
+        li      a2, LCD_BASE
+        li      a3, lcd_ctrl_cmd
         li      a0, lcd_cmd_clear
-        li      a1, lcd_ctrl_cmd
         call    lcd_send
         li      a0, lcd_cmd_home
-        li      a1, lcd_ctrl_cmd
         call    lcd_send
         lw      ra, 0(sp)
         addi    sp, sp, 4
         ret
 
 lcd_send:
-        addi    sp, sp, -12
+        addi    sp, sp, -4
         sw      ra, 0(sp)
-        sw      s0, 4(sp)
-        sw      s1, 8(sp)
-        mv      s0, a0
-        mv      s1, a1
         call    lcd_poll
-        mv      a0, s0
-        mv      a1, s1
         call    lcd_write
-        lw      s1, 8(sp)
-        lw      s0, 4(sp)
         lw      ra, 0(sp)
-        addi    sp, sp, 12
+        addi    sp, sp, 4
         ret
 
 lcd_poll:
         addi    sp, sp, -4
         sw      ra, 0(sp)
-        li      t2, LCD_BASE
 lp_wait:
-        li      t3, r_input
-        ori     t3, t3, lcd_e_bit
-        sb      t3, 1(t2)
-        li      a0, delay_short
+        li      t2, r_input
+        li      a1, delay_short
+        ori     t2, t2, lcd_e_bit
+        sb      t2, 1(a2)
         call    delay
-        lb      t3, 0(t2)
-        li      t0, r_input
-        andi    t0, t0, lcd_e_clear
-        sb      t0, 1(t2)
-        li      a0, delay_poll
+        lb      t3, 0(a2)
+        andi    t2, t2, lcd_e_clear
+        sb      t2, 1(a2)
+        li      a1, delay_poll
         call    delay
         andi    t3, t3, lcd_busy_flag
         bnez    t3, lp_wait
@@ -249,46 +213,69 @@ lp_wait:
 lcd_write:
         addi    sp, sp, -4
         sw      ra, 0(sp)
-        li      t2, LCD_BASE
-        mv      t3, a1
-        ori     t3, t3, lcd_e_bit
-        sb      a0, 0(t2)
-        sb      t3, 1(t2)
-        li      a0, delay_short
+        mv      t2, a3
+        ori     t2, t2, lcd_e_bit
+        sb      a0, 0(a2)
+        sb      t2, 1(a2)
+        li      a1, delay_short
         call    delay
-        andi    t3, t3, lcd_e_clear
-        sb      t3, 1(t2)
+        andi    t2, t2, lcd_e_clear
+        sb      t2, 1(a2)
         lw      ra, 0(sp)
         addi    sp, sp, 4
         ret
 
+        # delay(a1) — original uses a1, kept as-is
 delay:
-        beqz    a0, delay_done
+        mv      t4, a1
 1:
-        addi    a0, a0, -1
-        bnez    a0, 1b
-delay_done:
+        addi    t4, t4, -1
+        bnez    t4, 1b
         ret
 
-        # ── OS stack ─────────────────────────────────────────────────
         .section .bss
         .balign 4
         .space  OS_STACK_SIZE
 os_stack_top:
 
         # ================================================================
-        # U-MODE ENTRY (0x00040000)
+        # U-MODE (0x00040000)
         # ================================================================
         .section .utext
         .balign 4
+        .space  256
+user_stack_top:
 
 USER_CODE:
-        lui     sp, %hi(user_stack_top)
-        addi    sp, sp, %lo(user_stack_top)
-        call    user_main
+        la      sp, user_stack_top
+
+        la      a0, HELLO
+        call    print_str
+
+        la      a0, WORLD
+        call    print_str
+
         li      a7, SYS_EXIT
         ecall
         j       .
 
-        .space  256
-user_stack_top:
+print_str:
+        addi    sp, sp, -8
+        sw      ra, 0(sp)
+        sw      s0, 4(sp)
+        mv      s0, a0
+ps_loop:
+        lb      a0, 0(s0)
+        beqz    a0, ps_done
+        li      a7, SYS_LCD_CHAR
+        ecall
+        addi    s0, s0, 1
+        j       ps_loop
+ps_done:
+        lw      s0, 4(sp)
+        lw      ra, 0(sp)
+        addi    sp, sp, 8
+        ret
+
+HELLO:  .byte 'A','r','p','a','n',0x0a,0
+WORLD:  .byte 'W','o','r','l','d','!',0x0d,'H','e','l','l','o',0
