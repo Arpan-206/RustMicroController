@@ -72,6 +72,9 @@ init:
         la      t0, trap_entry
         csrw    MTVEC, t0
 
+        la      t0, tick_count
+        sw      zero, 0(t0)
+
         # Enable timer interrupt in PLIC (button is polled)
         li      t0, PLIC_BASE
         li      t1, TIMER_IRQ_BIT
