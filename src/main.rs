@@ -11,15 +11,6 @@ use core::panic::PanicInfo;
 pub extern "C" fn user_main() {
     lcd::clear();
     lcd::print_str(b"Press button");
-
-    loop {
-        // Foreground idles; ISR sets dirty flag when button pressed.
-        if syscall::shared_get() != 0 {
-            syscall::shared_clr();
-            lcd::clear();
-            lcd::print_str(b"BTN!");
-        }
-    }
 }
 
 #[panic_handler]
