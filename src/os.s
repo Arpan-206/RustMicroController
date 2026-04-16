@@ -1,4 +1,5 @@
         # ── constants ──────────────────────────────────────────────
+        .equ LED_PORT,       0x00010000
         .equ HALT_PORT,      0x00010700
         .equ LCD_BASE,       0x00010100
         .equ MPP_MASK,       0x00001800
@@ -162,7 +163,13 @@ isr_external:
         andi    t1, t1, BTN_IRQ_BIT
         beqz    t1, isr_return          # not the button — ignore
 
-        # Set dirty flag (button is level-sensitive, cleared when released)
+        # Toggle LED0 directly (like test6)
+        li      t0, LED_PORT
+        lbu     t2, 0(t0)
+        xori    t2, t2, 0x01
+        sb      t2, 0(t0)
+
+        # Also set dirty flag for foreground
         la      t0, isr_dirty
         li      t1, 1
         sw      t1, 0(t0)
