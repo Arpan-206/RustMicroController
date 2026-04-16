@@ -1,223 +1,260 @@
 0x0 : 00000117 ; auipc	sp,0x0
-0x4 : 47410113 ; addi	sp,sp,1140 # 474 <_bss_end>
+0x4 : 50810113 ; addi	sp,sp,1288 # 508 <_bss_end>
 0x8 : 34011073 ; csrw	mscratch,sp
 0xc : 00000297 ; auipc	t0,0x0
-0x10 : 03028293 ; addi	t0,t0,48 # 3c <trap_entry>
+0x10 : 05c28293 ; addi	t0,t0,92 # 68 <trap_entry>
 0x14 : 30529073 ; csrw	mtvec,t0
-0x18 : 00000097 ; auipc	ra,0x0
-0x1c : 268080e7 ; jalr	616(ra) # 280 <lcd_clear>
-0x20 : 000022b7 ; lui	t0,0x2
-0x24 : 80028293 ; addi	t0,t0,-2048 # 1800 <MPP_MASK>
-0x28 : 3002b073 ; csrc	mstatus,t0
-0x2c : 00040297 ; auipc	t0,0x40
-0x30 : 0d428293 ; addi	t0,t0,212 # 40100 <USER_CODE>
-0x34 : 34129073 ; csrw	mepc,t0
-0x38 : 30200073 ; mret
-0x3c : 34011173 ; csrrw	sp,mscratch,sp
-0x40 : ff010113 ; addi	sp,sp,-16
-0x44 : 00112023 ; sw	ra,0(sp)
-0x48 : 00512223 ; sw	t0,4(sp)
-0x4c : 01112423 ; sw	a7,8(sp)
-0x50 : 341022f3 ; csrr	t0,mepc
-0x54 : 00512623 ; sw	t0,12(sp)
-0x58 : 342022f3 ; csrr	t0,mcause
-0x5c : 00800313 ; li	t1,8
-0x60 : 02629e63 ; bne	t0,t1,9c <trap_error>
-0x64 : 00600293 ; li	t0,6
-0x68 : 0258fa63 ; bgeu	a7,t0,9c <trap_error>
-0x6c : 00000297 ; auipc	t0,0x0
-0x70 : 01828293 ; addi	t0,t0,24 # 84 <sys_table>
-0x74 : 00289313 ; slli	t1,a7,0x2
-0x78 : 006282b3 ; add	t0,t0,t1
-0x7c : 0002a283 ; lw	t0,0(t0)
-0x80 : 00028067 ; jr	t0
-0x84 : 3C 01 00 00
-0x88 : 50 01 00 00
-0x8c : 6C 01 00 00
-0x90 : 88 01 00 00
-0x94 : 94 01 00 00
-0x98 : A4 01 00 00
-0x9c : 00010337 ; lui	t1,0x10
-0xa0 : 70030313 ; addi	t1,t1,1792 # 10700 <HALT_PORT>
-0xa4 : deadc2b7 ; lui	t0,0xdeadc
-0xa8 : eef28293 ; addi	t0,t0,-273 # deadbeef <user_main+0xdea9bdbb>
-0xac : 00532023 ; sw	t0,0(t1)
-0xb0 : fedff06f ; j	9c <trap_error>
-0xb4 : 00c12283 ; lw	t0,12(sp)
-0xb8 : 00428293 ; addi	t0,t0,4
-0xbc : 34129073 ; csrw	mepc,t0
-0xc0 : 00812883 ; lw	a7,8(sp)
-0xc4 : 00412283 ; lw	t0,4(sp)
-0xc8 : 00012083 ; lw	ra,0(sp)
-0xcc : 01010113 ; addi	sp,sp,16
-0xd0 : 34011173 ; csrrw	sp,mscratch,sp
-0xd4 : 30200073 ; mret
-0xd8 : 00f2f293 ; andi	t0,t0,15
-0xdc : 00b00313 ; li	t1,11
-0xe0 : 02629e63 ; bne	t0,t1,11c <isr_return>
-0xe4 : 000102b7 ; lui	t0,0x10
-0xe8 : 40028293 ; addi	t0,t0,1024 # 10400 <PLIC_BASE>
-0xec : 0082a303 ; lw	t1,8(t0)
-0xf0 : 02037313 ; andi	t1,t1,32
-0xf4 : 02030463 ; beqz	t1,11c <isr_return>
-0xf8 : 000102b7 ; lui	t0,0x10
-0xfc : 0002c283 ; lbu	t0,0(t0) # 10000 <LED_PORT>
-0x100 : 0012c293 ; xori	t0,t0,1
-0x104 : 00010337 ; lui	t1,0x10
-0x108 : 00530023 ; sb	t0,0(t1) # 10000 <LED_PORT>
-0x10c : 00000297 ; auipc	t0,0x0
-0x110 : 26428293 ; addi	t0,t0,612 # 370 <isr_dirty>
-0x114 : 00100313 ; li	t1,1
-0x118 : 0062a023 ; sw	t1,0(t0)
-0x11c : 00c12283 ; lw	t0,12(sp)
-0x120 : 34129073 ; csrw	mepc,t0
-0x124 : 00812883 ; lw	a7,8(sp)
-0x128 : 00412283 ; lw	t0,4(sp)
-0x12c : 00012083 ; lw	ra,0(sp)
-0x130 : 01010113 ; addi	sp,sp,16
-0x134 : 34011173 ; csrrw	sp,mscratch,sp
-0x138 : 30200073 ; mret
-0x13c : 00010337 ; lui	t1,0x10
-0x140 : 70030313 ; addi	t1,t1,1792 # 10700 <HALT_PORT>
-0x144 : 00000293 ; li	t0,0
-0x148 : 00532023 ; sw	t0,0(t1)
-0x14c : ff1ff06f ; j	13c <sys_exit>
-0x150 : ffc10113 ; addi	sp,sp,-4
-0x154 : 00112023 ; sw	ra,0(sp)
-0x158 : 00000097 ; auipc	ra,0x0
-0x15c : 06c080e7 ; jalr	108(ra) # 1c4 <lcd_print_char>
-0x160 : 00012083 ; lw	ra,0(sp)
-0x164 : 00410113 ; addi	sp,sp,4
-0x168 : f4dff06f ; j	b4 <trap_return>
-0x16c : ffc10113 ; addi	sp,sp,-4
-0x170 : 00112023 ; sw	ra,0(sp)
-0x174 : 00000097 ; auipc	ra,0x0
-0x178 : 10c080e7 ; jalr	268(ra) # 280 <lcd_clear>
-0x17c : 00012083 ; lw	ra,0(sp)
-0x180 : 00410113 ; addi	sp,sp,4
-0x184 : f31ff06f ; j	b4 <trap_return>
-0x188 : 00000097 ; auipc	ra,0x0
-0x18c : 02c080e7 ; jalr	44(ra) # 1b4 <btn_read>
-0x190 : f25ff06f ; j	b4 <trap_return>
-0x194 : 00000297 ; auipc	t0,0x0
-0x198 : 1dc28293 ; addi	t0,t0,476 # 370 <isr_dirty>
-0x19c : 0002a503 ; lw	a0,0(t0)
-0x1a0 : f15ff06f ; j	b4 <trap_return>
-0x1a4 : 00000297 ; auipc	t0,0x0
-0x1a8 : 1cc28293 ; addi	t0,t0,460 # 370 <isr_dirty>
-0x1ac : 0002a023 ; sw	zero,0(t0)
-0x1b0 : f05ff06f ; j	b4 <trap_return>
-0x1b4 : 000102b7 ; lui	t0,0x10
-0x1b8 : 00128293 ; addi	t0,t0,1 # 10001 <BTN_PORT>
-0x1bc : 0002c503 ; lbu	a0,0(t0)
-0x1c0 : 00008067 ; ret
-0x1c4 : ffc10113 ; addi	sp,sp,-4
-0x1c8 : 00112023 ; sw	ra,0(sp)
-0x1cc : 00a00f13 ; li	t5,10
-0x1d0 : 03e50663 ; beq	a0,t5,1fc <lpc_newline>
-0x1d4 : 00d00f13 ; li	t5,13
-0x1d8 : 03e50863 ; beq	a0,t5,208 <lpc_home>
-0x1dc : 00c00f13 ; li	t5,12
-0x1e0 : 03e50a63 ; beq	a0,t5,214 <lpc_clear>
-0x1e4 : 00010637 ; lui	a2,0x10
-0x1e8 : 10060613 ; addi	a2,a2,256 # 10100 <LCD_BASE>
-0x1ec : 00a00693 ; li	a3,10
-0x1f0 : 00000097 ; auipc	ra,0x0
-0x1f4 : 0c8080e7 ; jalr	200(ra) # 2b8 <lcd_send>
-0x1f8 : 0240006f ; j	21c <lpc_done>
-0x1fc : 00000097 ; auipc	ra,0x0
-0x200 : 02c080e7 ; jalr	44(ra) # 228 <lcd_new_line>
-0x204 : 0180006f ; j	21c <lpc_done>
+0x18 : 00000a93 ; li	s5,0
+0x1c : 000102b7 ; lui	t0,0x10
+0x20 : 40028293 ; addi	t0,t0,1024 # 10400 <PLIC_BASE>
+0x24 : 03000313 ; li	t1,48
+0x28 : 0062a223 ; sw	t1,4(t0)
+0x2c : 0002a623 ; sw	zero,12(t0)
+0x30 : 000012b7 ; lui	t0,0x1
+0x34 : 80028293 ; addi	t0,t0,-2048 # 800 <MEIE_BIT>
+0x38 : 3042a073 ; csrs	mie,t0
+0x3c : 00800293 ; li	t0,8
+0x40 : 3002a073 ; csrs	mstatus,t0
+0x44 : 00000097 ; auipc	ra,0x0
+0x48 : 2d0080e7 ; jalr	720(ra) # 314 <lcd_clear>
+0x4c : 000022b7 ; lui	t0,0x2
+0x50 : 80028293 ; addi	t0,t0,-2048 # 1800 <MPP_MASK>
+0x54 : 3002b073 ; csrc	mstatus,t0
+0x58 : 00040297 ; auipc	t0,0x40
+0x5c : 0a828293 ; addi	t0,t0,168 # 40100 <USER_CODE>
+0x60 : 34129073 ; csrw	mepc,t0
+0x64 : 30200073 ; mret
+0x68 : 34011173 ; csrrw	sp,mscratch,sp
+0x6c : fe810113 ; addi	sp,sp,-24
+0x70 : 00112023 ; sw	ra,0(sp)
+0x74 : 00512223 ; sw	t0,4(sp)
+0x78 : 00612423 ; sw	t1,8(sp)
+0x7c : 00712623 ; sw	t2,12(sp)
+0x80 : 01112823 ; sw	a7,16(sp)
+0x84 : 341022f3 ; csrr	t0,mepc
+0x88 : 00512a23 ; sw	t0,20(sp)
+0x8c : 342022f3 ; csrr	t0,mcause
+0x90 : 80000337 ; lui	t1,0x80000
+0x94 : 00b30313 ; addi	t1,t1,11 # 8000000b <CAUSE_M_EXT>
+0x98 : 08628463 ; beq	t0,t1,120 <isr_dispatch>
+0x9c : 00800313 ; li	t1,8
+0xa0 : 02629e63 ; bne	t0,t1,dc <trap_error>
+0xa4 : 00600293 ; li	t0,6
+0xa8 : 0258fa63 ; bgeu	a7,t0,dc <trap_error>
+0xac : 00000297 ; auipc	t0,0x0
+0xb0 : 01828293 ; addi	t0,t0,24 # c4 <sys_table>
+0xb4 : 00289313 ; slli	t1,a7,0x2
+0xb8 : 006282b3 ; add	t0,t0,t1
+0xbc : 0002a283 ; lw	t0,0(t0)
+0xc0 : 00028067 ; jr	t0
+0xc4 : D0 01 00 00
+0xc8 : E4 01 00 00
+0xcc : 00 02 00 00
+0xd0 : 1C 02 00 00
+0xd4 : 28 02 00 00
+0xd8 : 38 02 00 00
+0xdc : 00010337 ; lui	t1,0x10
+0xe0 : 70030313 ; addi	t1,t1,1792 # 10700 <HALT_PORT>
+0xe4 : deadc2b7 ; lui	t0,0xdeadc
+0xe8 : eef28293 ; addi	t0,t0,-273 # deadbeef <CAUSE_M_EXT+0x5eadbee4>
+0xec : 00532023 ; sw	t0,0(t1)
+0xf0 : fedff06f ; j	dc <trap_error>
+0xf4 : 01412283 ; lw	t0,20(sp)
+0xf8 : 00428293 ; addi	t0,t0,4
+0xfc : 34129073 ; csrw	mepc,t0
+0x100 : 01012883 ; lw	a7,16(sp)
+0x104 : 00c12383 ; lw	t2,12(sp)
+0x108 : 00812303 ; lw	t1,8(sp)
+0x10c : 00412283 ; lw	t0,4(sp)
+0x110 : 00012083 ; lw	ra,0(sp)
+0x114 : 01810113 ; addi	sp,sp,24
+0x118 : 34011173 ; csrrw	sp,mscratch,sp
+0x11c : 30200073 ; mret
+0x120 : 000102b7 ; lui	t0,0x10
+0x124 : 40028293 ; addi	t0,t0,1024 # 10400 <PLIC_BASE>
+0x128 : 0082a303 ; lw	t1,8(t0)
+0x12c : 02037393 ; andi	t2,t1,32
+0x130 : 00039863 ; bnez	t2,140 <button_isr>
+0x134 : 01037393 ; andi	t2,t1,16
+0x138 : 04039463 ; bnez	t2,180 <timer_isr>
+0x13c : 06c0006f ; j	1a8 <isr_return>
+0x140 : 000102b7 ; lui	t0,0x10
+0x144 : 0002c383 ; lbu	t2,0(t0) # 10000 <LED_PORT>
+0x148 : 0013c393 ; xori	t2,t2,1
+0x14c : 00728023 ; sb	t2,0(t0)
+0x150 : 000102b7 ; lui	t0,0x10
+0x154 : 20028293 ; addi	t0,t0,512 # 10200 <TIMER_BASE>
+0x158 : 000f4337 ; lui	t1,0xf4
+0x15c : 23f30313 ; addi	t1,t1,575 # f423f <TIMER_1S>
+0x160 : 0062a223 ; sw	t1,4(t0)
+0x164 : 00b00313 ; li	t1,11
+0x168 : 0062aa23 ; sw	t1,20(t0)
+0x16c : 00000297 ; auipc	t0,0x0
+0x170 : 29828293 ; addi	t0,t0,664 # 404 <isr_dirty>
+0x174 : 00100313 ; li	t1,1
+0x178 : 0062a023 ; sw	t1,0(t0)
+0x17c : 02c0006f ; j	1a8 <isr_return>
+0x180 : 000102b7 ; lui	t0,0x10
+0x184 : 20028293 ; addi	t0,t0,512 # 10200 <TIMER_BASE>
+0x188 : 01000313 ; li	t1,16
+0x18c : 0062a823 ; sw	t1,16(t0)
+0x190 : 000f4337 ; lui	t1,0xf4
+0x194 : 23f30313 ; addi	t1,t1,575 # f423f <TIMER_1S>
+0x198 : 0062a223 ; sw	t1,4(t0)
+0x19c : 00b00313 ; li	t1,11
+0x1a0 : 0062aa23 ; sw	t1,20(t0)
+0x1a4 : 001a8a93 ; addi	s5,s5,1
+0x1a8 : 01412283 ; lw	t0,20(sp)
+0x1ac : 34129073 ; csrw	mepc,t0
+0x1b0 : 01012883 ; lw	a7,16(sp)
+0x1b4 : 00c12383 ; lw	t2,12(sp)
+0x1b8 : 00812303 ; lw	t1,8(sp)
+0x1bc : 00412283 ; lw	t0,4(sp)
+0x1c0 : 00012083 ; lw	ra,0(sp)
+0x1c4 : 01810113 ; addi	sp,sp,24
+0x1c8 : 34011173 ; csrrw	sp,mscratch,sp
+0x1cc : 30200073 ; mret
+0x1d0 : 00010337 ; lui	t1,0x10
+0x1d4 : 70030313 ; addi	t1,t1,1792 # 10700 <HALT_PORT>
+0x1d8 : 00000293 ; li	t0,0
+0x1dc : 00532023 ; sw	t0,0(t1)
+0x1e0 : ff1ff06f ; j	1d0 <sys_exit>
+0x1e4 : ffc10113 ; addi	sp,sp,-4
+0x1e8 : 00112023 ; sw	ra,0(sp)
+0x1ec : 00000097 ; auipc	ra,0x0
+0x1f0 : 06c080e7 ; jalr	108(ra) # 258 <lcd_print_char>
+0x1f4 : 00012083 ; lw	ra,0(sp)
+0x1f8 : 00410113 ; addi	sp,sp,4
+0x1fc : ef9ff06f ; j	f4 <trap_return>
+0x200 : ffc10113 ; addi	sp,sp,-4
+0x204 : 00112023 ; sw	ra,0(sp)
 0x208 : 00000097 ; auipc	ra,0x0
-0x20c : 04c080e7 ; jalr	76(ra) # 254 <lcd_home_line>
-0x210 : 00c0006f ; j	21c <lpc_done>
-0x214 : 00000097 ; auipc	ra,0x0
-0x218 : 06c080e7 ; jalr	108(ra) # 280 <lcd_clear>
-0x21c : 00012083 ; lw	ra,0(sp)
-0x220 : 00410113 ; addi	sp,sp,4
-0x224 : 00008067 ; ret
-0x228 : ffc10113 ; addi	sp,sp,-4
-0x22c : 00112023 ; sw	ra,0(sp)
-0x230 : 00010637 ; lui	a2,0x10
-0x234 : 10060613 ; addi	a2,a2,256 # 10100 <LCD_BASE>
-0x238 : 0c000513 ; li	a0,192
-0x23c : 00800693 ; li	a3,8
-0x240 : 00000097 ; auipc	ra,0x0
-0x244 : 078080e7 ; jalr	120(ra) # 2b8 <lcd_send>
-0x248 : 00012083 ; lw	ra,0(sp)
-0x24c : 00410113 ; addi	sp,sp,4
-0x250 : 00008067 ; ret
-0x254 : ffc10113 ; addi	sp,sp,-4
-0x258 : 00112023 ; sw	ra,0(sp)
-0x25c : 00010637 ; lui	a2,0x10
-0x260 : 10060613 ; addi	a2,a2,256 # 10100 <LCD_BASE>
-0x264 : 08000513 ; li	a0,128
-0x268 : 00800693 ; li	a3,8
-0x26c : 00000097 ; auipc	ra,0x0
-0x270 : 04c080e7 ; jalr	76(ra) # 2b8 <lcd_send>
-0x274 : 00012083 ; lw	ra,0(sp)
-0x278 : 00410113 ; addi	sp,sp,4
-0x27c : 00008067 ; ret
-0x280 : ffc10113 ; addi	sp,sp,-4
-0x284 : 00112023 ; sw	ra,0(sp)
-0x288 : 00010637 ; lui	a2,0x10
-0x28c : 10060613 ; addi	a2,a2,256 # 10100 <LCD_BASE>
-0x290 : 00800693 ; li	a3,8
-0x294 : 00100513 ; li	a0,1
-0x298 : 00000097 ; auipc	ra,0x0
-0x29c : 020080e7 ; jalr	32(ra) # 2b8 <lcd_send>
-0x2a0 : 00200513 ; li	a0,2
-0x2a4 : 00000097 ; auipc	ra,0x0
-0x2a8 : 014080e7 ; jalr	20(ra) # 2b8 <lcd_send>
-0x2ac : 00012083 ; lw	ra,0(sp)
-0x2b0 : 00410113 ; addi	sp,sp,4
-0x2b4 : 00008067 ; ret
-0x2b8 : ffc10113 ; addi	sp,sp,-4
-0x2bc : 00112023 ; sw	ra,0(sp)
-0x2c0 : 00000097 ; auipc	ra,0x0
-0x2c4 : 01c080e7 ; jalr	28(ra) # 2dc <lcd_poll>
-0x2c8 : 00000097 ; auipc	ra,0x0
-0x2cc : 060080e7 ; jalr	96(ra) # 328 <lcd_write>
-0x2d0 : 00012083 ; lw	ra,0(sp)
-0x2d4 : 00410113 ; addi	sp,sp,4
-0x2d8 : 00008067 ; ret
-0x2dc : ffc10113 ; addi	sp,sp,-4
-0x2e0 : 00112023 ; sw	ra,0(sp)
-0x2e4 : 00900393 ; li	t2,9
-0x2e8 : 01400593 ; li	a1,20
-0x2ec : 0043e393 ; ori	t2,t2,4
-0x2f0 : 007600a3 ; sb	t2,1(a2)
-0x2f4 : 00000097 ; auipc	ra,0x0
-0x2f8 : 06c080e7 ; jalr	108(ra) # 360 <delay>
-0x2fc : 00060e03 ; lb	t3,0(a2)
-0x300 : 0fb3f393 ; andi	t2,t2,251
-0x304 : 007600a3 ; sb	t2,1(a2)
-0x308 : 03000593 ; li	a1,48
-0x30c : 00000097 ; auipc	ra,0x0
-0x310 : 054080e7 ; jalr	84(ra) # 360 <delay>
-0x314 : 080e7e13 ; andi	t3,t3,128
-0x318 : fc0e16e3 ; bnez	t3,2e4 <lp_wait>
-0x31c : 00012083 ; lw	ra,0(sp)
-0x320 : 00410113 ; addi	sp,sp,4
-0x324 : 00008067 ; ret
-0x328 : ffc10113 ; addi	sp,sp,-4
-0x32c : 00112023 ; sw	ra,0(sp)
-0x330 : 00068393 ; mv	t2,a3
-0x334 : 0043e393 ; ori	t2,t2,4
-0x338 : 00a60023 ; sb	a0,0(a2)
-0x33c : 007600a3 ; sb	t2,1(a2)
-0x340 : 01400593 ; li	a1,20
-0x344 : 00000097 ; auipc	ra,0x0
-0x348 : 01c080e7 ; jalr	28(ra) # 360 <delay>
-0x34c : 0fb3f393 ; andi	t2,t2,251
-0x350 : 007600a3 ; sb	t2,1(a2)
-0x354 : 00012083 ; lw	ra,0(sp)
-0x358 : 00410113 ; addi	sp,sp,4
-0x35c : 00008067 ; ret
-0x360 : 00058e93 ; mv	t4,a1
-0x364 : fffe8e93 ; addi	t4,t4,-1
-0x368 : fe0e9ee3 ; bnez	t4,364 <delay+0x4>
+0x20c : 10c080e7 ; jalr	268(ra) # 314 <lcd_clear>
+0x210 : 00012083 ; lw	ra,0(sp)
+0x214 : 00410113 ; addi	sp,sp,4
+0x218 : eddff06f ; j	f4 <trap_return>
+0x21c : 00000097 ; auipc	ra,0x0
+0x220 : 02c080e7 ; jalr	44(ra) # 248 <btn_read>
+0x224 : ed1ff06f ; j	f4 <trap_return>
+0x228 : 00000297 ; auipc	t0,0x0
+0x22c : 1dc28293 ; addi	t0,t0,476 # 404 <isr_dirty>
+0x230 : 0002a503 ; lw	a0,0(t0)
+0x234 : ec1ff06f ; j	f4 <trap_return>
+0x238 : 00000297 ; auipc	t0,0x0
+0x23c : 1cc28293 ; addi	t0,t0,460 # 404 <isr_dirty>
+0x240 : 0002a023 ; sw	zero,0(t0)
+0x244 : eb1ff06f ; j	f4 <trap_return>
+0x248 : 000102b7 ; lui	t0,0x10
+0x24c : 00128293 ; addi	t0,t0,1 # 10001 <BTN_PORT>
+0x250 : 0002c503 ; lbu	a0,0(t0)
+0x254 : 00008067 ; ret
+0x258 : ffc10113 ; addi	sp,sp,-4
+0x25c : 00112023 ; sw	ra,0(sp)
+0x260 : 00a00f13 ; li	t5,10
+0x264 : 03e50663 ; beq	a0,t5,290 <lpc_newline>
+0x268 : 00d00f13 ; li	t5,13
+0x26c : 03e50863 ; beq	a0,t5,29c <lpc_home>
+0x270 : 00c00f13 ; li	t5,12
+0x274 : 03e50a63 ; beq	a0,t5,2a8 <lpc_clear>
+0x278 : 00010637 ; lui	a2,0x10
+0x27c : 10060613 ; addi	a2,a2,256 # 10100 <LCD_BASE>
+0x280 : 00a00693 ; li	a3,10
+0x284 : 00000097 ; auipc	ra,0x0
+0x288 : 0c8080e7 ; jalr	200(ra) # 34c <lcd_send>
+0x28c : 0240006f ; j	2b0 <lpc_done>
+0x290 : 00000097 ; auipc	ra,0x0
+0x294 : 02c080e7 ; jalr	44(ra) # 2bc <lcd_new_line>
+0x298 : 0180006f ; j	2b0 <lpc_done>
+0x29c : 00000097 ; auipc	ra,0x0
+0x2a0 : 04c080e7 ; jalr	76(ra) # 2e8 <lcd_home_line>
+0x2a4 : 00c0006f ; j	2b0 <lpc_done>
+0x2a8 : 00000097 ; auipc	ra,0x0
+0x2ac : 06c080e7 ; jalr	108(ra) # 314 <lcd_clear>
+0x2b0 : 00012083 ; lw	ra,0(sp)
+0x2b4 : 00410113 ; addi	sp,sp,4
+0x2b8 : 00008067 ; ret
+0x2bc : ffc10113 ; addi	sp,sp,-4
+0x2c0 : 00112023 ; sw	ra,0(sp)
+0x2c4 : 00010637 ; lui	a2,0x10
+0x2c8 : 10060613 ; addi	a2,a2,256 # 10100 <LCD_BASE>
+0x2cc : 0c000513 ; li	a0,192
+0x2d0 : 00800693 ; li	a3,8
+0x2d4 : 00000097 ; auipc	ra,0x0
+0x2d8 : 078080e7 ; jalr	120(ra) # 34c <lcd_send>
+0x2dc : 00012083 ; lw	ra,0(sp)
+0x2e0 : 00410113 ; addi	sp,sp,4
+0x2e4 : 00008067 ; ret
+0x2e8 : ffc10113 ; addi	sp,sp,-4
+0x2ec : 00112023 ; sw	ra,0(sp)
+0x2f0 : 00010637 ; lui	a2,0x10
+0x2f4 : 10060613 ; addi	a2,a2,256 # 10100 <LCD_BASE>
+0x2f8 : 08000513 ; li	a0,128
+0x2fc : 00800693 ; li	a3,8
+0x300 : 00000097 ; auipc	ra,0x0
+0x304 : 04c080e7 ; jalr	76(ra) # 34c <lcd_send>
+0x308 : 00012083 ; lw	ra,0(sp)
+0x30c : 00410113 ; addi	sp,sp,4
+0x310 : 00008067 ; ret
+0x314 : ffc10113 ; addi	sp,sp,-4
+0x318 : 00112023 ; sw	ra,0(sp)
+0x31c : 00010637 ; lui	a2,0x10
+0x320 : 10060613 ; addi	a2,a2,256 # 10100 <LCD_BASE>
+0x324 : 00800693 ; li	a3,8
+0x328 : 00100513 ; li	a0,1
+0x32c : 00000097 ; auipc	ra,0x0
+0x330 : 020080e7 ; jalr	32(ra) # 34c <lcd_send>
+0x334 : 00200513 ; li	a0,2
+0x338 : 00000097 ; auipc	ra,0x0
+0x33c : 014080e7 ; jalr	20(ra) # 34c <lcd_send>
+0x340 : 00012083 ; lw	ra,0(sp)
+0x344 : 00410113 ; addi	sp,sp,4
+0x348 : 00008067 ; ret
+0x34c : ffc10113 ; addi	sp,sp,-4
+0x350 : 00112023 ; sw	ra,0(sp)
+0x354 : 00000097 ; auipc	ra,0x0
+0x358 : 01c080e7 ; jalr	28(ra) # 370 <lcd_poll>
+0x35c : 00000097 ; auipc	ra,0x0
+0x360 : 060080e7 ; jalr	96(ra) # 3bc <lcd_write>
+0x364 : 00012083 ; lw	ra,0(sp)
+0x368 : 00410113 ; addi	sp,sp,4
 0x36c : 00008067 ; ret
+0x370 : ffc10113 ; addi	sp,sp,-4
+0x374 : 00112023 ; sw	ra,0(sp)
+0x378 : 00900393 ; li	t2,9
+0x37c : 01400593 ; li	a1,20
+0x380 : 0043e393 ; ori	t2,t2,4
+0x384 : 007600a3 ; sb	t2,1(a2)
+0x388 : 00000097 ; auipc	ra,0x0
+0x38c : 06c080e7 ; jalr	108(ra) # 3f4 <delay>
+0x390 : 00060e03 ; lb	t3,0(a2)
+0x394 : 0fb3f393 ; andi	t2,t2,251
+0x398 : 007600a3 ; sb	t2,1(a2)
+0x39c : 03000593 ; li	a1,48
+0x3a0 : 00000097 ; auipc	ra,0x0
+0x3a4 : 054080e7 ; jalr	84(ra) # 3f4 <delay>
+0x3a8 : 080e7e13 ; andi	t3,t3,128
+0x3ac : fc0e16e3 ; bnez	t3,378 <lp_wait>
+0x3b0 : 00012083 ; lw	ra,0(sp)
+0x3b4 : 00410113 ; addi	sp,sp,4
+0x3b8 : 00008067 ; ret
+0x3bc : ffc10113 ; addi	sp,sp,-4
+0x3c0 : 00112023 ; sw	ra,0(sp)
+0x3c4 : 00068393 ; mv	t2,a3
+0x3c8 : 0043e393 ; ori	t2,t2,4
+0x3cc : 00a60023 ; sb	a0,0(a2)
+0x3d0 : 007600a3 ; sb	t2,1(a2)
+0x3d4 : 01400593 ; li	a1,20
+0x3d8 : 00000097 ; auipc	ra,0x0
+0x3dc : 01c080e7 ; jalr	28(ra) # 3f4 <delay>
+0x3e0 : 0fb3f393 ; andi	t2,t2,251
+0x3e4 : 007600a3 ; sb	t2,1(a2)
+0x3e8 : 00012083 ; lw	ra,0(sp)
+0x3ec : 00410113 ; addi	sp,sp,4
+0x3f0 : 00008067 ; ret
+0x3f4 : 00058e93 ; mv	t4,a1
+0x3f8 : fffe8e93 ; addi	t4,t4,-1
+0x3fc : fe0e9ee3 ; bnez	t4,3f8 <delay+0x4>
+0x400 : 00008067 ; ret
 0x40000 : 00 00 00 00
 0x40004 : 00 00 00 00
 0x40008 : 00 00 00 00

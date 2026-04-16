@@ -3,6 +3,7 @@
         .equ LCD_BASE,       0x00010100
         .equ MPP_MASK,       0x00001800
         .equ CAUSE_ECALL_U,  8
+        .equ CAUSE_M_EXT,    0x8000000B
         .equ OS_STACK_SIZE,  256
         .equ SYS_EXIT,       0
         .equ SYS_LCD_CHAR,   1
@@ -16,8 +17,20 @@
         .equ PLIC_BASE,      0x00010400
         .equ PLIC_ENABLES,   0x04
         .equ PLIC_REQUESTS,  0x08
+        .equ PLIC_MODE,      0x0C
         .equ BTN_IRQ_BIT,    0x20        # bit 5 = button
+        .equ TIMER_IRQ_BIT,  0x10        # bit 4 = timer
         .equ LED_PORT,       0x00010000
+        # Timer
+        .equ TIMER_BASE,     0x00010200
+        .equ TIMER_LIMIT,    0x04
+        .equ TIMER_CLR,      0x10
+        .equ TIMER_SET,      0x14
+        .equ TIMER_EN,       0x01
+        .equ TIMER_MOD,      0x02
+        .equ TIMER_IE,       0x08
+        .equ TIMER_CLR_TERM, 0x10
+        .equ TIMER_1S,       999999
         # CSR addresses
         .equ MSCRATCH,       0x340
         .equ MTVEC,          0x305
@@ -58,6 +71,19 @@ init:
         la      t0, trap_entry
         csrw    MTVEC, t0
 
+        li      s5, 0
+
+        # Enable button + timer interrupts in PLIC
+        li      t0, PLIC_BASE
+        li      t1, BTN_IRQ_BIT | TIMER_IRQ_BIT
+        sw      t1, PLIC_ENABLES(t0)
+        sw      zero, PLIC_MODE(t0)
+
+        li      t0, MEIE_BIT
+        csrs    MIE_CSR, t0
+        li      t0, MSTATUS_MIE
+        csrs    MSTATUS, t0
+
         call    lcd_clear
 
         # ── drop to user mode ────────────────────────────────────────
@@ -74,16 +100,22 @@ init:
         # Interrupts branch to isr_dispatch; ECALLs go to sys_table.
 trap_entry:
         csrrw   sp, MSCRATCH, sp
-        addi    sp, sp, -16
+        addi    sp, sp, -24
         sw      ra,  0(sp)
         sw      t0,  4(sp)
-        sw      a7,  8(sp)
+        sw      t1,  8(sp)
+        sw      t2, 12(sp)
+        sw      a7, 16(sp)
         csrr    t0,  MEPC
-        sw      t0, 12(sp)
+        sw      t0, 20(sp)
 
         csrr    t0, MCAUSE
 
-        # synchronous — must be ECALL U (no interrupt support yet)
+        # external interrupt?
+        li      t1, CAUSE_M_EXT
+        beq     t0, t1, isr_dispatch
+
+        # synchronous — must be ECALL U
         li      t1, CAUSE_ECALL_U
         bne     t0, t1, trap_error
 
@@ -112,49 +144,80 @@ trap_error:
 
         # ECALL return — identical to lab5-works
 trap_return:
-        lw      t0, 12(sp)
+        lw      t0, 20(sp)
         addi    t0,  t0, 4
         csrw    MEPC, t0
-        lw      a7,  8(sp)
+        lw      a7, 16(sp)
+        lw      t2, 12(sp)
+        lw      t1,  8(sp)
         lw      t0,  4(sp)
         lw      ra,  0(sp)
-        addi    sp,  sp, 16
+        addi    sp,  sp, 24
         csrrw   sp,  MSCRATCH, sp
         mret
 
         # ── interrupt dispatcher ─────────────────────────────────────
 isr_dispatch:
-        andi    t0, t0, 0xF
-        li      t1, 11
-        bne     t0, t1, isr_return
-
-isr_external:
-        # Confirm it's the button via PLIC requests register
+        # Read PLIC requests to determine source
         li      t0, PLIC_BASE
         lw      t1, PLIC_REQUESTS(t0)
-        andi    t1, t1, BTN_IRQ_BIT
-        beqz    t1, isr_return
 
+        # Button?
+        andi    t2, t1, BTN_IRQ_BIT
+        bnez    t2, button_isr
+
+        # Timer?
+        andi    t2, t1, TIMER_IRQ_BIT
+        bnez    t2, timer_isr
+
+        j       isr_return
+
+button_isr:
         # Toggle LED0
         li      t0, LED_PORT
-        lbu     t0, 0(t0)
-        xori    t0, t0, 0x01
-        li      t1, LED_PORT
-        sb      t0, 0(t1)
+        lbu     t2, 0(t0)
+        xori    t2, t2, 0x01
+        sb      t2, 0(t0)
+
+        # Start 1Hz timer
+        li      t0, TIMER_BASE
+        li      t1, TIMER_1S
+        sw      t1, TIMER_LIMIT(t0)
+        li      t1, TIMER_EN | TIMER_MOD | TIMER_IE
+        sw      t1, TIMER_SET(t0)
 
         # Set dirty flag
         la      t0, isr_dirty
         li      t1, 1
         sw      t1, 0(t0)
 
+        j       isr_return
+
+timer_isr:
+        # Clear terminal count
+        li      t0, TIMER_BASE
+        li      t1, TIMER_CLR_TERM
+        sw      t1, TIMER_CLR(t0)
+
+        # Reload for next tick
+        li      t1, TIMER_1S
+        sw      t1, TIMER_LIMIT(t0)
+        li      t1, TIMER_EN | TIMER_MOD | TIMER_IE
+        sw      t1, TIMER_SET(t0)
+
+        # Increment counter
+        addi    s5, s5, 1
+
 isr_return:
         # Interrupt return — go back to interrupted instruction (no MEPC+4)
-        lw      t0, 12(sp)
+        lw      t0, 20(sp)
         csrw    MEPC, t0
-        lw      a7,  8(sp)
+        lw      a7, 16(sp)
+        lw      t2, 12(sp)
+        lw      t1,  8(sp)
         lw      t0,  4(sp)
         lw      ra,  0(sp)
-        addi    sp,  sp, 16
+        addi    sp,  sp, 24
         csrrw   sp,  MSCRATCH, sp
         mret
 
