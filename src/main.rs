@@ -11,6 +11,7 @@ use core::panic::PanicInfo;
 pub extern "C" fn user_main() {
     lcd::clear();
     lcd::print_str(b"Press button");
+    loop {}
 }
 
 #[panic_handler]
