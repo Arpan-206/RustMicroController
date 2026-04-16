@@ -11,21 +11,21 @@ pub const BTN_RESET: u8 = 0x04;
 pub const TIMER_1S: u32 = 999_999;
 pub const TIMER_1MS: u32 = 999;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum TimerStatus {
-    NotFired,
-    Fired,
-    Overrun,
-}
-
 pub fn btn_read() -> u8 {
     syscall::btn_read()
 }
 
-pub fn timer_init(_modulus_minus_1: u32) {}
+/// Start the interrupt-driven timer with the given modulus.
+pub fn timer_start(modulus: u32) {
+    syscall::timer_start(modulus);
+}
 
-pub fn timer_poll_raw() -> u32 { 0 }
+/// Read the tick counter (incremented by timer ISR each second).
+pub fn counter_get() -> u32 {
+    syscall::counter_get()
+}
 
-pub fn timer_poll_status() -> TimerStatus { TimerStatus::NotFired }
-
-pub fn timer_ack() {}
+/// Reset the tick counter to zero.
+pub fn counter_clr() {
+    syscall::counter_clr();
+}

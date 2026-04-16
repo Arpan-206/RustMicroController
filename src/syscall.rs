@@ -3,12 +3,13 @@
 /// Syscall numbers — must match sys_table order in os.s.
 #[repr(u32)]
 enum Syscall {
-    Exit      = 0,
-    LcdChar   = 1,
-    LcdClear  = 2,
-    BtnRead   = 3,
-    SharedGet = 4,  // read isr_dirty
-    SharedClr = 5,  // clear isr_dirty
+    Exit        = 0,
+    LcdChar     = 1,
+    LcdClear    = 2,
+    BtnRead     = 3,
+    CounterGet  = 4,  // read s5 tick counter
+    CounterClr  = 5,  // clear s5 tick counter
+    TimerStart  = 6,  // start timer with given modulus
 }
 
 // ── raw ecall primitives ────────────────────────────────────────────
@@ -70,12 +71,17 @@ pub fn exit() -> ! {
     }
 }
 
-/// Returns non-zero if the button ISR has fired since last clear.
-pub fn shared_get() -> u32 {
-    ecall0_ret(Syscall::SharedGet)
+/// Returns current value of s5 tick counter.
+pub fn counter_get() -> u32 {
+    ecall0_ret(Syscall::CounterGet)
 }
 
-/// Clear the ISR dirty flag.
-pub fn shared_clr() {
-    ecall0(Syscall::SharedClr);
+/// Reset s5 tick counter to zero.
+pub fn counter_clr() {
+    ecall0(Syscall::CounterClr);
+}
+
+/// Start the timer with the given modulus (limit register value).
+pub fn timer_start(modulus: u32) {
+    ecall1(Syscall::TimerStart, modulus);
 }

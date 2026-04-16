@@ -5,13 +5,14 @@
         .equ CAUSE_ECALL_U,  8
         .equ CAUSE_M_EXT,    0x8000000B
         .equ OS_STACK_SIZE,  256
-        .equ SYS_EXIT,       0
-        .equ SYS_LCD_CHAR,   1
-        .equ SYS_LCD_CLEAR,  2
-        .equ SYS_BTN_READ,   3
-        .equ SYS_SHARED_GET, 4
-        .equ SYS_SHARED_CLR, 5
-        .equ SYS_MAX,        6
+        .equ SYS_EXIT,        0
+        .equ SYS_LCD_CHAR,    1
+        .equ SYS_LCD_CLEAR,   2
+        .equ SYS_BTN_READ,    3
+        .equ SYS_COUNTER_GET, 4
+        .equ SYS_COUNTER_CLR, 5
+        .equ SYS_TIMER_START, 6
+        .equ SYS_MAX,         7
         .equ BTN_PORT,       0x00010001
         # External interrupt controller
         .equ PLIC_BASE,      0x00010400
@@ -73,9 +74,9 @@ init:
 
         li      s5, 0
 
-        # Enable button + timer interrupts in PLIC
+        # Enable timer interrupt in PLIC (button is polled)
         li      t0, PLIC_BASE
-        li      t1, BTN_IRQ_BIT | TIMER_IRQ_BIT
+        li      t1, TIMER_IRQ_BIT
         sw      t1, PLIC_ENABLES(t0)
         sw      zero, PLIC_MODE(t0)
 
@@ -133,8 +134,9 @@ sys_table:
         .word   sys_lcd_char
         .word   sys_lcd_clear
         .word   sys_btn_read
-        .word   sys_shared_get
-        .word   sys_shared_clr
+        .word   sys_counter_get
+        .word   sys_counter_clr
+        .word   sys_timer_start
 
 trap_error:
         li      t1, HALT_PORT
@@ -162,36 +164,12 @@ isr_dispatch:
         li      t0, PLIC_BASE
         lw      t1, PLIC_REQUESTS(t0)
 
-        # Button?
-        andi    t2, t1, BTN_IRQ_BIT
-        bnez    t2, button_isr
-
         # Timer?
         andi    t2, t1, TIMER_IRQ_BIT
         bnez    t2, timer_isr
 
         j       isr_return
 
-button_isr:
-        # Toggle LED0
-        li      t0, LED_PORT
-        lbu     t2, 0(t0)
-        xori    t2, t2, 0x01
-        sb      t2, 0(t0)
-
-        # Start 1Hz timer
-        li      t0, TIMER_BASE
-        li      t1, TIMER_1S
-        sw      t1, TIMER_LIMIT(t0)
-        li      t1, TIMER_EN | TIMER_MOD | TIMER_IE
-        sw      t1, TIMER_SET(t0)
-
-        # Set dirty flag
-        la      t0, isr_dirty
-        li      t1, 1
-        sw      t1, 0(t0)
-
-        j       isr_return
 
 timer_isr:
         # Clear terminal count
@@ -249,16 +227,22 @@ sys_btn_read:
         call    btn_read
         j       trap_return
 
-        # a0 ← isr_dirty
-sys_shared_get:
-        la      t0, isr_dirty
-        lw      a0, 0(t0)
+        # a0 ← s5 (tick counter)
+sys_counter_get:
+        mv      a0, s5
         j       trap_return
 
-        # isr_dirty ← 0
-sys_shared_clr:
-        la      t0, isr_dirty
-        sw      zero, 0(t0)
+        # s5 ← 0
+sys_counter_clr:
+        li      s5, 0
+        j       trap_return
+
+        # start 1Hz timer (a0 = modulus)
+sys_timer_start:
+        li      t0, TIMER_BASE
+        sw      a0, TIMER_LIMIT(t0)
+        li      t1, TIMER_EN | TIMER_MOD | TIMER_IE
+        sw      t1, TIMER_SET(t0)
         j       trap_return
 
 btn_read:
