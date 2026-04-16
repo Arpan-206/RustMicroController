@@ -72,8 +72,6 @@ init:
         la      t0, trap_entry
         csrw    MTVEC, t0
 
-        li      s5, 0
-
         # Enable timer interrupt in PLIC (button is polled)
         li      t0, PLIC_BASE
         li      t1, TIMER_IRQ_BIT
@@ -183,8 +181,11 @@ timer_isr:
         li      t1, TIMER_EN | TIMER_MOD | TIMER_IE
         sw      t1, TIMER_SET(t0)
 
-        # Increment counter
-        addi    s5, s5, 1
+        # Increment shared tick counter
+        la      t0, tick_count
+        lw      t1, 0(t0)
+        addi    t1, t1, 1
+        sw      t1, 0(t0)
 
 isr_return:
         # Interrupt return — go back to interrupted instruction (no MEPC+4)
@@ -227,14 +228,16 @@ sys_btn_read:
         call    btn_read
         j       trap_return
 
-        # a0 ← s5 (tick counter)
+        # a0 ← tick_count
 sys_counter_get:
-        mv      a0, s5
+        la      t0, tick_count
+        lw      a0, 0(t0)
         j       trap_return
 
-        # s5 ← 0
+        # tick_count ← 0
 sys_counter_clr:
-        li      s5, 0
+        la      t0, tick_count
+        sw      zero, 0(t0)
         j       trap_return
 
         # start 1Hz timer (a0 = modulus)
@@ -364,7 +367,7 @@ delay:
 
         .section .bss, "aw"
         .balign 4
-isr_dirty:  .word 0
+tick_count: .word 0
         .space  OS_STACK_SIZE
 os_stack_top:
 
