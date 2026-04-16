@@ -60,18 +60,6 @@ init:
 
         call    lcd_clear
 
-        # ── enable button interrupt in PLIC (bit 5, level-sensitive) ─
-        li      t0, PLIC_BASE
-        li      t1, BTN_IRQ_BIT
-        sw      t1, PLIC_ENABLES(t0)
-        sw      zero, 0x0C(t0)          # mode = 0 (level-sensitive)
-
-        # ── enable machine external interrupt + global enable ────────
-        li      t0, MEIE_BIT
-        csrs    MIE_CSR, t0
-        li      t0, MSTATUS_MIE
-        csrs    MSTATUS, t0
-
         # ── drop to user mode ────────────────────────────────────────
         li      t0, MPP_MASK
         csrc    MSTATUS, t0
