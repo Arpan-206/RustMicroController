@@ -1,88 +1,239 @@
 KMD
+00000000:             ;         ;       ----------------------------------------------------------
+00000000:             ;         ;       RISC-V Stopwatch OS Kernel
+00000000:             ;         ;       A. Pandey
+00000000:             ;         ;       Version 1.0
+00000000:             ;         ;       17th March 2026
+00000000:             ;         ;       ----------------------------------------------------------
+00000000:             ; 
 00000000:             ;         ORG     0
 00000000:             ; 
 00000000:             ;         INCLUDE os_consts.s
-00000000:             ;         ;             Memory mapped IO base addresses
-00000000:             ;         HALT_PORT     EQU 0x00010700
-00000000:             ;         LCD_BASE      EQU 0x00010100
+00000000:             ;         ;                ----------------------------------------------------------
+00000000:             ;         ;                OS Constants, Hardware Addresses and Syscall Definitions
+00000000:             ;         ;                A. Pandey
+00000000:             ;         ;                Version 1.0
+00000000:             ;         ;                17th March 2026
+00000000:             ;         ;                ----------------------------------------------------------
 00000000:             ; 
-00000000:             ;         ;             MSTATUS bits 12 and 11 form the MPP field
-00000000:             ;         MPP_MASK      EQU 0x00001800
 00000000:             ; 
-00000000:             ;         ;             MCAUSE code for ECALL from user mode
-00000000:             ;         CAUSE_ECALL_U EQU 8
+00000000:             ;         ;                Memory mapped IO base addresses
+00000000:             ;         HALT_PORT        EQU 0x00010700
+00000000:             ;         LCD_BASE         EQU 0x00010100
 00000000:             ; 
-00000000:             ;         ;             OS stack size in bytes
-00000000:             ;         OS_STACK_SIZE EQU 256
 00000000:             ; 
-00000000:             ;         ;             Syscall numbers
-00000000:             ;         SYS_EXIT      EQU 0
-00000000:             ;         SYS_LCD_CHAR  EQU 1
-00000000:             ;         SYS_LCD_CLEAR EQU 2
-00000000:             ;         SYS_MAX       EQU 3
+00000000:             ;         ;                MSTATUS bits 12 and 11 form the MPP field
+00000000:             ;         MPP_MASK         EQU 0x00001800
 00000000:             ; 
-00000000:             ;         ;             LCD hardware constants
-00000000:             ;         r_input       EQU 0b1001
-00000000:             ;         r_output      EQU 0b1010
-00000000:             ;         lcd_e_bit     EQU 0x04
-00000000:             ;         lcd_e_clear   EQU 0xfb
-00000000:             ;         lcd_busy_flag EQU 0x80
-00000000:             ;         lcd_ctrl_cmd  EQU 0b1000
-00000000:             ;         lcd_cmd_clear EQU 0x01
-00000000:             ;         lcd_cmd_home  EQU 0x02
-00000000:             ;         delay_short   EQU 20
-00000000:             ;         delay_poll    EQU 48
 00000000:             ; 
-00000000:             ;         ;             ASCII control codes
-00000000:             ;         ascii_lf      EQU '\n' ; \n move to line 2
-00000000:             ;         ascii_cr      EQU '\r' ; \r move to line 1
-00000000:             ;         ascii_ff      EQU '\f' ; \f clear
+00000000:             ;         ;                MCAUSE code for ECALL from user mode
+00000000:             ;         CAUSE_ECALL_U    EQU 8
 00000000:             ; 
-00000000:             ;         ;             LCD commands
-00000000:             ;         lcd_cmd_clear EQU 0x01
-00000000:             ;         lcd_cmd_home  EQU 0x02
-00000000:             ;         lcd_cmd_line1 EQU 0x80 ; DDRAM address for start of line 1
-00000000:             ;         lcd_cmd_line2 EQU 0xc0 ; DDRAM address for start of line 2
 00000000:             ; 
+00000000:             ;         ;                OS stack size in bytes
+00000000:             ;         OS_STACK_SIZE    EQU 256
+00000000:             ; 
+00000000:             ; 
+00000000:             ;         ;                Syscall numbers
+00000000:             ;         SYS_EXIT         EQU 0
+00000000:             ;         SYS_LCD_CHAR     EQU 1
+00000000:             ;         SYS_LCD_CLEAR    EQU 2
+00000000:             ;         HALT_PORT        EQU 0x00010700
+00000000:             ;         LCD_BASE         EQU 0x00010100
+00000000:             ; 
+00000000:             ;         ;                MSTATUS bits 12 and 11 form the MPP field
+00000000:             ;         MPP_MASK         EQU 0x00001800
+00000000:             ; 
+00000000:             ;         ;                MCAUSE code for ECALL from user mode
+00000000:             ;         CAUSE_ECALL_U    EQU 8
+00000000:             ; 
+00000000:             ;         ;                OS stack size in bytes
+00000000:             ;         OS_STACK_SIZE    EQU 256
+00000000:             ; 
+00000000:             ;         ;                Syscall numbers
+00000000:             ;         SYS_EXIT         EQU 0
+00000000:             ;         SYS_LCD_CHAR     EQU 1
+00000000:             ;         SYS_LCD_CLEAR    EQU 2
+00000000:             ;         SYS_BTN_READ     EQU 3
+00000000:             ;         SYS_TIMER_INIT   EQU 4
+00000000:             ;         SYS_TIMER_POLL   EQU 5
+00000000:             ;         SYS_TIMER_ACK    EQU 6
+00000000:             ;         SYS_MAX          EQU 7
+00000000:             ; 
+00000000:             ;         ;                LCD hardware constants
+00000000:             ;         r_input          EQU 0b1001
+00000000:             ;         r_output         EQU 0b1010
+00000000:             ;         lcd_e_bit        EQU 0x04
+00000000:             ;         lcd_e_clear      EQU 0xfb
+00000000:             ;         lcd_busy_flag    EQU 0x80
+00000000:             ;         lcd_ctrl_cmd     EQU 0b1000
+00000000:             ;         delay_short      EQU 20
+00000000:             ;         delay_poll       EQU 48
+00000000:             ; 
+00000000:             ;         ;                LCD commands
+00000000:             ;         lcd_cmd_clear    EQU 0x01
+00000000:             ;         lcd_cmd_home     EQU 0x02
+00000000:             ;         lcd_cmd_line1    EQU 0x80
+00000000:             ;         lcd_cmd_line2    EQU 0xc0
+00000000:             ; 
+00000000:             ;         ;                ASCII control codes
+00000000:             ;         ascii_lf         EQU 0x0a
+00000000:             ;         ascii_cr         EQU 0x0d
+00000000:             ;         ascii_ff         EQU 0x0c
+00000000:             ; 
+00000000:             ;         ;                Button port
+00000000:             ;         BTN_PORT         EQU 0x00010001
+00000000:             ;         BTN_START        EQU 0x01
+00000000:             ;         BTN_PAUSE        EQU 0x02
+00000000:             ;         BTN_RESET        EQU 0x04
+00000000:             ; 
+00000000:             ;         ;                Timer peripheral offsets from TIMER_BASE
+00000000:             ;         TIMER_BASE       EQU 0x00010200
+00000000:             ;         TIMER_LIMIT      EQU 0x04
+00000000:             ;         TIMER_CTRL       EQU 0x0C
+00000000:             ;         TIMER_CLR        EQU 0x10
+00000000:             ;         TIMER_SET        EQU 0x14
+00000000:             ; 
+00000000:             ;         ;                Timer control bits
+00000000:             ;         TIMER_EN         EQU 0x01
+00000000:             ;         TIMER_MOD        EQU 0x02
+00000000:             ;         TIMER_CLR_TERM   EQU 0x10
+00000000:             ; 
+00000000:             ;         ;                1 second modulus at 1MHz limit = modulus - 1
+00000000:             ;         TIMER_1S         EQU 999999
+00000000:             ;         TIMER_1MS        EQU 999
+00000000:             ; 
+00000000:             ;         bcd_sec_max      EQU 0x60 ; BCD 60 seconds per minute
+00000000:             ;         bcd_min_max      EQU 0x60 ; BCD 60 minutes per hour
+00000000:             ;         bcd_hr_max       EQU 0x24 ; BCD 24 hours per day
+00000000:             ;         bcd_digit_max    EQU 10 ; first invalid single BCD digit
+00000000:             ;         bcd_carry_adjust EQU 6 ; correction to skip hex A-F gap
+00000000:             ;         USER_STACK_SIZE  EQU 512 ; user stack depth in bytes
+00000000:             ; 
+00000000:             ;         SYS_BTN_READ     EQU 3
+00000000:             ;         SYS_TIMER_INIT   EQU 4
+00000000:             ;         SYS_TIMER_POLL   EQU 5
+00000000:             ;         SYS_TIMER_ACK    EQU 6
+00000000:             ;         SYS_MAX          EQU 7
+00000000:             ; 
+00000000:             ; 
+00000000:             ;         ;                LCD hardware constants
+00000000:             ;         r_input          EQU 0b1001 ; control pattern for read mode
+00000000:             ;         r_output         EQU 0b1010 ; control pattern for write mode
+00000000:             ;         lcd_e_bit        EQU 0x04 ; enable bit mask
+00000000:             ;         lcd_e_clear      EQU 0xfb ; enable bit clear mask
+00000000:             ;         lcd_busy_flag    EQU 0x80 ; busy flag in bit 7 of read data
+00000000:             ;         lcd_ctrl_cmd     EQU 0b1000 ; backlight on, RS low for command
+00000000:             ;         delay_short      EQU 20 ; short delay loop count for enable pulse
+00000000:             ;         delay_poll       EQU 48 ; longer delay between poll reads
+00000000:             ; 
+00000000:             ; 
+00000000:             ;         ;                LCD commands
+00000000:             ;         lcd_cmd_clear    EQU 0x01 ; clear display and reset DDRAM address
+00000000:             ;         lcd_cmd_home     EQU 0x02 ; return cursor to home position
+00000000:             ;         lcd_cmd_line1    EQU 0x80 ; DDRAM address for start of line 1
+00000000:             ;         lcd_cmd_line2    EQU 0xc0 ; DDRAM address for start of line 2
+00000000:             ; 
+00000000:             ; 
+00000000:             ;         ;                ASCII control codes
+00000000:             ;         ascii_lf         EQU 0x0a ; line feed, used to move to line 2
+00000000:             ;         ascii_cr         EQU 0x0d ; carriage return, used to move to line 1
+00000000:             ;         ascii_ff         EQU 0x0c ; form feed, used to clear display
+00000000:             ; 
+00000000:             ; 
+00000000:             ;         ;                Button port address and bit masks
+00000000:             ;         BTN_PORT         EQU 0x00010001
+00000000:             ;         BTN_START        EQU 0x01 ; bit 0 starts the stopwatch
+00000000:             ;         BTN_PAUSE        EQU 0x02 ; bit 1 pauses the stopwatch
+00000000:             ;         BTN_RESET        EQU 0x04 ; bit 2 resets the stopwatch
+00000000:             ; 
+00000000:             ; 
+00000000:             ;         ;                Timer peripheral base and register offsets from TIMER_BASE
+00000000:             ;         TIMER_BASE       EQU 0x00010200
+00000000:             ;         TIMER_LIMIT      EQU 0x04 ; modulus register offset
+00000000:             ;         TIMER_CTRL       EQU 0x0C ; control and status register offset
+00000000:             ;         TIMER_CLR        EQU 0x10 ; control clear register offset
+00000000:             ;         TIMER_SET        EQU 0x14 ; control set register offset
+00000000:             ; 
+00000000:             ; 
+00000000:             ;         ;                Timer control bits
+00000000:             ;         TIMER_EN         EQU 0x01 ; enable bit starts the counter
+00000000:             ;         TIMER_MOD        EQU 0x02 ; modulus mode wraps at TIMER_LIMIT
+00000000:             ;         TIMER_CLR_TERM   EQU 0x10 ; writing this clears terminal count flag
+00000000:             ; 
+00000000:             ; 
+00000000:             ;         ;                Timer modulus values, limit register takes modulus minus 1
+00000000:             ;         TIMER_1S         EQU 999999 ; 1 second at 1MHz tick rate
+00000000:             ;         TIMER_1MS        EQU 999 ; 1 millisecond at 1MHz tick rate
+00000000:             ; 
+00000000:             ; 
+00000000:             ;         ;                BCD arithmetic constants
+00000000:             ;         bcd_sec_max      EQU 0x60 ; BCD 60 is the rollover point for seconds
+00000000:             ;         bcd_min_max      EQU 0x60 ; BCD 60 is the rollover point for minutes
+00000000:             ;         bcd_hr_max       EQU 0x24 ; BCD 24 is the rollover point for hours
+00000000:             ;         bcd_digit_max    EQU 10 ; first value that needs carry correction
+00000000:             ;         bcd_carry_adjust EQU 6 ; added to skip the hex A through F gap
+00000000:             ; 
+00000000:             ; 
+00000000:             ;         ;                User space constants
+00000000:             ;         USER_STACK_SIZE  EQU 512 ; user stack depth in bytes
+00000000:             ;         ascii_zero       EQU 48 ; ASCII value of digit zero
+00000000:             ;         ascii_colon      EQU 58 ; ASCII value of separator character
+00000000:             ; 
+00000000:             ; 
+00000000:             ; 
+00000000:             ;         ;       ----------------------------------------------------------
+00000000:             ;         ;       init
+00000000:             ;         ;       Input none
+00000000:             ;         ;       Saved nothing
+00000000:             ;         ;       Clobbers t0
+00000000:             ;         ;       Effect sets up OS stack, installs trap vector, clears LCD,
+00000000:             ;         ;       drops to user mode and jumps to USER_CODE via mret
+00000000:             ;         ;       ----------------------------------------------------------
 00000000:             ; init:
 00000000: 00000117    ;         la      sp, os_stack_top
-00000004: 38410113    ; 
+00000004: 42010113    ; 
 00000008: 34011073    ;         csrw    MSCRATCH, sp
 0000000C:             ; 
 0000000C: 00000297    ;         la      t0, trap_entry
 00000010: 02C28293    ; 
 00000014: 30529073    ;         csrw    MTVEC, t0
 00000018:             ; 
-00000018: 198000EF    ;         call    lcd_clear
+00000018: 1C8000EF    ;         call    lcd_clear
 0000001C:             ; 
 0000001C: 000022B7    ;         li      t0, MPP_MASK
 00000020: 80028293    ; 
 00000024: 3002B073    ;         csrc    MSTATUS, t0
 00000028: 00040297    ;         la      t0, USER_CODE
-0000002C: 0D828293    ; 
+0000002C: 1D828293    ; 
 00000030: 34129073    ;         csrw    MEPC, t0
 00000034: 30200073    ;         mret
 00000038:             ; 
 00000038:             ; 
 00000038:             ;         ;       ----------------------------------------------------------
-00000038:             ;         ;       Trap entry
-00000038:             ;         ;       Saves ra t0 a7 MEPC, dispatches via sys_table
+00000038:             ;         ;       trap_entry
+00000038:             ;         ;       Input machine trap frame via CSRs
+00000038:             ;         ;       Saved ra t0 a7 MEPC on OS stack
+00000038:             ;         ;       Clobbers t0 t1
+00000038:             ;         ;       Effect swaps to OS stack, saves minimal context, checks
+00000038:             ;         ;       cause is ecall from user, dispatches via sys_table,
+00000038:             ;         ;       falls through to trap_error on any unexpected cause
 00000038:             ;         ;       ----------------------------------------------------------
 00000038:             ; trap_entry:
 00000038: 34011173    ;         csrrw   sp, MSCRATCH, sp
 0000003C: FF010113    ;         subi    sp, sp, 16
-00000040: 00112023    ;         sw      ra,  0[sp]
-00000044: 00512223    ;         sw      t0,  4[sp]
-00000048: 01112423    ;         sw      a7,  8[sp]
+00000040: 00112023    ;         sw      ra, 0[sp]
+00000044: 00512223    ;         sw      t0, 4[sp]
+00000048: 01112423    ;         sw      a7, 8[sp]
 0000004C: 341022F3    ;         csrr    t0, MEPC
 00000050: 00512623    ;         sw      t0, 12[sp]
 00000054:             ; 
 00000054: 342022F3    ;         csrr    t0, MCAUSE
 00000058: 00800313    ;         li      t1, CAUSE_ECALL_U
-0000005C: 02629863    ;         bne     t0, t1, trap_error
+0000005C: 04629063    ;         bne     t0, t1, trap_error
 00000060:             ; 
-00000060: 00300293    ;         li      t0, SYS_MAX
-00000064: 0258F463    ;         bgeu    a7, t0, trap_error
+00000060: 00700293    ;         li      t0, SYS_MAX
+00000064: 0258FC63    ;         bgeu    a7, t0, trap_error
 00000068:             ; 
 00000068: 00000297    ;         la      t0, sys_table
 0000006C: 01828293    ; 
@@ -93,311 +244,705 @@ KMD
 00000080:             ; 
 00000080:             ; 
 00000080:             ;         ;       ----------------------------------------------------------
-00000080:             ;         ;       Syscall dispatch table
+00000080:             ;         ;       sys_table
+00000080:             ;         ;       Effect word table of handler addresses indexed by a7
+00000080:             ;         ;       must stay in same order as SYS_ constants in os_consts.s
 00000080:             ;         ;       ----------------------------------------------------------
 00000080:             ; sys_table:
-00000080: 000000C8    ;         defw    sys_exit
-00000084: 000000DC    ;         defw    sys_lcd_char
-00000088: 000000F4    ;         defw    sys_lcd_clear
-0000008C:             ; 
-0000008C:             ; 
-0000008C:             ; trap_error:
-0000008C: 00010337    ;         li      t1, HALT_PORT
-00000090: 70030313    ; 
-00000094: DEADC2B7    ;         li      t0, 0xDEADBEEF
-00000098: EEF28293    ; 
-0000009C: 00532023    ;         sw      t0, 0[t1]
-000000A0: FEDFF06F    ;         j       trap_error
-000000A4:             ; 
-000000A4:             ; 
-000000A4:             ; trap_return:
-000000A4: 00C12283    ;         lw      t0, 12[sp]
-000000A8: 00428293    ;         addi    t0, t0, 4
-000000AC: 34129073    ;         csrw    MEPC, t0
-000000B0: 00812883    ;         lw      a7,  8[sp]
-000000B4: 00412283    ;         lw      t0,  4[sp]
-000000B8: 00012083    ;         lw      ra,  0[sp]
-000000BC: 01010113    ;         addi    sp, sp, 16
-000000C0: 34011173    ;         csrrw   sp, MSCRATCH, sp
-000000C4: 30200073    ;         mret
-000000C8:             ; 
-000000C8:             ; 
-000000C8:             ;         ;       ----------------------------------------------------------
-000000C8:             ;         ;       Syscall stubs
-000000C8:             ;         ;       Only reachable via trap dispatch, end with j trap_return
-000000C8:             ;         ;       ----------------------------------------------------------
-000000C8:             ; 
-000000C8:             ;         ;       SYS_EXIT halts the processor
-000000C8:             ;         ;       in  nothing
-000000C8:             ; sys_exit:
-000000C8: 00010337    ;         li      t1, HALT_PORT
-000000CC: 70030313    ; 
-000000D0: 00000293    ;         li      t0, 0
-000000D4: 00532023    ;         sw      t0, 0[t1]
-000000D8: FF1FF06F    ;         j       sys_exit
-000000DC:             ; 
-000000DC:             ; 
-000000DC:             ;         ;       SYS_LCD_CHAR prints one character to LCD
-000000DC:             ;         ;       in  a0  character to print
-000000DC:             ; sys_lcd_char:
-000000DC: FFC10113    ;         subi    sp, sp, 4
-000000E0: 00112023    ;         sw      ra, 0[sp]
-000000E4: 028000EF    ;         call    lcd_print_char
-000000E8: 00012083    ;         lw      ra, 0[sp]
-000000EC: 00410113    ;         addi    sp, sp, 4
-000000F0: FB5FF06F    ;         j       trap_return
-000000F4:             ; 
-000000F4:             ; 
-000000F4:             ;         ;       SYS_LCD_CLEAR clears display and homes cursor
-000000F4:             ;         ;       in  nothing
-000000F4:             ; sys_lcd_clear:
-000000F4: FFC10113    ;         subi    sp, sp, 4
-000000F8: 00112023    ;         sw      ra, 0[sp]
-000000FC: 0B4000EF    ;         call    lcd_clear
-00000100: 00012083    ;         lw      ra, 0[sp]
-00000104: 00410113    ;         addi    sp, sp, 4
-00000108: F9DFF06F    ;         j       trap_return
-0000010C:             ; 
-0000010C:             ; 
-0000010C:             ;         ;       ----------------------------------------------------------
-0000010C:             ;         ;       Raw LCD functions
-0000010C:             ;         ;       Safe to call from anywhere, always end with ret
-0000010C:             ;         ;       No global registers used — LCD_BASE loaded locally via a2
-0000010C:             ;         ;       ----------------------------------------------------------
-0000010C:             ; 
-0000010C:             ;         ;       lcd_print_char(a0)
-0000010C:             ;         ;       in  a0  character to write
-0000010C:             ;         ;       Handles ascii_lf ascii_cr ascii_ff as control codes
-0000010C:             ;         ;       corrupts a1 a2 a3 t2 t3 t5
-0000010C:             ; lcd_print_char:
-0000010C: FFC10113    ;         subi    sp, sp, 4
-00000110: 00112023    ;         sw      ra, 0[sp]
-00000114:             ; 
-00000114: 00A00F13    ;         li      t5, ascii_lf
-00000118: 03E50463    ;         beq     a0, t5, lpc_newline
-0000011C: 00D00F13    ;         li      t5, ascii_cr
-00000120: 03E50463    ;         beq     a0, t5, lpc_home
-00000124: 00C00F13    ;         li      t5, ascii_ff
-00000128: 03E50463    ;         beq     a0, t5, lpc_clear
+00000080: 000000D8    ;         defw    sys_exit
+00000084: 000000EC    ;         defw    sys_lcd_char
+00000088: 00000104    ;         defw    sys_lcd_clear
+0000008C: 0000011C    ;         defw    sys_btn_read
+00000090: 00000124    ;         defw    sys_timer_init
+00000094: 0000012C    ;         defw    sys_timer_poll
+00000098: 00000134    ;         defw    sys_timer_ack
+0000009C:             ; 
+0000009C:             ; 
+0000009C:             ;         ;       ----------------------------------------------------------
+0000009C:             ;         ;       trap_error
+0000009C:             ;         ;       Input none
+0000009C:             ;         ;       Saved nothing
+0000009C:             ;         ;       Clobbers t0 t1
+0000009C:             ;         ;       Effect writes something to HALT_PORT and spins forever
+0000009C:             ;         ;       ----------------------------------------------------------
+0000009C:             ; trap_error:
+0000009C: 00010337    ;         li      t1, HALT_PORT
+000000A0: 70030313    ; 
+000000A4: 010102B7    ;         li      t0, 0x01010101 ; Does not really matter what is being sent
+000000A8: 10128293    ; 
+000000AC: 00532023    ;         sw      t0, 0[t1]
+000000B0: FEDFF06F    ;         j       trap_error ; Just in case the halt somehow did not work
+000000B4:             ; 
+000000B4:             ; 
+000000B4:             ;         ;       ----------------------------------------------------------
+000000B4:             ;         ;       trap_return
+000000B4:             ;         ;       Input saved context on OS stack
+000000B4:             ;         ;       Saved nothing
+000000B4:             ;         ;       Clobbers t0
+000000B4:             ;         ;       Effect increments saved MEPC past ecall, restores context,
+000000B4:             ;         ;       swaps back to user stack and returns to user mode
+000000B4:             ;         ;       ----------------------------------------------------------
+000000B4:             ; trap_return:
+000000B4: 00C12283    ;         lw      t0, 12[sp] ; reload saved MEPC
+000000B8: 00428293    ;         addi    t0, t0, 4 ; advance past the ecall instruction
+000000BC: 34129073    ;         csrw    MEPC, t0 ; write updated return address
+000000C0: 00812883    ;         lw      a7, 8[sp] ; restore syscall register
+000000C4: 00412283    ;         lw      t0, 4[sp] ; restore t0
+000000C8: 00012083    ;         lw      ra, 0[sp] ; restore return address
+000000CC: 01010113    ;         addi    sp, sp, 16 ; deallocate trap frame
+000000D0: 34011173    ;         csrrw   sp, MSCRATCH, sp ; swap OS sp back, restore user sp
+000000D4: 30200073    ;         mret    ; return to user mode
+000000D8:             ; 
+000000D8:             ; 
+000000D8:             ;         ;       ----------------------------------------------------------
+000000D8:             ;         ;       sys_exit
+000000D8:             ;         ;       Input none
+000000D8:             ;         ;       Saved nothing
+000000D8:             ;         ;       Clobbers t0 t1
+000000D8:             ;         ;       Effect writes 0 to HALT_PORT and spins, never returns
+000000D8:             ;         ;       ----------------------------------------------------------
+000000D8:             ; sys_exit:
+000000D8:             ;         ;       This is unused as of now but could be useful sometime later and it exists since
+                      ;  we may want different exit logic at some point
+000000D8: 00010337    ;         li      t1, HALT_PORT ; load halt port address
+000000DC: 70030313    ; 
+000000E0: 00000293    ;         li      t0, 0 ; clean exit code
+000000E4: 00532023    ;         sw      t0, 0[t1] ; halt the processor
+000000E8: FF1FF06F    ;         j       sys_exit ; spin in case halt does not fire
+000000EC:             ; 
+000000EC:             ; 
+000000EC:             ;         ;       ----------------------------------------------------------
+000000EC:             ;         ;       sys_lcd_char
+000000EC:             ;         ;       Input a0 = character byte to print
+000000EC:             ;         ;       Saved ra on OS stack
+000000EC:             ;         ;       Clobbers a1 a2 a3 t2 t3 t5
+000000EC:             ;         ;       Effect calls lcd_print_char then returns to user via trap_return
+000000EC:             ;         ;       ----------------------------------------------------------
+000000EC:             ; sys_lcd_char:
+000000EC: FFC10113    ;         subi    sp, sp, 4 ; allocate frame for ra
+000000F0: 00112023    ;         sw      ra, 0[sp] ; save ra before nested call
+000000F4: 048000EF    ;         call    lcd_print_char ; delegate to LCD driver
+000000F8: 00012083    ;         lw      ra, 0[sp] ; restore ra
+000000FC: 00410113    ;         addi    sp, sp, 4 ; deallocate frame
+00000100: FB5FF06F    ;         j       trap_return ; return to user mode
+00000104:             ; 
+00000104:             ; 
+00000104:             ;         ;       ----------------------------------------------------------
+00000104:             ;         ;       sys_lcd_clear
+00000104:             ;         ;       Input none
+00000104:             ;         ;       Saved ra on OS stack
+00000104:             ;         ;       Clobbers a0 a1 a2 a3 t2 t3
+00000104:             ;         ;       Effect calls lcd_clear then returns to user via trap_return
+00000104:             ;         ;       ----------------------------------------------------------
+00000104:             ; sys_lcd_clear:
+00000104: FFC10113    ;         subi    sp, sp, 4 ; allocate frame for ra
+00000108: 00112023    ;         sw      ra, 0[sp] ; save ra before nested call
+0000010C: 0D4000EF    ;         call    lcd_clear ; delegate to LCD driver
+00000110: 00012083    ;         lw      ra, 0[sp] ; restore ra
+00000114: 00410113    ;         addi    sp, sp, 4 ; deallocate frame
+00000118: F9DFF06F    ;         j       trap_return ; return to user mode
+0000011C:             ; 
+0000011C:             ; 
+0000011C:             ;         ;       ----------------------------------------------------------
+0000011C:             ;         ;       sys_btn_read
+0000011C:             ;         ;       Input none
+0000011C:             ;         ;       Saved nothing
+0000011C:             ;         ;       Clobbers t0
+0000011C:             ;         ;       Effect calls btn_read, result in a0, returns via trap_return
+0000011C:             ;         ;       ----------------------------------------------------------
+0000011C:             ; sys_btn_read:
+0000011C: 188000EF    ;         call    btn_read ; read button port into a0
+00000120: F95FF06F    ;         j       trap_return ; return to user mode
+00000124:             ; 
+00000124:             ; 
+00000124:             ;         ;       ----------------------------------------------------------
+00000124:             ;         ;       sys_timer_init
+00000124:             ;         ;       Input a0 = modulus minus 1 value
+00000124:             ;         ;       Saved nothing
+00000124:             ;         ;       Clobbers t0 t1
+00000124:             ;         ;       Effect calls timer_init then returns to user via trap_return
+00000124:             ;         ;       ----------------------------------------------------------
+00000124:             ; sys_timer_init:
+00000124: 190000EF    ;         call    timer_init ; configure and start timer
+00000128: F8DFF06F    ;         j       trap_return ; return to user mode
 0000012C:             ; 
-0000012C:             ;         ;       Normal character — poll then write
-0000012C: 00010637    ;         li      a2, LCD_BASE
-00000130: 10060613    ; 
-00000134: 00A00693    ;         li      a3, r_output
-00000138: 0A8000EF    ;         call    lcd_send
-0000013C: 0180006F    ;         j       lpc_done
-00000140:             ; 
-00000140:             ; lpc_newline:
-00000140: 020000EF    ;         call    lcd_new_line
-00000144: 0100006F    ;         j       lpc_done
-00000148:             ; 
-00000148:             ; lpc_home:
-00000148: 040000EF    ;         call    lcd_home_line
-0000014C: 0080006F    ;         j       lpc_done
-00000150:             ; 
-00000150:             ; lpc_clear:
-00000150: 060000EF    ;         call    lcd_clear
-00000154:             ; 
-00000154:             ; lpc_done:
-00000154: 00012083    ;         lw      ra, 0[sp]
-00000158: 00410113    ;         addi    sp, sp, 4
-0000015C: 00008067    ;         ret
-00000160:             ; 
-00000160:             ; 
-00000160:             ;         ;       lcd_new_line()
-00000160:             ;         ;       in  nothing
-00000160:             ;         ;       Sets DDRAM address to start of line 2 (0xC0)
-00000160:             ;         ;       corrupts a0 a1 a2 a3 t2 t3
-00000160:             ; lcd_new_line:
-00000160: FFC10113    ;         subi    sp, sp, 4
-00000164: 00112023    ;         sw      ra, 0[sp]
-00000168: 00010637    ;         li      a2, LCD_BASE
-0000016C: 10060613    ; 
-00000170: 0C000513    ;         li      a0, lcd_cmd_line2
-00000174: 00800693    ;         li      a3, lcd_ctrl_cmd
-00000178: 068000EF    ;         call    lcd_send
-0000017C: 00012083    ;         lw      ra, 0[sp]
-00000180: 00410113    ;         addi    sp, sp, 4
-00000184: 00008067    ;         ret
-00000188:             ; 
-00000188:             ; 
-00000188:             ;         ;       lcd_home_line()
-00000188:             ;         ;       in  nothing
-00000188:             ;         ;       Sets DDRAM address to start of line 1 (0x80)
-00000188:             ;         ;       corrupts a0 a1 a2 a3 t2 t3
-00000188:             ; lcd_home_line:
-00000188: FFC10113    ;         subi    sp, sp, 4
-0000018C: 00112023    ;         sw      ra, 0[sp]
-00000190: 00010637    ;         li      a2, LCD_BASE
-00000194: 10060613    ; 
-00000198: 08000513    ;         li      a0, lcd_cmd_line1
-0000019C: 00800693    ;         li      a3, lcd_ctrl_cmd
-000001A0: 040000EF    ;         call    lcd_send
-000001A4: 00012083    ;         lw      ra, 0[sp]
-000001A8: 00410113    ;         addi    sp, sp, 4
-000001AC: 00008067    ;         ret
-000001B0:             ; 
-000001B0:             ; 
-000001B0:             ;         ;       lcd_clear()
-000001B0:             ;         ;       in  nothing
-000001B0:             ;         ;       corrupts a0 a1 a2 a3 t2 t3
-000001B0:             ; lcd_clear:
-000001B0: FFC10113    ;         subi    sp, sp, 4
-000001B4: 00112023    ;         sw      ra, 0[sp]
-000001B8: 00010637    ;         li      a2, LCD_BASE
-000001BC: 10060613    ; 
-000001C0: 00800693    ;         li      a3, lcd_ctrl_cmd
-000001C4: 00100513    ;         li      a0, lcd_cmd_clear
-000001C8: 018000EF    ;         call    lcd_send
-000001CC: 00200513    ;         li      a0, lcd_cmd_home
-000001D0: 010000EF    ;         call    lcd_send
+0000012C:             ; 
+0000012C:             ;         ;       ----------------------------------------------------------
+0000012C:             ;         ;       sys_timer_poll
+0000012C:             ;         ;       Input none
+0000012C:             ;         ;       Saved nothing
+0000012C:             ;         ;       Clobbers t0 t1
+0000012C:             ;         ;       Effect calls timer_poll, result in a0, returns via trap_return
+0000012C:             ;         ;       ----------------------------------------------------------
+0000012C:             ; sys_timer_poll:
+0000012C: 1A0000EF    ;         call    timer_poll ; check terminal count status
+00000130: F85FF06F    ;         j       trap_return ; return to user mode
+00000134:             ; 
+00000134:             ; 
+00000134:             ;         ;       ----------------------------------------------------------
+00000134:             ;         ;       sys_timer_ack
+00000134:             ;         ;       Input none
+00000134:             ;         ;       Saved nothing
+00000134:             ;         ;       Clobbers t0 t1
+00000134:             ;         ;       Effect calls timer_ack to clear sticky terminal count bit,
+00000134:             ;         ;       returns to user via trap_return
+00000134:             ;         ;       ----------------------------------------------------------
+00000134:             ; sys_timer_ack:
+00000134: 1C8000EF    ;         call    timer_ack ; clear terminal count flag
+00000138: F7DFF06F    ;         j       trap_return ; return to user mode
+0000013C:             ; 
+0000013C:             ; 
+0000013C:             ;         INCLUDE lcd.s
+0000013C:             ;         ;       ----------------------------------------------------------
+0000013C:             ;         ;       LCD Screen Display with Clear, new-line, home etc
+0000013C:             ;         ;       A. Pandey
+0000013C:             ;         ;       Version 1.0
+0000013C:             ;         ;       17th March 2026
+0000013C:             ;         ;       ----------------------------------------------------------
+0000013C:             ; 
+0000013C:             ; 
+0000013C:             ;         ;       ----------------------------------------------------------
+0000013C:             ;         ;       lcd_print_char(a0)
+0000013C:             ;         ;       Input  a0 = character byte to print
+0000013C:             ;         ;       Saved  ra
+0000013C:             ;         ;       Clobbers a1 a2 a3 t2 t3 t5
+0000013C:             ;         ;       Effect routes ascii_lf ascii_cr ascii_ff to control
+0000013C:             ;         ;              routines, all other bytes written to LCD data
+0000013C:             ;         ;       ----------------------------------------------------------
+0000013C:             ; lcd_print_char:
+0000013C: FFC10113    ;         subi    sp, sp, 4
+00000140: 00112023    ;         sw      ra, 0[sp]
+00000144:             ; 
+00000144: 00A00F13    ;         li      t5, ascii_lf
+00000148: 03E50463    ;         beq     a0, t5, lpc_newline
+0000014C: 00D00F13    ;         li      t5, ascii_cr
+00000150: 03E50463    ;         beq     a0, t5, lpc_home
+00000154: 00C00F13    ;         li      t5, ascii_ff
+00000158: 03E50463    ;         beq     a0, t5, lpc_clear
+0000015C:             ; 
+0000015C: 00010637    ;         li      a2, LCD_BASE
+00000160: 10060613    ; 
+00000164: 00A00693    ;         li      a3, r_output
+00000168: 0A8000EF    ;         call    lcd_send
+0000016C: 0180006F    ;         j       lpc_done
+00000170:             ; 
+00000170:             ; lpc_newline:
+00000170: 020000EF    ;         call    lcd_new_line
+00000174: 0100006F    ;         j       lpc_done
+00000178:             ; 
+00000178:             ; lpc_home:
+00000178: 040000EF    ;         call    lcd_home_line
+0000017C: 0080006F    ;         j       lpc_done
+00000180:             ; 
+00000180:             ; lpc_clear:
+00000180: 060000EF    ;         call    lcd_clear
+00000184:             ; 
+00000184:             ; lpc_done:
+00000184: 00012083    ;         lw      ra, 0[sp]
+00000188: 00410113    ;         addi    sp, sp, 4
+0000018C: 00008067    ;         ret
+00000190:             ; 
+00000190:             ; 
+00000190:             ;         ;       ----------------------------------------------------------
+00000190:             ;         ;       lcd_new_line()
+00000190:             ;         ;       Input  none
+00000190:             ;         ;       Saved  ra
+00000190:             ;         ;       Clobbers a0 a1 a2 a3 t2 t3
+00000190:             ;         ;       Effect sends DDRAM set-address command for start of line 2
+00000190:             ;         ;       ----------------------------------------------------------
+00000190:             ; lcd_new_line:
+00000190: FFC10113    ;         subi    sp, sp, 4
+00000194: 00112023    ;         sw      ra, 0[sp]
+00000198: 00010637    ;         li      a2, LCD_BASE
+0000019C: 10060613    ; 
+000001A0: 0C000513    ;         li      a0, lcd_cmd_line2
+000001A4: 00800693    ;         li      a3, lcd_ctrl_cmd
+000001A8: 068000EF    ;         call    lcd_send
+000001AC: 00012083    ;         lw      ra, 0[sp]
+000001B0: 00410113    ;         addi    sp, sp, 4
+000001B4: 00008067    ;         ret
+000001B8:             ; 
+000001B8:             ; 
+000001B8:             ;         ;       ----------------------------------------------------------
+000001B8:             ;         ;       lcd_home_line()
+000001B8:             ;         ;       Input  none
+000001B8:             ;         ;       Saved  ra
+000001B8:             ;         ;       Clobbers a0 a1 a2 a3 t2 t3
+000001B8:             ;         ;       Effect sends DDRAM set-address command for start of line 1
+000001B8:             ;         ;       ----------------------------------------------------------
+000001B8:             ; lcd_home_line:
+000001B8: FFC10113    ;         subi    sp, sp, 4
+000001BC: 00112023    ;         sw      ra, 0[sp]
+000001C0: 00010637    ;         li      a2, LCD_BASE
+000001C4: 10060613    ; 
+000001C8: 08000513    ;         li      a0, lcd_cmd_line1
+000001CC: 00800693    ;         li      a3, lcd_ctrl_cmd
+000001D0: 040000EF    ;         call    lcd_send
 000001D4: 00012083    ;         lw      ra, 0[sp]
 000001D8: 00410113    ;         addi    sp, sp, 4
 000001DC: 00008067    ;         ret
 000001E0:             ; 
 000001E0:             ; 
 000001E0:             ;         ;       ----------------------------------------------------------
-000001E0:             ;         ;       lcd_send(a0, a2, a3)
-000001E0:             ;         ;       in  a0  byte to send
-000001E0:             ;         ;       in  a2  LCD base address
-000001E0:             ;         ;       in  a3  control pattern
-000001E0:             ;         ;       Polls until ready then writes
-000001E0:             ;         ;       corrupts a1 t2 t3
+000001E0:             ;         ;       lcd_clear()
+000001E0:             ;         ;       Input  none
+000001E0:             ;         ;       Saved  ra
+000001E0:             ;         ;       Clobbers a0 a1 a2 a3 t2 t3
+000001E0:             ;         ;       Effect sends clear-display then return-home commands
 000001E0:             ;         ;       ----------------------------------------------------------
-000001E0:             ; lcd_send:
+000001E0:             ; lcd_clear:
 000001E0: FFC10113    ;         subi    sp, sp, 4
 000001E4: 00112023    ;         sw      ra, 0[sp]
-000001E8: 014000EF    ;         call    lcd_poll
-000001EC: 054000EF    ;         call    lcd_write
-000001F0: 00012083    ;         lw      ra, 0[sp]
-000001F4: 00410113    ;         addi    sp, sp, 4
-000001F8: 00008067    ;         ret
-000001FC:             ; 
-000001FC:             ; 
-000001FC:             ;         ;       ----------------------------------------------------------
-000001FC:             ;         ;       lcd_poll(a2)
-000001FC:             ;         ;       in  a2  LCD base address
-000001FC:             ;         ;       Spins until busy flag clears
-000001FC:             ;         ;       corrupts a1 t2 t3
-000001FC:             ;         ;       ----------------------------------------------------------
-000001FC:             ; lcd_poll:
-000001FC: FFC10113    ;         subi    sp, sp, 4
-00000200: 00112023    ;         sw      ra, 0[sp]
-00000204:             ; lp_wait:
-00000204: 00900393    ;         li      t2, r_input
-00000208: 01400593    ;         li      a1, delay_short
-0000020C: 0043E393    ;         ori     t2, t2, lcd_e_bit
-00000210: 007600A3    ;         sb      t2, 1[a2]
-00000214: 060000EF    ;         call    delay
-00000218: 00060E03    ;         lb      t3, 0[a2]
-0000021C: 0FB3F393    ;         andi    t2, t2, lcd_e_clear
-00000220: 007600A3    ;         sb      t2, 1[a2]
-00000224: 03000593    ;         li      a1, delay_poll
-00000228: 04C000EF    ;         call    delay
-0000022C: 080E7E13    ;         andi    t3, t3, lcd_busy_flag
-00000230: FC0E1AE3    ;         bnez    t3, lp_wait
-00000234: 00012083    ;         lw      ra, 0[sp]
-00000238: 00410113    ;         addi    sp, sp, 4
-0000023C: 00008067    ;         ret
-00000240:             ; 
-00000240:             ; 
-00000240:             ;         ;       ----------------------------------------------------------
-00000240:             ;         ;       lcd_write(a0, a2, a3)
-00000240:             ;         ;       in  a0  byte to send
-00000240:             ;         ;       in  a2  LCD base address
-00000240:             ;         ;       in  a3  control pattern
-00000240:             ;         ;       Assumes LCD is already ready — call lcd_poll first
-00000240:             ;         ;       corrupts a1 t2
-00000240:             ;         ;       ----------------------------------------------------------
-00000240:             ; lcd_write:
-00000240: FFC10113    ;         subi    sp, sp, 4
-00000244: 00112023    ;         sw      ra, 0[sp]
-00000248: 00068393    ;         mv      t2, a3
-0000024C: 0043E393    ;         ori     t2, t2, lcd_e_bit
-00000250: 00A60023    ;         sb      a0, 0[a2]
-00000254: 007600A3    ;         sb      t2, 1[a2]
-00000258: 01400593    ;         li      a1, delay_short
-0000025C: 018000EF    ;         call    delay
-00000260: 0FB3F393    ;         andi    t2, t2, lcd_e_clear
-00000264: 007600A3    ;         sb      t2, 1[a2]
-00000268: 00012083    ;         lw      ra, 0[sp]
-0000026C: 00410113    ;         addi    sp, sp, 4
-00000270: 00008067    ;         ret
-00000274:             ; 
-00000274:             ; 
-00000274:             ;         ;       ----------------------------------------------------------
-00000274:             ;         ;       delay(a1)
-00000274:             ;         ;       in  a1  loop count
-00000274:             ;         ;       corrupts t4
-00000274:             ;         ;       ----------------------------------------------------------
-00000274:             ; delay:
-00000274: 00058E93    ;         mv      t4, a1
-00000278:             ; dl:
-00000278: FFFE8E93    ;         addi    t4, t4, -1
-0000027C: FE0E9EE3    ;         bnez    t4, dl
-00000280: 00008067    ;         ret
-00000284:             ; 
-00000284:             ; 
-00000284:             ;         defs    OS_STACK_SIZE
-00000384:             ; os_stack_top:
-00000384:             ; 
-00000384:             ; 
-00000384:             ;         ;       ----------------------------------------------------------
-00000384:             ;         ;       User space
-00000384:             ;         ;       ----------------------------------------------------------
-00040000:             ;         ORG     0x00040000
-00040000:             ;         defs    256
-00040100:             ; user_stack_top:
-00040100:             ; 
-00040100:             ; USER_CODE:
-00040100: 00000117    ;         la      sp, user_stack_top
-00040104: 00010113    ; 
-00040108:             ; 
-00040108: 00000517    ;         la      a0, HELLO
-0004010C: 05C50513    ; 
-00040110: 01C000EF    ;         call    print_str
-00040114:             ; 
-00040114: 00000517    ;         la      a0, WORLD
-00040118: 05750513    ; 
-0004011C: 010000EF    ;         call    print_str
-00040120:             ; 
-00040120: 00000893    ;         li      a7, SYS_EXIT
-00040124: 00000073    ;         ecall
-00040128:             ; 
-00040128: 0000006F    ;         j       .
-0004012C:             ; 
-0004012C:             ; 
-0004012C:             ;         ;       print_str(a0)
-0004012C:             ;         ;       in  a0  address of null-terminated string
-0004012C:             ;         ;       corrupts a0 a7 s0
-0004012C:             ; print_str:
-0004012C: FF810113    ;         subi    sp, sp, 8
-00040130: 00112023    ;         sw      ra, 0[sp]
-00040134: 00812223    ;         sw      s0, 4[sp]
-00040138: 00050413    ;         mv      s0, a0
-0004013C:             ; 
-0004013C:             ; ps_loop:
-0004013C: 00040503    ;         lb      a0, 0[s0]
-00040140: 00050A63    ;         beqz    a0, ps_done
-00040144: 00100893    ;         li      a7, SYS_LCD_CHAR
-00040148: 00000073    ;         ecall
-0004014C: 00140413    ;         addi    s0, s0, 1
-00040150: FEDFF06F    ;         j       ps_loop
-00040154:             ; 
-00040154:             ; ps_done:
-00040154: 00412403    ;         lw      s0, 4[sp]
-00040158: 00012083    ;         lw      ra, 0[sp]
-0004015C: 00810113    ;         addi    sp, sp, 8
-00040160: 00008067    ;         ret
-00040164:             ; 
-00040164:             ; 
-00040164: 41 72 70 61 ;         HELLO   DEFB    "Arpan\n", 0
-00040168: 6E 0A 00    ; 
-0004016B: 57 6F 72 6C ;         WORLD   DEFB    "World!\rHello", 0
-0004016F: 64 21 0D 48 ; 
-00040173: 65 6C 6C 6F ; 
-00040177: 00          ; 
-00040178:             ; 
+000001E8: 00010637    ;         li      a2, LCD_BASE
+000001EC: 10060613    ; 
+000001F0: 00800693    ;         li      a3, lcd_ctrl_cmd
+000001F4: 00100513    ;         li      a0, lcd_cmd_clear
+000001F8: 018000EF    ;         call    lcd_send
+000001FC: 00200513    ;         li      a0, lcd_cmd_home
+00000200: 010000EF    ;         call    lcd_send
+00000204: 00012083    ;         lw      ra, 0[sp]
+00000208: 00410113    ;         addi    sp, sp, 4
+0000020C: 00008067    ;         ret
+00000210:             ; 
+00000210:             ; 
+00000210:             ;         ;       ----------------------------------------------------------
+00000210:             ;         ;       lcd_send(a0, a2, a3)
+00000210:             ;         ;       Input  a0 = byte to send
+00000210:             ;         ;              a2 = LCD base address
+00000210:             ;         ;              a3 = control pattern
+00000210:             ;         ;       Saved  ra
+00000210:             ;         ;       Clobbers a1 t2 t3
+00000210:             ;         ;       Effect polls busy flag then writes a0 with control a3
+00000210:             ;         ;       ----------------------------------------------------------
+00000210:             ; lcd_send:
+00000210: FFC10113    ;         subi    sp, sp, 4
+00000214: 00112023    ;         sw      ra, 0[sp]
+00000218: 014000EF    ;         call    lcd_poll
+0000021C: 054000EF    ;         call    lcd_write
+00000220: 00012083    ;         lw      ra, 0[sp]
+00000224: 00410113    ;         addi    sp, sp, 4
+00000228: 00008067    ;         ret
+0000022C:             ; 
+0000022C:             ; 
+0000022C:             ;         ;       ----------------------------------------------------------
+0000022C:             ;         ;       lcd_poll(a2)
+0000022C:             ;         ;       Input  a2 = LCD base address
+0000022C:             ;         ;       Saved  ra
+0000022C:             ;         ;       Clobbers a1 t2 t3
+0000022C:             ;         ;       Effect spins reading LCD busy flag until it clears
+0000022C:             ;         ;       ----------------------------------------------------------
+0000022C:             ; lcd_poll:
+0000022C: FFC10113    ;         subi    sp, sp, 4
+00000230: 00112023    ;         sw      ra, 0[sp]
+00000234:             ; lp_wait:
+00000234: 00900393    ;         li      t2, r_input
+00000238: 01400593    ;         li      a1, delay_short
+0000023C: 0043E393    ;         ori     t2, t2, lcd_e_bit
+00000240: 007600A3    ;         sb      t2, 1[a2]
+00000244: 0CC000EF    ;         call    delay
+00000248: 00060E03    ;         lb      t3, 0[a2]
+0000024C: 0FB3F393    ;         andi    t2, t2, lcd_e_clear
+00000250: 007600A3    ;         sb      t2, 1[a2]
+00000254: 03000593    ;         li      a1, delay_poll
+00000258: 0B8000EF    ;         call    delay
+0000025C: 080E7E13    ;         andi    t3, t3, lcd_busy_flag
+00000260: FC0E1AE3    ;         bnez    t3, lp_wait
+00000264: 00012083    ;         lw      ra, 0[sp]
+00000268: 00410113    ;         addi    sp, sp, 4
+0000026C: 00008067    ;         ret
+00000270:             ; 
+00000270:             ; 
+00000270:             ;         ;       ----------------------------------------------------------
+00000270:             ;         ;       lcd_write(a0, a2, a3)
+00000270:             ;         ;       Input  a0 = byte to send
+00000270:             ;         ;              a2 = LCD base address
+00000270:             ;         ;              a3 = control pattern
+00000270:             ;         ;       Saved  ra
+00000270:             ;         ;       Clobbers a1 t2
+00000270:             ;         ;       Effect writes a0 to LCD with enable strobe, assumes lcd_poll
+00000270:             ;         ;              has already confirmed the display is ready
+00000270:             ;         ;       ----------------------------------------------------------
+00000270:             ; lcd_write:
+00000270: FFC10113    ;         subi    sp, sp, 4
+00000274: 00112023    ;         sw      ra, 0[sp]
+00000278: 00068393    ;         mv      t2, a3
+0000027C: 0043E393    ;         ori     t2, t2, lcd_e_bit
+00000280: 00A60023    ;         sb      a0, 0[a2]
+00000284: 007600A3    ;         sb      t2, 1[a2]
+00000288: 01400593    ;         li      a1, delay_short
+0000028C: 084000EF    ;         call    delay
+00000290: 0FB3F393    ;         andi    t2, t2, lcd_e_clear
+00000294: 007600A3    ;         sb      t2, 1[a2]
+00000298: 00012083    ;         lw      ra, 0[sp]
+0000029C: 00410113    ;         addi    sp, sp, 4
+000002A0: 00008067    ;         ret
+000002A4:             ; 
+000002A4:             ; 
+000002A4:             ;         INCLUDE drivers.s
+000002A4:             ;     ;    ----------------------------------------------------------
+000002A4:             ;     ;    Hardware Drivers- buttons, timer and delay
+000002A4:             ;     ;    A. Pandey
+000002A4:             ;     ;    Version 1.0
+000002A4:             ;     ;    17th March 2026
+000002A4:             ;     ;    ----------------------------------------------------------
+000002A4:             ; 
+000002A4:             ; 
+000002A4:             ;     ;    ----------------------------------------------------------
+000002A4:             ;     ;    btn_read()
+000002A4:             ;     ;    Input none
+000002A4:             ;     ;    Saved nothing
+000002A4:             ;     ;    Clobbers t0
+000002A4:             ;     ;    Effect reads raw button byte from BTN_PORT into a0
+000002A4:             ;     ;    ----------------------------------------------------------
+000002A4:             ; btn_read:
+000002A4: 000102B7    ;     li   t0, BTN_PORT
+000002A8: 00128293    ; 
+000002AC: 0002C503    ;     lbu  a0, 0[t0]
+000002B0: 00008067    ;     ret
+000002B4:             ; 
+000002B4:             ; 
+000002B4:             ;     ;    ----------------------------------------------------------
+000002B4:             ;     ;    timer_init(a0)
+000002B4:             ;     ;    Input a0 = modulus minus 1 value
+000002B4:             ;     ;    Saved nothing
+000002B4:             ;     ;    Clobbers t0 t1
+000002B4:             ;     ;    Effect writes modulus to TIMER_LIMIT then enables timer
+000002B4:             ;     ;    in modulus mode via TIMER_SET
+000002B4:             ;     ;    ----------------------------------------------------------
+000002B4:             ; timer_init:
+000002B4: 000102B7    ;     li   t0, TIMER_BASE
+000002B8: 20028293    ; 
+000002BC: 00A2A223    ;     sw   a0, TIMER_LIMIT[t0]
+000002C0: 00300313    ;     li   t1, TIMER_EN | TIMER_MOD
+000002C4: 0062AA23    ;     sw   t1, TIMER_SET[t0]
+000002C8: 00008067    ;     ret
+000002CC:             ; 
+000002CC:             ; 
+000002CC:             ;     ;    ----------------------------------------------------------
+000002CC:             ;     ;    timer_poll()
+000002CC:             ;     ;    Input none
+000002CC:             ;     ;    Saved nothing
+000002CC:             ;     ;    Clobbers t0 t1
+000002CC:             ;     ;    Effect reads TIMER_CTRL and returns 0 if terminal count
+000002CC:             ;     ;    not set, 1 if fired once, 2 if overrun (fired and
+000002CC:             ;     ;    bit 30 also set indicating a missed tick)
+000002CC:             ;     ;    ----------------------------------------------------------
+000002CC:             ; timer_poll:
+000002CC: 000102B7    ;     li   t0, TIMER_BASE
+000002D0: 20028293    ; 
+000002D4: 00C2A303    ;     lw   t1, TIMER_CTRL[t0]
+000002D8: 00000513    ;     li   a0, 0
+000002DC: 00034463    ;     bltz t1, tp_fired
+000002E0: 00008067    ;     ret
+000002E4:             ; tp_fired:
+000002E4: 00100513    ;     li   a0, 1
+000002E8: 00131313    ;     slli t1, t1, 1
+000002EC: 00034463    ;     bltz t1, tp_overrun
+000002F0: 00008067    ;     ret
+000002F4:             ; tp_overrun:
+000002F4: 00200513    ;     li   a0, 2
+000002F8: 00008067    ;     ret
+000002FC:             ; 
+000002FC:             ; 
+000002FC:             ;     ;    ----------------------------------------------------------
+000002FC:             ;     ;    timer_ack()
+000002FC:             ;     ;    Input none
+000002FC:             ;     ;    Saved nothing
+000002FC:             ;     ;    Clobbers t0 t1
+000002FC:             ;     ;    Effect clears the terminal count sticky bit via TIMER_CLR
+000002FC:             ;     ;    ----------------------------------------------------------
+000002FC:             ; timer_ack:
+000002FC: 000102B7    ;     li   t0, TIMER_BASE
+00000300: 20028293    ; 
+00000304: 01000313    ;     li   t1, TIMER_CLR_TERM
+00000308: 0062A823    ;     sw   t1, TIMER_CLR[t0]
+0000030C: 00008067    ;     ret
+00000310:             ; 
+00000310:             ; 
+00000310:             ;     ;    ----------------------------------------------------------
+00000310:             ;     ;    delay(a1)
+00000310:             ;     ;    Input a1 = loop iteration count
+00000310:             ;     ;    Saved nothing
+00000310:             ;     ;    Clobbers t4
+00000310:             ;     ;    Effect burns time in a decrement loop, each iteration
+00000310:             ;     ;    takes 4 cycles (100ns) at 40MHz
+00000310:             ;     ;    ----------------------------------------------------------
+00000310:             ; delay:
+00000310: 00058E93    ;     mv   t4, a1
+00000314:             ; delay_loop:
+00000314: FFFE8E93    ;     subi t4, t4, 1
+00000318: FE0E9EE3    ;     bnez t4, delay_loop
+0000031C: 00008067    ;     ret
+00000320:             ; 
+00000320:             ; 
+00000320:             ; 
+00000320:             ;         defs    OS_STACK_SIZE
+00000420:             ; os_stack_top:
+00000420:             ; 
+00000420:             ; 
+00000420:             ;         INCLUDE user.s
+00000420:             ;         ;     ----------------------------------------------------------
+00000420:             ;         ;     Stopwatch Application, User Space
+00000420:             ;         ;     A. Pandey
+00000420:             ;         ;     Version 1.0
+00000420:             ;         ;     17th March 2026
+00000420:             ;         ;     ----------------------------------------------------------
+00000420:             ; 
+00040000:             ;         ORG   0x00040000
+00040000:             ;         defs  USER_STACK_SIZE
+00040200:             ; user_stack_top:
+00040200:             ; 
+00040200:             ; 
+00040200:             ;         ;     ----------------------------------------------------------
+00040200:             ;         ;     USER_CODE
+00040200:             ;         ;     Input none
+00040200:             ;         ;     Saved nothing
+00040200:             ;         ;     Clobbers a0 a7 s1 s2 s3 s4
+00040200:             ;         ;     Effect sets up user stack, initialises 1s timer, clears
+00040200:             ;         ;     display, prints title and enters main_loop
+00040200:             ;         ;     ----------------------------------------------------------
+00040200:             ; USER_CODE:
+00040200: 00000117    ;         la    sp, user_stack_top
+00040204: 00010113    ; 
+00040208:             ; 
+00040208: 000F4537    ;         li    a0, TIMER_1S
+0004020C: 23F50513    ; 
+00040210: 00400893    ;         li    a7, SYS_TIMER_INIT
+00040214: 00000073    ;         ecall
+00040218:             ; 
+00040218: 00000493    ;         li    s1, 0
+0004021C: 00000913    ;         li    s2, 0
+00040220: 00000993    ;         li    s3, 0
+00040224: 00000A13    ;         li    s4, 0
+00040228:             ; 
+00040228: 00200893    ;         li    a7, SYS_LCD_CLEAR
+0004022C: 00000073    ;         ecall
+00040230: 00000517    ;         la    a0, STR_TITLE
+00040234: 1B850513    ; 
+00040238: 178000EF    ;         call  print_str
+0004023C: 0CC000EF    ;         call  print_time
+00040240:             ; 
+00040240:             ; 
+00040240:             ;         ;     ----------------------------------------------------------
+00040240:             ;         ;     main_loop
+00040240:             ;         ;     Input s1 run state, s2 hours, s3 minutes, s4 seconds
+00040240:             ;         ;     Saved s1 s2 s3 s4 s6 across iterations
+00040240:             ;         ;     Clobbers a0 a1 a7 t0 t1
+00040240:             ;         ;     Effect polls timer and buttons on every iteration, advances
+00040240:             ;         ;     BCD time counters on each elapsed second, updates
+00040240:             ;         ;     display on rollover, handles start pause reset buttons
+00040240:             ;         ;     ----------------------------------------------------------
+00040240:             ; main_loop:
+00040240: 00500893    ;         li    a7, SYS_TIMER_POLL
+00040244: 00000073    ;         ecall
+00040248: 04050C63    ;         beqz  a0, skip_tick
+0004024C:             ; 
+0004024C: 00050B13    ;         mv    s6, a0
+00040250: 00600893    ;         li    a7, SYS_TIMER_ACK
+00040254: 00000073    ;         ecall
+00040258:             ; 
+00040258: 04048463    ;         beqz  s1, skip_tick
+0004025C:             ; 
+0004025C:             ; add_ticks:
+0004025C:             ;         ;     This is repetitive but a loop and procedure for 3 times was not really worth it i
+                      ; mo
+0004025C: 06000593    ;         li    a1, bcd_sec_max
+00040260: 000A0513    ;         mv    a0, s4
+00040264: 084000EF    ;         call  bcd_inc
+00040268: 00050A13    ;         mv    s4, a0
+0004026C: 02051463    ;         bnez  a0, tick_done
+00040270:             ; 
+00040270: 06000593    ;         li    a1, bcd_min_max
+00040274: 00098513    ;         mv    a0, s3
+00040278: 070000EF    ;         call  bcd_inc
+0004027C: 00050993    ;         mv    s3, a0
+00040280: 00051A63    ;         bnez  a0, tick_done
+00040284:             ; 
+00040284: 02400593    ;         li    a1, bcd_hr_max
+00040288: 00090513    ;         mv    a0, s2
+0004028C: 05C000EF    ;         call  bcd_inc
+00040290: 00050913    ;         mv    s2, a0
+00040294:             ; 
+00040294:             ; tick_done:
+00040294: FFFB0B13    ;         subi  s6, s6, 1
+00040298: FC0B12E3    ;         bnez  s6, add_ticks
+0004029C:             ; 
+0004029C: 06C000EF    ;         call  print_time
+000402A0:             ; 
+000402A0:             ; skip_tick:
+000402A0: 00300893    ;         li    a7, SYS_BTN_READ
+000402A4: 00000073    ;         ecall
+000402A8:             ; 
+000402A8: 00157293    ;         andi  t0, a0, BTN_START
+000402AC: 00028663    ;         beqz  t0, check_pause
+000402B0: 00100493    ;         li    s1, 1
+000402B4: F8DFF06F    ;         j     main_loop
+000402B8:             ; 
+000402B8:             ; check_pause:
+000402B8: 00257293    ;         andi  t0, a0, BTN_PAUSE
+000402BC: 00028663    ;         beqz  t0, check_reset
+000402C0: 00000493    ;         li    s1, 0
+000402C4: F7DFF06F    ;         j     main_loop
+000402C8:             ; 
+000402C8:             ; check_reset:
+000402C8: 00457293    ;         andi  t0, a0, BTN_RESET
+000402CC: F6028AE3    ;         beqz  t0, main_loop
+000402D0: F60498E3    ;         bnez  s1, main_loop
+000402D4: 00000913    ;         li    s2, 0
+000402D8: 00000993    ;         li    s3, 0
+000402DC: 00000A13    ;         li    s4, 0
+000402E0: 028000EF    ;         call  print_time
+000402E4: F5DFF06F    ;         j     main_loop
+000402E8:             ; 
+000402E8:             ; 
+000402E8:             ;         ;     ----------------------------------------------------------
+000402E8:             ;         ;     bcd_inc(a0, a1)
+000402E8:             ;         ;     Input a0 = current BCD byte value
+000402E8:             ;         ;     a1 = exclusive upper BCD limit (e.g. bcd_sec_max)
+000402E8:             ;         ;     Saved nothing
+000402E8:             ;         ;     Clobbers t0 t1
+000402E8:             ;         ;     Effect increments a0 as BCD, applies digit carry correction
+000402E8:             ;         ;     if lower nibble exceeds 9, wraps to zero if result
+000402E8:             ;         ;     reaches or exceeds the limit in a1
+000402E8:             ;         ;     ----------------------------------------------------------
+000402E8:             ; bcd_inc:
+000402E8: 00150513    ;         addi  a0, a0, 1
+000402EC: 00F57293    ;         andi  t0, a0, 0xF
+000402F0: 00A00313    ;         li    t1, bcd_digit_max
+000402F4: 0062C463    ;         blt   t0, t1, bi_no_carry
+000402F8: 00650513    ;         addi  a0, a0, bcd_carry_adjust
+000402FC:             ; bi_no_carry:
+000402FC: 00B54463    ;         blt   a0, a1, bi_done
+00040300: 00000513    ;         li    a0, 0
+00040304:             ; bi_done:
+00040304: 00008067    ;         ret
+00040308:             ; 
+00040308:             ; 
+00040308:             ;         ;     ----------------------------------------------------------
+00040308:             ;         ;     print_time()
+00040308:             ;         ;     Input s2 = hours BCD, s3 = minutes BCD, s4 = seconds BCD
+00040308:             ;         ;     Saved ra
+00040308:             ;         ;     Clobbers a0 a1 a7 t0 t1
+00040308:             ;         ;     Effect moves cursor to line 2 and prints hh mm ss separated
+00040308:             ;         ;     by ascii_colon, reads BCD values directly from s2 s3 s4
+00040308:             ;         ;     ----------------------------------------------------------
+00040308:             ; print_time:
+00040308: FFC10113    ;         subi  sp, sp, 4
+0004030C: 00112023    ;         sw    ra, 0[sp]
+00040310:             ; 
+00040310: 00A00513    ;         li    a0, ascii_lf
+00040314: 00100893    ;         li    a7, SYS_LCD_CHAR
+00040318: 00000073    ;         ecall
+0004031C:             ; 
+0004031C: 00090513    ;         mv    a0, s2
+00040320: 068000EF    ;         call  print_hex8
+00040324: 03A00513    ;         li    a0, ascii_colon
+00040328: 00100893    ;         li    a7, SYS_LCD_CHAR
+0004032C: 00000073    ;         ecall
+00040330:             ; 
+00040330: 00098513    ;         mv    a0, s3
+00040334: 054000EF    ;         call  print_hex8
+00040338: 03A00513    ;         li    a0, ascii_colon
+0004033C: 00100893    ;         li    a7, SYS_LCD_CHAR
+00040340: 00000073    ;         ecall
+00040344:             ; 
+00040344: 000A0513    ;         mv    a0, s4 ; seconds in BCD
+00040348: 040000EF    ;         call  print_hex8 ; display ss
+0004034C:             ; 
+0004034C: 00012083    ;         lw    ra, 0[sp] ; restore return address
+00040350: 00410113    ;         addi  sp, sp, 4
+00040354: 00008067    ;         ret
+00040358:             ; 
+00040358:             ; 
+00040358:             ;         ;     ----------------------------------------------------------
+00040358:             ;         ;     print_hex4(a0)
+00040358:             ;         ;     Input a0 = byte whose lower nibble is to be printed
+00040358:             ;         ;     Saved ra
+00040358:             ;         ;     Clobbers a0 a1 a7 t0
+00040358:             ;         ;     Effect masks lower nibble of a0, converts to ASCII digit
+00040358:             ;         ;     and prints via SYS_LCD_CHAR, BCD input always stays
+00040358:             ;         ;     in the 0-9 range so hex letter path is never taken
+00040358:             ;         ;     ----------------------------------------------------------
+00040358:             ; print_hex4:
+00040358: FFC10113    ;         subi  sp, sp, 4
+0004035C: 00112023    ;         sw    ra, 0[sp] ; save return address
+00040360:             ; 
+00040360: 00F57513    ;         andi  a0, a0, 0xF ; mask to lower nibble only
+00040364: 00900293    ;         li    t0, 9 ; highest valid decimal digit
+00040368: 00A2D463    ;         ble   a0, t0, ph4_digit ; 0-9 need no adjustment
+0004036C: 00750513    ;         addi  a0, a0, 7 ; skip gap between 9 and A in ASCII
+00040370:             ; ph4_digit:
+00040370: 03050513    ;         addi  a0, a0, ascii_zero ; convert digit value to ASCII
+00040374: 00100893    ;         li    a7, SYS_LCD_CHAR ; print via syscall
+00040378: 00000073    ;         ecall
+0004037C:             ; 
+0004037C: 00012083    ;         lw    ra, 0[sp] ; restore return address
+00040380: 00410113    ;         addi  sp, sp, 4
+00040384: 00008067    ;         ret
+00040388:             ; 
+00040388:             ; 
+00040388:             ;         ;     ----------------------------------------------------------
+00040388:             ;         ;     print_hex8(a0)
+00040388:             ;         ;     Input a0 = byte to print as two digits
+00040388:             ;         ;     Saved ra
+00040388:             ;         ;     Clobbers a0 a1 a7 t0 t1
+00040388:             ;         ;     Effect splits a0 into upper and lower nibbles and prints
+00040388:             ;         ;     each via print_hex4, for BCD input produces correct
+00040388:             ;         ;     two-digit decimal output with no extra conversion
+00040388:             ;         ;     ----------------------------------------------------------
+00040388:             ; print_hex8:
+00040388: FF810113    ;         subi  sp, sp, 8
+0004038C: 00112023    ;         sw    ra, 0[sp] ; save return address
+00040390: 00A12223    ;         sw    a0, 4[sp] ; save full byte for second digit
+00040394:             ; 
+00040394: 00455513    ;         srli  a0, a0, 4 ; shift upper nibble into low position
+00040398: FC1FF0EF    ;         call  print_hex4 ; print tens digit
+0004039C:             ; 
+0004039C: 00412503    ;         lw    a0, 4[sp] ; reload original byte
+000403A0: FB9FF0EF    ;         call  print_hex4 ; print units digit from lower nibble
+000403A4:             ; 
+000403A4: 00012083    ;         lw    ra, 0[sp] ; restore return address
+000403A8: 00810113    ;         addi  sp, sp, 8
+000403AC: 00008067    ;         ret
+000403B0:             ; 
+000403B0:             ; 
+000403B0:             ;         ;     ----------------------------------------------------------
+000403B0:             ;         ;     print_str(a0)
+000403B0:             ;         ;     Input a0 = address of null-terminated string
+000403B0:             ;         ;     Saved ra s0
+000403B0:             ;         ;     Clobbers a0 a7
+000403B0:             ;         ;     Effect walks the string byte by byte printing each character
+000403B0:             ;         ;     via SYS_LCD_CHAR until the null terminator is found,
+000403B0:             ;         ;     uses loop-at-test-point pattern to avoid redundant load
+000403B0:             ;         ;     ----------------------------------------------------------
+000403B0:             ; print_str:
+000403B0: FF810113    ;         subi  sp, sp, 8
+000403B4: 00112023    ;         sw    ra, 0[sp] ; save return address
+000403B8: 00812223    ;         sw    s0, 4[sp] ; save s0 before use
+000403BC:             ; 
+000403BC: 00050413    ;         mv    s0, a0 ; copy string pointer to saved reg
+000403C0: 0100006F    ;         j     ps_test ; jump to test before first print
+000403C4:             ; 
+000403C4:             ; ps_loop:
+000403C4: 00100893    ;         li    a7, SYS_LCD_CHAR ; print current character
+000403C8: 00000073    ;         ecall
+000403CC: 00140413    ;         addi  s0, s0, 1 ; advance to next character
+000403D0:             ; ps_test:
+000403D0: 00044503    ;         lbu   a0, 0[s0] ; load next character unsigned
+000403D4: FE0518E3    ;         bnez  a0, ps_loop ; loop until null terminator
+000403D8:             ; 
+000403D8: 00412403    ;         lw    s0, 4[sp] ; restore s0
+000403DC: 00012083    ;         lw    ra, 0[sp] ; restore return address
+000403E0: 00810113    ;         addi  sp, sp, 8
+000403E4: 00008067    ;         ret
+000403E8:             ; 
+000403E8:             ; 
+000403E8:             ; STR_TITLE:
+000403E8: 53 74 6F 70 ;         DEFB  "Stopwatch\n", 0
+000403EC: 77 61 74 63 ; 
+000403F0: 68 0A 00    ; 
+000403F3:             ; 
+000403F3:             ; 
 
 Symbol Table: Labels
 : HALT_PORT                         00010700  Value
@@ -408,49 +953,97 @@ Symbol Table: Labels
 : SYS_EXIT                          00000000  Value
 : SYS_LCD_CHAR                      00000001  Value
 : SYS_LCD_CLEAR                     00000002  Value
-: SYS_MAX                           00000003  Value
+: SYS_BTN_READ                      00000003  Value
+: SYS_TIMER_INIT                    00000004  Value
+: SYS_TIMER_POLL                    00000005  Value
+: SYS_TIMER_ACK                     00000006  Value
+: SYS_MAX                           00000007  Value
 : r_input                           00000009  Value
 : r_output                          0000000A  Value
 : lcd_e_bit                         00000004  Value
 : lcd_e_clear                       000000FB  Value
 : lcd_busy_flag                     00000080  Value
 : lcd_ctrl_cmd                      00000008  Value
-: lcd_cmd_clear                     00000001  Value
-: lcd_cmd_home                      00000002  Value
 : delay_short                       00000014  Value
 : delay_poll                        00000030  Value
+: lcd_cmd_clear                     00000001  Value
+: lcd_cmd_home                      00000002  Value
+: lcd_cmd_line1                     00000080  Value
+: lcd_cmd_line2                     000000C0  Value
 : ascii_lf                          0000000A  Value
 : ascii_cr                          0000000D  Value
 : ascii_ff                          0000000C  Value
-: lcd_cmd_line1                     00000080  Value
-: lcd_cmd_line2                     000000C0  Value
+: BTN_PORT                          00010001  Value
+: BTN_START                         00000001  Value
+: BTN_PAUSE                         00000002  Value
+: BTN_RESET                         00000004  Value
+: TIMER_BASE                        00010200  Value
+: TIMER_LIMIT                       00000004  Value
+: TIMER_CTRL                        0000000C  Value
+: TIMER_CLR                         00000010  Value
+: TIMER_SET                         00000014  Value
+: TIMER_EN                          00000001  Value
+: TIMER_MOD                         00000002  Value
+: TIMER_CLR_TERM                    00000010  Value
+: TIMER_1S                          000F423F  Value
+: TIMER_1MS                         000003E7  Value
+: bcd_sec_max                       00000060  Value
+: bcd_min_max                       00000060  Value
+: bcd_hr_max                        00000024  Value
+: bcd_digit_max                     0000000A  Value
+: bcd_carry_adjust                  00000006  Value
+: USER_STACK_SIZE                   00000200  Value
+: ascii_zero                        00000030  Value
+: ascii_colon                       0000003A  Value
 : init                              00000000  Label
 : trap_entry                        00000038  Label
 : sys_table                         00000080  Label
-: trap_error                        0000008C  Label
-: trap_return                       000000A4  Label
-: sys_exit                          000000C8  Label
-: sys_lcd_char                      000000DC  Label
-: sys_lcd_clear                     000000F4  Label
-: lcd_print_char                    0000010C  Label
-: lpc_newline                       00000140  Label
-: lpc_home                          00000148  Label
-: lpc_clear                         00000150  Label
-: lpc_done                          00000154  Label
-: lcd_new_line                      00000160  Label
-: lcd_home_line                     00000188  Label
-: lcd_clear                         000001B0  Label
-: lcd_send                          000001E0  Label
-: lcd_poll                          000001FC  Label
-: lp_wait                           00000204  Label
-: lcd_write                         00000240  Label
-: delay                             00000274  Label
-: dl                                00000278  Label
-: os_stack_top                      00000384  Label
-: user_stack_top                    00040100  Label
-: USER_CODE                         00040100  Label
-: print_str                         0004012C  Label
-: ps_loop                           0004013C  Label
-: ps_done                           00040154  Label
-: HELLO                             00040164  Label
-: WORLD                             0004016B  Label
+: trap_error                        0000009C  Label
+: trap_return                       000000B4  Label
+: sys_exit                          000000D8  Label
+: sys_lcd_char                      000000EC  Label
+: sys_lcd_clear                     00000104  Label
+: sys_btn_read                      0000011C  Label
+: sys_timer_init                    00000124  Label
+: sys_timer_poll                    0000012C  Label
+: sys_timer_ack                     00000134  Label
+: lcd_print_char                    0000013C  Label
+: lpc_newline                       00000170  Label
+: lpc_home                          00000178  Label
+: lpc_clear                         00000180  Label
+: lpc_done                          00000184  Label
+: lcd_new_line                      00000190  Label
+: lcd_home_line                     000001B8  Label
+: lcd_clear                         000001E0  Label
+: lcd_send                          00000210  Label
+: lcd_poll                          0000022C  Label
+: lp_wait                           00000234  Label
+: lcd_write                         00000270  Label
+: btn_read                          000002A4  Label
+: timer_init                        000002B4  Label
+: timer_poll                        000002CC  Label
+: tp_fired                          000002E4  Label
+: tp_overrun                        000002F4  Label
+: timer_ack                         000002FC  Label
+: delay                             00000310  Label
+: delay_loop                        00000314  Label
+: os_stack_top                      00000420  Label
+: user_stack_top                    00040200  Label
+: USER_CODE                         00040200  Label
+: main_loop                         00040240  Label
+: add_ticks                         0004025C  Label
+: tick_done                         00040294  Label
+: skip_tick                         000402A0  Label
+: check_pause                       000402B8  Label
+: check_reset                       000402C8  Label
+: bcd_inc                           000402E8  Label
+: bi_no_carry                       000402FC  Label
+: bi_done                           00040304  Label
+: print_time                        00040308  Label
+: print_hex4                        00040358  Label
+: ph4_digit                         00040370  Label
+: print_hex8                        00040388  Label
+: print_str                         000403B0  Label
+: ps_loop                           000403C4  Label
+: ps_test                           000403D0  Label
+: STR_TITLE                         000403E8  Label

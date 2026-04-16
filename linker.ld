@@ -10,6 +10,7 @@ SECTIONS {
     .ktext.start : { KEEP(*(.ktext.start)) } > MMODE
     .ktext       : { KEEP(*(.ktext))       } > MMODE
     .krodata     : { *(.krodata*)          } > MMODE
+    .data        : { *(.data*)             } > MMODE
     .bss         : { *(.bss*) *(COMMON)    } > MMODE
     _bss_end = .;
 
