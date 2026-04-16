@@ -1,5 +1,4 @@
         # ── constants ──────────────────────────────────────────────
-        .equ LED_PORT,       0x00010000
         .equ HALT_PORT,      0x00010700
         .equ LCD_BASE,       0x00010100
         .equ MPP_MASK,       0x00001800
@@ -18,6 +17,7 @@
         .equ PLIC_ENABLES,   0x04
         .equ PLIC_REQUESTS,  0x08
         .equ BTN_IRQ_BIT,    0x20        # bit 5 = button
+        .equ LED_PORT,       0x00010000
         # CSR addresses
         .equ MSCRATCH,       0x340
         .equ MTVEC,          0x305
@@ -25,8 +25,8 @@
         .equ MEPC,           0x341
         .equ MCAUSE,         0x342
         .equ MIE_CSR,        0x304
-        .equ MEIE_BIT,       0x800       # bit 11: machine external interrupt enable
-        .equ MSTATUS_MIE,    0x8         # bit  3: global machine interrupt enable
+        .equ MEIE_BIT,       0x800
+        .equ MSTATUS_MIE,    0x8
         .equ r_input,        0b1001
         .equ r_output,       0b1010
         .equ lcd_e_bit,      0x04
@@ -63,14 +63,12 @@ init:
         # ── enable button interrupt in PLIC (bit 5, level-sensitive) ─
         li      t0, PLIC_BASE
         li      t1, BTN_IRQ_BIT
-        sw      t1, PLIC_ENABLES(t0)    # enable bit 5 (button)
+        sw      t1, PLIC_ENABLES(t0)
         sw      zero, 0x0C(t0)          # mode = 0 (level-sensitive)
 
-        # ── enable machine external interrupt (MIE bit 11) ───────────
+        # ── enable machine external interrupt + global enable ────────
         li      t0, MEIE_BIT
         csrs    MIE_CSR, t0
-
-        # ── global interrupt enable (MSTATUS bit 3) ──────────────────
         li      t0, MSTATUS_MIE
         csrs    MSTATUS, t0
 
@@ -83,21 +81,24 @@ init:
 
         .section .ktext, "ax"
 
+        # ── trap entry — identical to lab5-works ─────────────────────
+        # Saves ra, t0, a7, MEPC. Dispatches on MCAUSE.
+        # Interrupts branch to isr_dispatch; ECALLs go to sys_table.
 trap_entry:
         csrrw   sp, MSCRATCH, sp
-        addi    sp, sp, -20
+        addi    sp, sp, -16
         sw      ra,  0(sp)
         sw      t0,  4(sp)
-        sw      t1,  8(sp)
-        sw      a0, 12(sp)
-        sw      a7, 16(sp)
+        sw      a7,  8(sp)
+        csrr    t0,  MEPC
+        sw      t0, 12(sp)
 
         csrr    t0, MCAUSE
 
         # interrupt: MSB set → negative
         bltz    t0, isr_dispatch
 
-        # synchronous trap — must be ECALL from U-mode
+        # synchronous — must be ECALL U
         li      t1, CAUSE_ECALL_U
         bne     t0, t1, trap_error
 
@@ -124,28 +125,15 @@ trap_error:
         sw      t0, 0(t1)
         j       trap_error
 
-        # ECALL return: advance MEPC past the ecall
+        # ECALL return — identical to lab5-works
 trap_return:
-        csrr    t0, MEPC
-        addi    t0, t0, 4
+        lw      t0, 12(sp)
+        addi    t0,  t0, 4
         csrw    MEPC, t0
-        lw      a7, 16(sp)
-        lw      a0, 12(sp)
-        lw      t1,  8(sp)
+        lw      a7,  8(sp)
         lw      t0,  4(sp)
         lw      ra,  0(sp)
-        addi    sp,  sp, 20
-        csrrw   sp,  MSCRATCH, sp
-        mret
-
-        # Interrupt return: return to interrupted instruction
-isr_return:
-        lw      a7, 16(sp)
-        lw      a0, 12(sp)
-        lw      t1,  8(sp)
-        lw      t0,  4(sp)
-        lw      ra,  0(sp)
-        addi    sp,  sp, 20
+        addi    sp,  sp, 16
         csrrw   sp,  MSCRATCH, sp
         mret
 
@@ -153,28 +141,37 @@ isr_return:
 isr_dispatch:
         andi    t0, t0, 0xF
         li      t1, 11
-        beq     t0, t1, isr_external
-        j       isr_return
+        bne     t0, t1, isr_return
 
 isr_external:
-        # Check PLIC requests register to confirm it's the button
+        # Confirm it's the button via PLIC requests register
         li      t0, PLIC_BASE
         lw      t1, PLIC_REQUESTS(t0)
         andi    t1, t1, BTN_IRQ_BIT
-        beqz    t1, isr_return          # not the button — ignore
+        beqz    t1, isr_return
 
-        # Toggle LED0 directly (like test6)
+        # Toggle LED0
         li      t0, LED_PORT
-        lbu     t2, 0(t0)
-        xori    t2, t2, 0x01
-        sb      t2, 0(t0)
+        lbu     t0, 0(t0)
+        xori    t0, t0, 0x01
+        li      t1, LED_PORT
+        sb      t0, 0(t1)
 
-        # Also set dirty flag for foreground
+        # Set dirty flag
         la      t0, isr_dirty
         li      t1, 1
         sw      t1, 0(t0)
 
-        j       isr_return
+isr_return:
+        # Interrupt return — go back to interrupted instruction (no MEPC+4)
+        lw      t0, 12(sp)
+        csrw    MEPC, t0
+        lw      a7,  8(sp)
+        lw      t0,  4(sp)
+        lw      ra,  0(sp)
+        addi    sp,  sp, 16
+        csrrw   sp,  MSCRATCH, sp
+        mret
 
         # ── syscall implementations ──────────────────────────────────
 
@@ -335,8 +332,6 @@ delay:
 
         .section .bss, "aw"
         .balign 4
-        # isr_dirty: set by ISR when button pressed, cleared by foreground
-        # Must come BEFORE OS stack space.
 isr_dirty:  .word 0
         .space  OS_STACK_SIZE
 os_stack_top:
