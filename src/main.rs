@@ -10,14 +10,18 @@ use io::{BTN_PAUSE, BTN_RESET, BTN_START, TIMER_1S};
 
 const BCD_SEC_MAX: u8 = 0x60;
 const BCD_MIN_MAX: u8 = 0x60;
-const BCD_HR_MAX:  u8 = 0x24;
+const BCD_HR_MAX: u8 = 0x24;
 
 fn bcd_inc(val: u8, limit: u8) -> u8 {
     let mut v = val.wrapping_add(1);
     if v & 0xF >= 10 {
         v = v.wrapping_add(6);
     }
-    if v >= limit { 0 } else { v }
+    if v >= limit {
+        0
+    } else {
+        v
+    }
 }
 
 fn print_bcd2(byte: u8) {
@@ -54,10 +58,10 @@ pub extern "C" fn user_main() {
     print_time(hh, mm, ss);
 
     loop {
-        // ── timer tick ──────────────────────────────────────────────
-        let ticks = io::timer_poll_raw();
+        // ── consume ticks deposited by the timer ISR ─────────────────
+        let ticks = syscall::shared_get();
         if ticks != 0 {
-            io::timer_ack();
+            syscall::shared_clr();
             if running != 0 {
                 let mut remaining = ticks;
                 while remaining > 0 {
@@ -74,7 +78,7 @@ pub extern "C" fn user_main() {
             }
         }
 
-        // ── buttons ─────────────────────────────────────────────────
+        // ── buttons ──────────────────────────────────────────────────
         let btns = io::btn_read();
         if btns & BTN_START != 0 {
             set_running(&mut running, 1);
@@ -91,5 +95,6 @@ pub extern "C" fn user_main() {
 
 #[panic_handler]
 fn panic(_: &PanicInfo) -> ! {
+    lcd::print_str(b"ERROR");
     loop {}
 }

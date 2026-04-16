@@ -11,7 +11,9 @@
         .equ SYS_TIMER_INIT, 4
         .equ SYS_TIMER_POLL, 5
         .equ SYS_TIMER_ACK,  6
-        .equ SYS_MAX,        7
+        .equ SYS_SHARED_GET, 7
+        .equ SYS_SHARED_CLR, 8
+        .equ SYS_MAX,        9
         .equ BTN_PORT,       0x00010001
         .equ TIMER_BASE,     0x00010200
         .equ TIMER_LIMIT,    0x04
@@ -21,11 +23,19 @@
         .equ TIMER_EN,       0x01
         .equ TIMER_MOD,      0x02
         .equ TIMER_CLR_TERM, 0x10
+        # External interrupt controller base and offsets
+        .equ PLIC_BASE,      0x00010400
+        .equ PLIC_ENABLES,   0x04        # bit 4 = timer input enable
+        .equ TIMER_IRQ_BIT,  0x10        # value: bit 4
+        # CSR addresses
         .equ MSCRATCH,       0x340
         .equ MTVEC,          0x305
         .equ MSTATUS,        0x300
         .equ MEPC,           0x341
         .equ MCAUSE,         0x342
+        .equ MIE_CSR,        0x304
+        .equ MEIE_BIT,       0x800       # bit 11: machine external interrupt enable
+        .equ MSTATUS_MIE,    0x8         # bit  3: global machine interrupt enable
         .equ r_input,        0b1001
         .equ r_output,       0b1010
         .equ lcd_e_bit,      0x04
@@ -59,6 +69,20 @@ init:
 
         call    lcd_clear
 
+        # ── enable timer in external interrupt controller ────────────
+        li      t0, PLIC_BASE
+        li      t1, TIMER_IRQ_BIT       # enable bit 4 (timer)
+        sw      t1, PLIC_ENABLES(t0)    # mode stays 0 = level-sensitive
+
+        # ── enable machine external interrupt (bit 11 of MIE) ───────
+        li      t0, MEIE_BIT
+        csrs    MIE_CSR, t0
+
+        # ── global interrupt enable (bit 3 of MSTATUS) ──────────────
+        li      t0, MSTATUS_MIE
+        csrs    MSTATUS, t0
+
+        # ── drop to user mode ────────────────────────────────────────
         li      t0, MPP_MASK
         csrc    MSTATUS, t0
         la      t0, USER_CODE
@@ -69,24 +93,29 @@ init:
 
 trap_entry:
         csrrw   sp, MSCRATCH, sp
-        addi    sp, sp, -16
+        addi    sp, sp, -20
         sw      ra,  0(sp)
         sw      t0,  4(sp)
-        sw      a7,  8(sp)
-        csrr    t0,  MEPC
-        sw      t0, 12(sp)
+        sw      t1,  8(sp)
+        sw      a0, 12(sp)
+        sw      a7, 16(sp)
 
-        csrr    t0,  MCAUSE
-        li      t1,  CAUSE_ECALL_U
-        bne     t0,  t1, trap_error
+        csrr    t0, MCAUSE
 
-        li      t0,  SYS_MAX
-        bgeu    a7,  t0, trap_error
+        # ── interrupt? MSB set → negative in signed comparison ──────
+        bltz    t0, isr_dispatch
 
-        la      t0,  sys_table
-        slli    t1,  a7, 2
-        add     t0,  t0, t1
-        lw      t0,  0(t0)
+        # ── synchronous trap — must be ECALL from U-mode ────────────
+        li      t1, CAUSE_ECALL_U
+        bne     t0, t1, trap_error
+
+        li      t0, SYS_MAX
+        bgeu    a7, t0, trap_error
+
+        la      t0, sys_table
+        slli    t1, a7, 2
+        add     t0, t0, t1
+        lw      t0, 0(t0)
         jr      t0
 
 sys_table:
@@ -97,6 +126,8 @@ sys_table:
         .word   sys_timer_init
         .word   sys_timer_poll
         .word   sys_timer_ack
+        .word   sys_shared_get
+        .word   sys_shared_clr
 
 trap_error:
         li      t1, HALT_PORT
@@ -104,16 +135,58 @@ trap_error:
         sw      t0, 0(t1)
         j       trap_error
 
+        # ECALL return: advance past the ecall instruction
 trap_return:
-        lw      t0, 12(sp)
-        addi    t0,  t0, 4
+        csrr    t0, MEPC
+        addi    t0, t0, 4
         csrw    MEPC, t0
-        lw      a7,  8(sp)
+        lw      a7, 16(sp)
+        lw      a0, 12(sp)
+        lw      t1,  8(sp)
         lw      t0,  4(sp)
         lw      ra,  0(sp)
-        addi    sp,  sp, 16
+        addi    sp,  sp, 20
         csrrw   sp,  MSCRATCH, sp
         mret
+
+        # Interrupt return: go back to the interrupted instruction
+isr_return:
+        lw      a7, 16(sp)
+        lw      a0, 12(sp)
+        lw      t1,  8(sp)
+        lw      t0,  4(sp)
+        lw      ra,  0(sp)
+        addi    sp,  sp, 20
+        csrrw   sp,  MSCRATCH, sp
+        mret
+
+        # ── interrupt dispatcher ─────────────────────────────────────
+isr_dispatch:
+        andi    t0, t0, 0xF             # keep lower bits (cause id)
+        li      t1, 11                  # 11 = machine external interrupt
+        beq     t0, t1, isr_external
+        j       isr_return              # ignore unexpected interrupts
+
+isr_external:
+        # Ack: clear the timer terminal-count sticky bit
+        li      t0, TIMER_BASE
+        li      t1, TIMER_CLR_TERM
+        sw      t1, TIMER_CLR(t0)
+
+        # Increment shared tick counter
+        la      t0, isr_ticks
+        lw      t1, 0(t0)
+        addi    t1, t1, 1
+        sw      t1, 0(t0)
+
+        # Set dirty flag so foreground knows there is new data
+        la      t0, isr_dirty
+        li      t1, 1
+        sw      t1, 0(t0)
+
+        j       isr_return
+
+        # ── syscall implementations ──────────────────────────────────
 
 sys_exit:
         li      t1, HALT_PORT
@@ -151,6 +224,20 @@ sys_timer_poll:
 
 sys_timer_ack:
         call    timer_ack
+        j       trap_return
+
+        # a0 ← isr_ticks (snapshot of current count)
+sys_shared_get:
+        la      t0, isr_ticks
+        lw      a0, 0(t0)
+        j       trap_return
+
+        # isr_ticks ← 0 and isr_dirty ← 0
+sys_shared_clr:
+        la      t0, isr_ticks
+        sw      zero, 0(t0)
+        la      t0, isr_dirty
+        sw      zero, 0(t0)
         j       trap_return
 
 btn_read:
@@ -302,6 +389,10 @@ delay:
         .balign 4
         .space  OS_STACK_SIZE
 os_stack_top:
+        # shared state: written by ISR, read/cleared by foreground via syscall
+        .balign 4
+isr_ticks:  .word 0
+isr_dirty:  .word 0
 
         # ================================================================
         # U-MODE (0x00040000)

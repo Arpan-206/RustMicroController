@@ -10,6 +10,8 @@ enum Syscall {
     TimerInit = 4,
     TimerPoll = 5,
     TimerAck  = 6,
+    SharedGet = 7,  // read isr_ticks (ISR tick counter)
+    SharedClr = 8,  // clear isr_ticks and isr_dirty
 }
 
 // ── raw ecall primitives ────────────────────────────────────────────
@@ -81,4 +83,14 @@ pub fn exit() -> ! {
     loop {
         ecall0(Syscall::Exit);
     }
+}
+
+/// Read the ISR tick counter (number of timer interrupts since last clear).
+pub fn shared_get() -> u32 {
+    ecall0_ret(Syscall::SharedGet)
+}
+
+/// Clear the ISR tick counter and dirty flag.
+pub fn shared_clr() {
+    ecall0(Syscall::SharedClr);
 }
