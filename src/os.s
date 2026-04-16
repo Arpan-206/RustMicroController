@@ -69,20 +69,9 @@ init:
 
         call    lcd_clear
 
-        # ── enable timer in external interrupt controller ────────────
-        li      t0, PLIC_BASE
-        li      t1, TIMER_IRQ_BIT       # enable bit 4 (timer)
-        sw      t1, PLIC_ENABLES(t0)    # mode stays 0 = level-sensitive
-
-        # ── enable machine external interrupt (bit 11 of MIE) ───────
-        li      t0, MEIE_BIT
-        csrs    MIE_CSR, t0
-
-        # ── global interrupt enable (bit 3 of MSTATUS) ──────────────
-        li      t0, MSTATUS_MIE
-        csrs    MSTATUS, t0
-
         # ── drop to user mode ────────────────────────────────────────
+        # Interrupts are NOT enabled here; sys_timer_init does that
+        # after the modulus is programmed, so no spurious ISR fires.
         li      t0, MPP_MASK
         csrc    MSTATUS, t0
         la      t0, USER_CODE
@@ -216,6 +205,15 @@ sys_btn_read:
 
 sys_timer_init:
         call    timer_init
+        # Now that the modulus is set, enable interrupts for the first time.
+        # Idempotent: safe to call again (csrs is a set-bits operation).
+        li      t0, PLIC_BASE
+        li      t1, TIMER_IRQ_BIT
+        sw      t1, PLIC_ENABLES(t0)    # enable timer in ext. interrupt controller
+        li      t0, MEIE_BIT
+        csrs    MIE_CSR, t0             # enable machine external interrupt (bit 11)
+        li      t0, MSTATUS_MIE
+        csrs    MSTATUS, t0             # global interrupt enable (bit 3)
         j       trap_return
 
 sys_timer_poll:
