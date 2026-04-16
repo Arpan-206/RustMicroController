@@ -385,12 +385,12 @@ delay:
 
         .section .bss, "aw"
         .balign 4
-        .space  OS_STACK_SIZE
-os_stack_top:
         # shared state: written by ISR, read/cleared by foreground via syscall
-        .balign 4
+        # Must come BEFORE the OS stack so pushes don't overwrite them.
 isr_ticks:  .word 0
 isr_dirty:  .word 0
+        .space  OS_STACK_SIZE
+os_stack_top:
 
         # ================================================================
         # U-MODE (0x00040000)

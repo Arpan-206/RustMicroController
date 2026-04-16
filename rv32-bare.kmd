@@ -1,5 +1,5 @@
 0x0 : 00000117 ; auipc	sp,0x0
-0x4 : 53c10113 ; addi	sp,sp,1340 # 53c <isr_ticks>
+0x4 : 54410113 ; addi	sp,sp,1348 # 544 <_bss_end>
 0x8 : 34011073 ; csrw	mscratch,sp
 0xc : 00000297 ; auipc	t0,0x0
 0x10 : 03028293 ; addi	t0,t0,48 # 3c <trap_entry>
@@ -75,12 +75,12 @@
 0x128 : 01000313 ; li	t1,16
 0x12c : 0062a823 ; sw	t1,16(t0)
 0x130 : 00000297 ; auipc	t0,0x0
-0x134 : 40c28293 ; addi	t0,t0,1036 # 53c <isr_ticks>
+0x134 : 30c28293 ; addi	t0,t0,780 # 43c <isr_ticks>
 0x138 : 0002a303 ; lw	t1,0(t0)
 0x13c : 00130313 ; addi	t1,t1,1
 0x140 : 0062a023 ; sw	t1,0(t0)
 0x144 : 00000297 ; auipc	t0,0x0
-0x148 : 3fc28293 ; addi	t0,t0,1020 # 540 <isr_dirty>
+0x148 : 2fc28293 ; addi	t0,t0,764 # 440 <isr_dirty>
 0x14c : 00100313 ; li	t1,1
 0x150 : 0062a023 ; sw	t1,0(t0)
 0x154 : f9dff06f ; j	f0 <isr_return>
@@ -125,14 +125,14 @@
 0x1f0 : 090080e7 ; jalr	144(ra) # 27c <timer_ack>
 0x1f4 : ed1ff06f ; j	c4 <trap_return>
 0x1f8 : 00000297 ; auipc	t0,0x0
-0x1fc : 34428293 ; addi	t0,t0,836 # 53c <isr_ticks>
+0x1fc : 24428293 ; addi	t0,t0,580 # 43c <isr_ticks>
 0x200 : 0002a503 ; lw	a0,0(t0)
 0x204 : ec1ff06f ; j	c4 <trap_return>
 0x208 : 00000297 ; auipc	t0,0x0
-0x20c : 33428293 ; addi	t0,t0,820 # 53c <isr_ticks>
+0x20c : 23428293 ; addi	t0,t0,564 # 43c <isr_ticks>
 0x210 : 0002a023 ; sw	zero,0(t0)
 0x214 : 00000297 ; auipc	t0,0x0
-0x218 : 32c28293 ; addi	t0,t0,812 # 540 <isr_dirty>
+0x218 : 22c28293 ; addi	t0,t0,556 # 440 <isr_dirty>
 0x21c : 0002a023 ; sw	zero,0(t0)
 0x220 : ea5ff06f ; j	c4 <trap_return>
 0x224 : 000102b7 ; lui	t0,0x10
