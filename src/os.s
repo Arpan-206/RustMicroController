@@ -83,10 +83,7 @@ trap_entry:
 
         csrr    t0, MCAUSE
 
-        # interrupt: MSB set → negative
-        bltz    t0, isr_dispatch
-
-        # synchronous — must be ECALL U
+        # synchronous — must be ECALL U (no interrupt support yet)
         li      t1, CAUSE_ECALL_U
         bne     t0, t1, trap_error
 
