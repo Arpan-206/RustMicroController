@@ -8,25 +8,15 @@
         .equ SYS_LCD_CHAR,   1
         .equ SYS_LCD_CLEAR,  2
         .equ SYS_BTN_READ,   3
-        .equ SYS_TIMER_INIT, 4
-        .equ SYS_TIMER_POLL, 5
-        .equ SYS_TIMER_ACK,  6
-        .equ SYS_SHARED_GET, 7
-        .equ SYS_SHARED_CLR, 8
-        .equ SYS_MAX,        9
+        .equ SYS_SHARED_GET, 4
+        .equ SYS_SHARED_CLR, 5
+        .equ SYS_MAX,        6
         .equ BTN_PORT,       0x00010001
-        .equ TIMER_BASE,     0x00010200
-        .equ TIMER_LIMIT,    0x04
-        .equ TIMER_CTRL,     0x0C
-        .equ TIMER_CLR,      0x10
-        .equ TIMER_SET,      0x14
-        .equ TIMER_EN,       0x01
-        .equ TIMER_MOD,      0x02
-        .equ TIMER_CLR_TERM, 0x10
-        # External interrupt controller base and offsets
+        # External interrupt controller
         .equ PLIC_BASE,      0x00010400
-        .equ PLIC_ENABLES,   0x04        # bit 4 = timer input enable
-        .equ TIMER_IRQ_BIT,  0x10        # value: bit 4
+        .equ PLIC_ENABLES,   0x04
+        .equ PLIC_REQUESTS,  0x08
+        .equ BTN_IRQ_BIT,    0x20        # bit 5 = button
         # CSR addresses
         .equ MSCRATCH,       0x340
         .equ MTVEC,          0x305
@@ -69,9 +59,21 @@ init:
 
         call    lcd_clear
 
+        # ── enable button interrupt in PLIC (bit 5, level-sensitive) ─
+        li      t0, PLIC_BASE
+        li      t1, BTN_IRQ_BIT
+        sw      t1, PLIC_ENABLES(t0)    # enable bit 5 (button)
+        sw      zero, 0x0C(t0)          # mode = 0 (level-sensitive)
+
+        # ── enable machine external interrupt (MIE bit 11) ───────────
+        li      t0, MEIE_BIT
+        csrs    MIE_CSR, t0
+
+        # ── global interrupt enable (MSTATUS bit 3) ──────────────────
+        li      t0, MSTATUS_MIE
+        csrs    MSTATUS, t0
+
         # ── drop to user mode ────────────────────────────────────────
-        # Interrupts are NOT enabled here; sys_timer_init does that
-        # after the modulus is programmed, so no spurious ISR fires.
         li      t0, MPP_MASK
         csrc    MSTATUS, t0
         la      t0, USER_CODE
@@ -91,10 +93,10 @@ trap_entry:
 
         csrr    t0, MCAUSE
 
-        # ── interrupt? MSB set → negative in signed comparison ──────
+        # interrupt: MSB set → negative
         bltz    t0, isr_dispatch
 
-        # ── synchronous trap — must be ECALL from U-mode ────────────
+        # synchronous trap — must be ECALL from U-mode
         li      t1, CAUSE_ECALL_U
         bne     t0, t1, trap_error
 
@@ -112,9 +114,6 @@ sys_table:
         .word   sys_lcd_char
         .word   sys_lcd_clear
         .word   sys_btn_read
-        .word   sys_timer_init
-        .word   sys_timer_poll
-        .word   sys_timer_ack
         .word   sys_shared_get
         .word   sys_shared_clr
 
@@ -124,7 +123,7 @@ trap_error:
         sw      t0, 0(t1)
         j       trap_error
 
-        # ECALL return: advance past the ecall instruction
+        # ECALL return: advance MEPC past the ecall
 trap_return:
         csrr    t0, MEPC
         addi    t0, t0, 4
@@ -138,7 +137,7 @@ trap_return:
         csrrw   sp,  MSCRATCH, sp
         mret
 
-        # Interrupt return: go back to the interrupted instruction
+        # Interrupt return: return to interrupted instruction
 isr_return:
         lw      a7, 16(sp)
         lw      a0, 12(sp)
@@ -151,24 +150,19 @@ isr_return:
 
         # ── interrupt dispatcher ─────────────────────────────────────
 isr_dispatch:
-        andi    t0, t0, 0xF             # keep lower bits (cause id)
-        li      t1, 11                  # 11 = machine external interrupt
+        andi    t0, t0, 0xF
+        li      t1, 11
         beq     t0, t1, isr_external
-        j       isr_return              # ignore unexpected interrupts
+        j       isr_return
 
 isr_external:
-        # Ack: clear the timer terminal-count sticky bit
-        li      t0, TIMER_BASE
-        li      t1, TIMER_CLR_TERM
-        sw      t1, TIMER_CLR(t0)
+        # Check PLIC requests register to confirm it's the button
+        li      t0, PLIC_BASE
+        lw      t1, PLIC_REQUESTS(t0)
+        andi    t1, t1, BTN_IRQ_BIT
+        beqz    t1, isr_return          # not the button — ignore
 
-        # Increment shared tick counter
-        la      t0, isr_ticks
-        lw      t1, 0(t0)
-        addi    t1, t1, 1
-        sw      t1, 0(t0)
-
-        # Set dirty flag so foreground knows there is new data
+        # Set dirty flag (button is level-sensitive, cleared when released)
         la      t0, isr_dirty
         li      t1, 1
         sw      t1, 0(t0)
@@ -203,37 +197,14 @@ sys_btn_read:
         call    btn_read
         j       trap_return
 
-sys_timer_init:
-        call    timer_init
-        # Now that the modulus is set, enable interrupts for the first time.
-        # Idempotent: safe to call again (csrs is a set-bits operation).
-        li      t0, PLIC_BASE
-        li      t1, TIMER_IRQ_BIT
-        sw      t1, PLIC_ENABLES(t0)    # enable timer in ext. interrupt controller
-        li      t0, MEIE_BIT
-        csrs    MIE_CSR, t0             # enable machine external interrupt (bit 11)
-        li      t0, MSTATUS_MIE
-        csrs    MSTATUS, t0             # global interrupt enable (bit 3)
-        j       trap_return
-
-sys_timer_poll:
-        call    timer_poll
-        j       trap_return
-
-sys_timer_ack:
-        call    timer_ack
-        j       trap_return
-
-        # a0 ← isr_ticks (snapshot of current count)
+        # a0 ← isr_dirty
 sys_shared_get:
-        la      t0, isr_ticks
+        la      t0, isr_dirty
         lw      a0, 0(t0)
         j       trap_return
 
-        # isr_ticks ← 0 and isr_dirty ← 0
+        # isr_dirty ← 0
 sys_shared_clr:
-        la      t0, isr_ticks
-        sw      zero, 0(t0)
         la      t0, isr_dirty
         sw      zero, 0(t0)
         j       trap_return
@@ -241,34 +212,6 @@ sys_shared_clr:
 btn_read:
         li      t0, BTN_PORT
         lbu     a0, 0(t0)
-        ret
-
-timer_init:
-        li      t0, TIMER_BASE
-        sw      a0, TIMER_LIMIT(t0)
-        li      t1, (TIMER_EN | TIMER_MOD)
-        sw      t1, TIMER_SET(t0)
-        ret
-
-timer_poll:
-        li      t0, TIMER_BASE
-        lw      t1, TIMER_CTRL(t0)
-        li      a0, 0
-        bltz    t1, tp_fired
-        ret
-tp_fired:
-        li      a0, 1
-        slli    t1, t1, 1
-        bltz    t1, tp_overrun
-        ret
-tp_overrun:
-        li      a0, 2
-        ret
-
-timer_ack:
-        li      t0, TIMER_BASE
-        li      t1, TIMER_CLR_TERM
-        sw      t1, TIMER_CLR(t0)
         ret
 
 lcd_print_char:
@@ -385,9 +328,8 @@ delay:
 
         .section .bss, "aw"
         .balign 4
-        # shared state: written by ISR, read/cleared by foreground via syscall
-        # Must come BEFORE the OS stack so pushes don't overwrite them.
-isr_ticks:  .word 0
+        # isr_dirty: set by ISR when button pressed, cleared by foreground
+        # Must come BEFORE OS stack space.
 isr_dirty:  .word 0
         .space  OS_STACK_SIZE
 os_stack_top:

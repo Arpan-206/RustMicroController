@@ -22,22 +22,10 @@ pub fn btn_read() -> u8 {
     syscall::btn_read()
 }
 
-pub fn timer_init(modulus_minus_1: u32) {
-    syscall::timer_init(modulus_minus_1);
-}
+pub fn timer_init(_modulus_minus_1: u32) {}
 
-pub fn timer_poll_raw() -> u32 {
-    syscall::timer_poll()
-}
+pub fn timer_poll_raw() -> u32 { 0 }
 
-pub fn timer_poll_status() -> TimerStatus {
-    match timer_poll_raw() {
-        1 => TimerStatus::Fired,
-        2 => TimerStatus::Overrun,
-        _ => TimerStatus::NotFired,
-    }
-}
+pub fn timer_poll_status() -> TimerStatus { TimerStatus::NotFired }
 
-pub fn timer_ack() {
-    syscall::timer_ack();
-}
+pub fn timer_ack() {}

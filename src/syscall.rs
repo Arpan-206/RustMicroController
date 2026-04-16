@@ -7,11 +7,8 @@ enum Syscall {
     LcdChar   = 1,
     LcdClear  = 2,
     BtnRead   = 3,
-    TimerInit = 4,
-    TimerPoll = 5,
-    TimerAck  = 6,
-    SharedGet = 7,  // read isr_ticks (ISR tick counter)
-    SharedClr = 8,  // clear isr_ticks and isr_dirty
+    SharedGet = 4,  // read isr_dirty
+    SharedClr = 5,  // clear isr_dirty
 }
 
 // ── raw ecall primitives ────────────────────────────────────────────
@@ -67,30 +64,18 @@ pub fn btn_read() -> u8 {
     ecall0_ret(Syscall::BtnRead) as u8
 }
 
-pub fn timer_init(modulus_minus_1: u32) {
-    ecall1(Syscall::TimerInit, modulus_minus_1);
-}
-
-pub fn timer_poll() -> u32 {
-    ecall0_ret(Syscall::TimerPoll)
-}
-
-pub fn timer_ack() {
-    ecall0(Syscall::TimerAck);
-}
-
 pub fn exit() -> ! {
     loop {
         ecall0(Syscall::Exit);
     }
 }
 
-/// Read the ISR tick counter (number of timer interrupts since last clear).
+/// Returns non-zero if the button ISR has fired since last clear.
 pub fn shared_get() -> u32 {
     ecall0_ret(Syscall::SharedGet)
 }
 
-/// Clear the ISR tick counter and dirty flag.
+/// Clear the ISR dirty flag.
 pub fn shared_clr() {
     ecall0(Syscall::SharedClr);
 }
