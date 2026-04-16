@@ -41,7 +41,12 @@ fn print_time(hh: u8, mm: u8, ss: u8) {
 // the running flag assignment and collapsing the if/else chain.
 #[inline(never)]
 fn set_running(running: &mut u8, val: u8) {
-    *running = val;
+    unsafe { core::ptr::write_volatile(running, val); }
+}
+
+#[inline(never)]
+fn get_running(running: &u8) -> u8 {
+    unsafe { core::ptr::read_volatile(running) }
 }
 
 #[no_mangle]
@@ -61,8 +66,8 @@ pub extern "C" fn user_main() {
         // ── consume ticks deposited by the timer ISR ─────────────────
         let ticks = syscall::shared_get();
         if ticks != 0 {
-            syscall::shared_clr();
-            if running != 0 {
+            syscall::shared_clr(); // always drain, even when paused
+            if get_running(&running) != 0 {
                 let mut remaining = ticks;
                 while remaining > 0 {
                     remaining -= 1;
@@ -84,7 +89,7 @@ pub extern "C" fn user_main() {
             set_running(&mut running, 1);
         } else if btns & BTN_PAUSE != 0 {
             set_running(&mut running, 0);
-        } else if btns & BTN_RESET != 0 && running == 0 {
+        } else if btns & BTN_RESET != 0 && get_running(&running) == 0 {
             hh = 0;
             mm = 0;
             ss = 0;
