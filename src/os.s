@@ -12,8 +12,13 @@
         .equ SYS_COUNTER_GET, 4
         .equ SYS_COUNTER_CLR, 5
         .equ SYS_TIMER_START, 6
-        .equ SYS_MAX,         7
+        .equ SYS_KBD_SCAN,    7
+        .equ SYS_MAX,         8
         .equ BTN_PORT,       0x00010001
+        .equ PIO_BASE,      0x00010300
+        .equ PIO_DATA,      0x00
+        .equ PIO_CLR,       0x08
+        .equ PIO_SET,       0x0C
         # External interrupt controller
         .equ PLIC_BASE,      0x00010400
         .equ PLIC_ENABLES,   0x04
@@ -138,6 +143,7 @@ sys_table:
         .word   sys_counter_get
         .word   sys_counter_clr
         .word   sys_timer_start
+        .word   sys_kbd_scan
 
 trap_error:
         li      t1, HALT_PORT
@@ -249,6 +255,23 @@ sys_timer_start:
         sw      a0, TIMER_LIMIT(t0)
         li      t1, TIMER_EN | TIMER_MOD | TIMER_IE
         sw      t1, TIMER_SET(t0)
+        j       trap_return
+
+sys_kbd_scan:
+        li      t0, PIO_BASE
+        li      t1, 1
+        sll     t1, t1, a0
+        sw      t1, PIO_CLR(t0)
+        nop
+        nop
+        lw      t2, PIO_DATA(t0)
+        sw      t1, PIO_SET(t0)
+        li      t3, 10
+1:
+        addi    t3, t3, -1
+        bnez    t3, 1b
+        srli    t2, t2, 4
+        andi    a0, t2, 0x0F
         j       trap_return
 
 btn_read:

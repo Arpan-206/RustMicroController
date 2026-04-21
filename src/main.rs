@@ -6,80 +6,36 @@ mod lcd;
 mod syscall;
 
 use core::panic::PanicInfo;
-use io::{BTN_PAUSE, BTN_RESET, BTN_START, TIMER_1S};
-
-const BCD_SEC_MAX: u8 = 0x60;
-const BCD_MIN_MAX: u8 = 0x60;
-const BCD_HR_MAX:  u8 = 0x24;
-
-fn bcd_inc(val: u8, limit: u8) -> u8 {
-    let mut v = val.wrapping_add(1);
-    if v & 0xF >= 10 {
-        v = v.wrapping_add(6);
-    }
-    if v >= limit { 0 } else { v }
-}
-
-fn print_bcd2(byte: u8) {
-    lcd::print_str(&[b'0' + (byte >> 4), b'0' + (byte & 0xF)]);
-}
-
-fn print_time(hh: u8, mm: u8, ss: u8) {
-    lcd::print_str(b"\n");
-    print_bcd2(hh);
-    lcd::print_str(b":");
-    print_bcd2(mm);
-    lcd::print_str(b":");
-    print_bcd2(ss);
-}
 
 #[no_mangle]
 pub extern "C" fn user_main() {
-    let mut hh: u8 = 0;
-    let mut mm: u8 = 0;
-    let mut ss: u8 = 0;
-    let mut running: u8 = 0;
+    crate::syscall::timer_start(999999);
 
-    lcd::clear();
-    lcd::print_str(b"Stopwatch");
-    print_time(hh, mm, ss);
-
-    // Start the 1Hz interrupt-driven timer
-    io::timer_start(TIMER_1S);
+    let mut sample: u8 = 0;
+    let mut debounced: u8 = 0;
+    let mut last_tick: u32 = 0;
 
     loop {
-        // ── timer ticks (from ISR via shared memory) ─────────────────
-        let ticks = io::counter_get();
-        if ticks != 0 {
-            io::counter_clr();
-            if running != 0 {
-                let mut remaining = ticks;
-                while remaining > 0 {
-                    remaining -= 1;
-                    ss = bcd_inc(ss, BCD_SEC_MAX);
-                    if ss == 0 {
-                        mm = bcd_inc(mm, BCD_MIN_MAX);
-                        if mm == 0 {
-                            hh = bcd_inc(hh, BCD_HR_MAX);
-                        }
-                    }
-                }
-                print_time(hh, mm, ss);
-            }
+        let mut tick = crate::syscall::counter_get();
+        while tick == last_tick {
+            tick = crate::syscall::counter_get();
         }
 
-        // ── buttons ──────────────────────────────────────────────────
-        let btns = io::btn_read();
-        if btns & BTN_START != 0 {
-            running = 1;
-        } else if btns & BTN_PAUSE != 0 {
-            running = 0;
-        } else if btns & BTN_RESET != 0 && running == 0 {
-            hh = 0;
-            mm = 0;
-            ss = 0;
-            print_time(hh, mm, ss);
+        last_tick = tick;
+        crate::syscall::counter_clr();
+
+        let raw_cols: u8 = crate::syscall::kbd_scan(0);
+        let raw: u8 = raw_cols & 1;
+
+        sample = ((sample << 1) | raw) & 0xFF;
+
+        if sample == 0xFF {
+            debounced = 1;
+        } else if sample == 0x00 {
+            debounced = 0;
         }
+
+        crate::syscall::lcd_char(if debounced == 1 { b'1' } else { b'0' });
     }
 }
 
