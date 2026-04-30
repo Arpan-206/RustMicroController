@@ -1,5 +1,5 @@
 0x0 : 00000117 ; auipc	sp,0x0
-0x4 : 53410113 ; addi	sp,sp,1332 # 534 <_bss_end>
+0x4 : 51c10113 ; addi	sp,sp,1308 # 51c <_bss_end>
 0x8 : 34011073 ; csrw	mscratch,sp
 0xc : 00000297 ; auipc	t0,0x0
 0x10 : 06428293 ; addi	t0,t0,100 # 70 <trap_entry>
