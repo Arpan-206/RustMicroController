@@ -10,7 +10,7 @@ enum Syscall {
     CounterGet = 4, // read s5 tick counter
     CounterClr = 5, // clear s5 tick counter
     TimerStart = 6, // start timer with given modulus
-    KbdScan = 7,
+    KeyRead = 7,
 }
 
 // ── raw ecall primitives ────────────────────────────────────────────
@@ -101,6 +101,7 @@ pub fn timer_start(modulus: u32) {
     ecall1(Syscall::TimerStart, modulus);
 }
 
-pub fn kbd_scan(row: u8) -> u8 {
-    ecall1_ret(Syscall::KbdScan, row as u32) as u8
+/// Read a debounced key from the FIFO. Returns -1 if empty.
+pub fn key_read() -> i32 {
+    ecall0_ret(Syscall::KeyRead) as i32
 }

@@ -13,13 +13,22 @@
         .equ SYS_COUNTER_GET, 4
         .equ SYS_COUNTER_CLR, 5
         .equ SYS_TIMER_START, 6
-        .equ SYS_KBD_SCAN,    7
+        .equ SYS_KEY_READ,    7
         .equ SYS_MAX,         8
         .equ BTN_PORT,       0x00010001
         .equ PIO_BASE,      0x00010300
         .equ PIO_DATA,      0x00
+        .equ PIO_DIR,      0x04
         .equ PIO_CLR,       0x08
         .equ PIO_SET,       0x0C
+        .equ PIO_ROW_MASK, 0x0F    # bits 0-3 = rows (outputs)
+        .equ PIO_COL_MASK, 0xF0    # bits 4-7 = cols (inputs)
+        .equ PIO_DIR_VAL,  0xFFFFFFF0  # 0=output for rows, 1=input for cols
+
+        # ── Debounce / FIFO ──────────────────
+        .equ DEBOUNCE_MAX, 3       # ticks at 10ms → 30ms to confirm
+        .equ FIFO_SIZE,    16
+        .equ KEY_NONE,     0xFF
         # External interrupt controller
         .equ PLIC_BASE,      0x00010400
         .equ PLIC_ENABLES,   0x04
@@ -38,6 +47,7 @@
         .equ TIMER_IE,       0x08
         .equ TIMER_CLR_TERM, 0x10
         .equ TIMER_1S,       999999
+        .equ TIMER_10MS,    9999
         # CSR addresses
         .equ MSCRATCH,       0x340
         .equ MTVEC,          0x305
@@ -80,6 +90,12 @@ init:
 
         la      t0, tick_count
         sw      zero, 0(t0)
+
+        # PIO: set rows as outputs, columns as inputs
+        li      t0, PIO_BASE
+        li      t1, PIO_DIR_VAL
+        sw      t1, PIO_DIR(t0)
+        sw      zero, PIO_DATA(t0)  # all rows deactivated (LOW)
 
         # Default timer reload value
         la      t0, timer_reload
@@ -149,7 +165,7 @@ sys_table:
         .word   sys_counter_get
         .word   sys_counter_clr
         .word   sys_timer_start
-        .word   sys_kbd_scan
+        .word   sys_key_read
 
 trap_error:
         li      t1, HALT_PORT
@@ -185,23 +201,12 @@ isr_dispatch:
 
 
 timer_isr:
-        # Clear terminal count
         li      t0, TIMER_BASE
         li      t1, TIMER_CLR_TERM
-        sw      t1, TIMER_CLR(t0)
-
-        # Reload for next tick (user-configurable)
-        la      t1, timer_reload
-        lw      t1, 0(t1)
-        sw      t1, TIMER_LIMIT(t0)
-        li      t1, TIMER_EN | TIMER_MOD | TIMER_IE
-        sw      t1, TIMER_SET(t0)
-
-        # Increment shared tick counter
-        la      t0, tick_count
-        lw      t1, 0(t0)
-        addi    t1, t1, 1
-        sw      t1, 0(t0)
+        sw      t1, TIMER_CLR(t0)   # clear TERM
+        la      t0, scan_due
+        li      t1, 1
+        sw      t1, 0(t0)           # set flag, done
 
 isr_return:
         # Interrupt return — go back to interrupted instruction (no MEPC+4)
@@ -266,22 +271,112 @@ sys_timer_start:
         sw      t1, TIMER_SET(t0)
         j       trap_return
 
-sys_kbd_scan:
-        li      t0, PIO_BASE
-        li      t1, 1
-        sll     t1, t1, a0
-        sw      t1, PIO_CLR(t0)
-        nop
-        nop
-        lw      t2, PIO_DATA(t0)
-        sw      t1, PIO_SET(t0)
-        li      t3, 10
+sys_key_read:
+        la      t0, scan_due
+        lw      t1, 0(t0)
+        beqz    t1, 1f
+        sw      zero, 0(t0)
+        addi    sp, sp, -4
+        sw      ra, 0(sp)
+        call    key_scan
+        lw      ra, 0(sp)
+        addi    sp, sp, 4
 1:
-        addi    t3, t3, -1
-        bnez    t3, 1b
-        srli    t2, t2, 4
-        andi    a0, t2, 0x0F
+        la      t0, fifo_head
+        lw      t1, 0(t0)
+        la      t2, fifo_tail
+        lw      t3, 0(t2)
+        beq     t1, t3, fifo_empty
+        la      t2, fifo_buf
+        add     t2, t2, t1
+        lbu     a0, 0(t2)
+        addi    t1, t1, 1
+        li      t4, FIFO_SIZE-1
+        and     t1, t1, t4
+        sw      t1, 0(t0)
         j       trap_return
+fifo_empty:
+        li      a0, -1
+        j       trap_return
+
+key_scan:
+        li      t0, 0
+row_loop:
+        li      t1, PIO_BASE
+        li      t2, 1
+        sll     t2, t2, t0
+        sw      t2, PIO_SET(t1)
+        nop
+        nop
+        lw      t3, PIO_DATA(t1)
+        srli    t3, t3, 4
+        sw      t2, PIO_CLR(t1)
+        li      t4, 10
+2:
+        addi    t4, t4, -1
+        bnez    t4, 2b
+
+        li      t4, 0
+col_loop:
+        li      t5, 1
+        sll     t5, t5, t4
+        and     t5, t5, t3
+
+        slli    t6, t0, 2
+        add     t6, t6, t4
+        la      t1, key_debounce
+        add     t1, t1, t6
+        lbu     t2, 0(t1)
+        beqz    t5, not_pressed
+pressed:
+        li      t5, DEBOUNCE_MAX
+        blt     t2, t5, inc_cnt
+        j       after_update
+inc_cnt:
+        addi    t2, t2, 1
+        sb      t2, 0(t1)
+        li      t5, DEBOUNCE_MAX
+        bne     t2, t5, after_update
+        la      t5, key_table
+        add     t5, t5, t6
+        lbu     t5, 0(t5)
+        mv      a0, t5
+        call    fifo_push
+        j       after_update
+not_pressed:
+        beqz    t2, after_update
+        addi    t2, t2, -1
+        sb      t2, 0(t1)
+after_update:
+        addi    t4, t4, 1
+        li      t5, 4
+        blt     t4, t5, col_loop
+        addi    t0, t0, 1
+        li      t5, 4
+        blt     t0, t5, row_loop
+        ret
+
+fifo_push:
+        la      t0, fifo_tail
+        lw      t1, 0(t0)
+        addi    t2, t1, 1
+        li      t3, FIFO_SIZE-1
+        and     t2, t2, t3
+        la      t4, fifo_head
+        lw      t3, 0(t4)
+        beq     t2, t3, fifo_push_done
+        la      t4, fifo_buf
+        add     t4, t4, t1
+        sb      a0, 0(t4)
+        sw      t2, 0(t0)
+fifo_push_done:
+        ret
+
+key_table:
+        .byte   '1','2','3','+'
+        .byte   '4','5','6','-'
+        .byte   '7','8','9','='
+        .byte   '*','0','#','/'
 
 btn_read:
         li      t0, BTN_PORT
@@ -404,6 +499,12 @@ delay:
         .balign 4
 tick_count: .word 0
 timer_reload: .word 0
+key_debounce:  .space 16   # one byte counter per key (16 keys)
+key_state:     .space 16   # confirmed pressed/released map
+fifo_buf:      .space FIFO_SIZE
+fifo_head:     .word 0
+fifo_tail:     .word 0
+scan_due:      .word 0
         .space  OS_STACK_SIZE
 os_stack_top:
 
