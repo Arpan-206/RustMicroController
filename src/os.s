@@ -272,16 +272,11 @@ sys_timer_start:
         j       trap_return
 
 sys_key_read:
-        la      t0, scan_due
-        lw      t1, 0(t0)
-        beqz    t1, 1f
-        sw      zero, 0(t0)
         addi    sp, sp, -4
         sw      ra, 0(sp)
         call    key_scan
         lw      ra, 0(sp)
         addi    sp, sp, 4
-1:
         la      t0, fifo_head
         lw      t1, 0(t0)
         la      t2, fifo_tail
@@ -305,12 +300,13 @@ row_loop:
         li      t1, PIO_BASE
         li      t2, 1
         sll     t2, t2, t0
-        sw      t2, PIO_SET(t1)
+        sw      t2, PIO_CLR(t1)
         nop
         nop
         lw      t3, PIO_DATA(t1)
         srli    t3, t3, 4
-        sw      t2, PIO_CLR(t1)
+        xori    t3, t3, 0x0F
+        sw      t2, PIO_SET(t1)
         li      t4, 10
 2:
         addi    t4, t4, -1
