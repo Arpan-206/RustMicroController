@@ -5,6 +5,7 @@
         .equ CAUSE_ECALL_U,  8
         .equ CAUSE_M_EXT,    0x8000000B
         .equ OS_STACK_SIZE,  256
+        .equ USER_STACK_SIZE, 1024
         .equ SYS_EXIT,        0
         .equ SYS_LCD_CHAR,    1
         .equ SYS_LCD_CLEAR,   2
@@ -74,6 +75,11 @@ init:
 
         la      t0, tick_count
         sw      zero, 0(t0)
+
+        # Default timer reload value
+        la      t0, timer_reload
+        li      t1, TIMER_1S
+        sw      t1, 0(t0)
 
         # Enable timer interrupt in PLIC (button is polled)
         li      t0, PLIC_BASE
@@ -178,8 +184,9 @@ timer_isr:
         li      t1, TIMER_CLR_TERM
         sw      t1, TIMER_CLR(t0)
 
-        # Reload for next tick
-        li      t1, TIMER_1S
+        # Reload for next tick (user-configurable)
+        la      t1, timer_reload
+        lw      t1, 0(t1)
         sw      t1, TIMER_LIMIT(t0)
         li      t1, TIMER_EN | TIMER_MOD | TIMER_IE
         sw      t1, TIMER_SET(t0)
@@ -243,8 +250,10 @@ sys_counter_clr:
         sw      zero, 0(t0)
         j       trap_return
 
-        # start 1Hz timer (a0 = modulus)
+        # start timer (a0 = modulus)
 sys_timer_start:
+        la      t1, timer_reload
+        sw      a0, 0(t1)
         li      t0, TIMER_BASE
         sw      a0, TIMER_LIMIT(t0)
         li      t1, TIMER_EN | TIMER_MOD | TIMER_IE
@@ -371,6 +380,7 @@ delay:
         .section .bss, "aw"
         .balign 4
 tick_count: .word 0
+timer_reload: .word 0
         .space  OS_STACK_SIZE
 os_stack_top:
 
@@ -379,7 +389,7 @@ os_stack_top:
         # ================================================================
         .section .utext.start, "ax"
         .balign 4
-        .space  256
+        .space  USER_STACK_SIZE
 user_stack_top:
 
         .global USER_CODE
