@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
 
+mod io;
 mod syscall;
 
 use core::panic::PanicInfo;
@@ -8,10 +9,10 @@ use core::panic::PanicInfo;
 #[no_mangle]
 pub extern "C" fn user_main() {
     // 10 ms tick for keypad scanning
-    syscall::timer_start(9_999);
+    io::timer_start(io::TIMER_10MS);
 
     loop {
-        let key = syscall::key_read();
+        let key = io::key_read();
         if key == -1 {
             continue;
         }

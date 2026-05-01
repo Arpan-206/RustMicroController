@@ -9,6 +9,7 @@ pub const BTN_RESET: u8 = 0x04;
 
 /// Timer modulus helpers (limit register uses modulus minus 1).
 pub const TIMER_1S: u32 = 999_999;
+pub const TIMER_10MS: u32 = 9_999;
 pub const TIMER_1MS: u32 = 999;
 
 pub fn btn_read() -> u8 {
@@ -20,7 +21,7 @@ pub fn timer_start(modulus: u32) {
     syscall::timer_start(modulus);
 }
 
-/// Read the tick counter (incremented by timer ISR each second).
+/// Read the tick counter (incremented by timer ISR each tick).
 pub fn counter_get() -> u32 {
     syscall::counter_get()
 }
@@ -28,4 +29,9 @@ pub fn counter_get() -> u32 {
 /// Reset the tick counter to zero.
 pub fn counter_clr() {
     syscall::counter_clr();
+}
+
+/// Read a debounced key from the FIFO. Returns -1 if empty.
+pub fn key_read() -> i32 {
+    syscall::key_read()
 }

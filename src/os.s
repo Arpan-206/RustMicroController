@@ -1,4 +1,4 @@
-        # ── constants ──────────────────────────────────────────────
+# ── constants ──────────────────────────────────────────────
         .equ HALT_PORT,      0x00010700
         .equ LCD_BASE,       0x00010100
         .equ MPP_MASK,       0x00001800
@@ -16,28 +16,22 @@
         .equ SYS_KEY_READ,    7
         .equ SYS_MAX,         8
         .equ BTN_PORT,       0x00010001
-        .equ PIO_BASE,      0x00010300
-        .equ PIO_DATA,      0x00
-        .equ PIO_DIR,      0x04
-        .equ PIO_CLR,       0x08
-        .equ PIO_SET,       0x0C
-        .equ PIO_ROW_MASK, 0x0F    # bits 0-3 = rows (outputs)
-        .equ PIO_COL_MASK, 0xF0    # bits 4-7 = cols (inputs)
-        .equ PIO_DIR_VAL,  0xFFFFFFF0  # 0=output for rows, 1=input for cols
-
-        # ── Debounce / FIFO ──────────────────
-        .equ DEBOUNCE_MAX, 3       # ticks at 10ms → 30ms to confirm
-        .equ FIFO_SIZE,    16
-        .equ KEY_NONE,     0xFF
-        # External interrupt controller
+        .equ PIO_BASE,       0x00010300
+        .equ PIO_DATA,       0x00
+        .equ PIO_DIR,        0x04
+        .equ PIO_CLR,        0x08
+        .equ PIO_SET,        0x0C
+        .equ PIO_DIR_VAL,    0xFFFFFFF0
+        .equ DEBOUNCE_MAX,   3
+        .equ FIFO_SIZE,      16
+        .equ KEY_NONE,       0xFF
         .equ PLIC_BASE,      0x00010400
         .equ PLIC_ENABLES,   0x04
         .equ PLIC_REQUESTS,  0x08
         .equ PLIC_MODE,      0x0C
-        .equ BTN_IRQ_BIT,    0x20        # bit 5 = button
-        .equ TIMER_IRQ_BIT,  0x10        # bit 4 = timer
+        .equ BTN_IRQ_BIT,    0x20
+        .equ TIMER_IRQ_BIT,  0x10
         .equ LED_PORT,       0x00010000
-        # Timer
         .equ TIMER_BASE,     0x00010200
         .equ TIMER_LIMIT,    0x04
         .equ TIMER_CLR,      0x10
@@ -47,8 +41,7 @@
         .equ TIMER_IE,       0x08
         .equ TIMER_CLR_TERM, 0x10
         .equ TIMER_1S,       999999
-        .equ TIMER_10MS,    9999
-        # CSR addresses
+        .equ TIMER_10MS,     9999
         .equ MSCRATCH,       0x340
         .equ MTVEC,          0x305
         .equ MSTATUS,        0x300
@@ -91,18 +84,25 @@ init:
         la      t0, tick_count
         sw      zero, 0(t0)
 
-        # PIO: set rows as outputs, columns as inputs
+        # PIO: rows = outputs (low), cols = inputs
         li      t0, PIO_BASE
         li      t1, PIO_DIR_VAL
         sw      t1, PIO_DIR(t0)
-        sw      zero, PIO_DATA(t0)  # all rows deactivated (LOW)
+        sw      zero, PIO_DATA(t0)
 
-        # Default timer reload value
+        # Start 10ms debounce timer immediately
+        li      t0, TIMER_BASE
+        li      t1, TIMER_10MS
+        sw      t1, TIMER_LIMIT(t0)
+        li      t1, TIMER_EN | TIMER_MOD | TIMER_IE
+        sw      t1, TIMER_SET(t0)
+
+        # Store reload value
         la      t0, timer_reload
-        li      t1, TIMER_1S
+        li      t1, TIMER_10MS
         sw      t1, 0(t0)
 
-        # Enable timer interrupt in PLIC (button is polled)
+        # Enable timer IRQ in PLIC
         li      t0, PLIC_BASE
         li      t1, TIMER_IRQ_BIT
         sw      t1, PLIC_ENABLES(t0)
@@ -115,7 +115,7 @@ init:
 
         call    lcd_clear
 
-        # ── drop to user mode ────────────────────────────────────────
+        # drop to user mode
         li      t0, MPP_MASK
         csrc    MSTATUS, t0
         la      t0, USER_CODE
@@ -124,9 +124,6 @@ init:
 
         .section .ktext, "ax"
 
-        # ── trap entry — identical to lab5-works ─────────────────────
-        # Saves ra, t0, a7, MEPC. Dispatches on MCAUSE.
-        # Interrupts branch to isr_dispatch; ECALLs go to sys_table.
 trap_entry:
         csrrw   sp, MSCRATCH, sp
         addi    sp, sp, -24
@@ -135,22 +132,17 @@ trap_entry:
         sw      t1,  8(sp)
         sw      t2, 12(sp)
         sw      a7, 16(sp)
-        csrr    t0,  MEPC
+        csrr    t0, MEPC
         sw      t0, 20(sp)
 
         csrr    t0, MCAUSE
-
-        # external interrupt?
         li      t1, CAUSE_M_EXT
         beq     t0, t1, isr_dispatch
-
-        # synchronous — must be ECALL U
         li      t1, CAUSE_ECALL_U
         bne     t0, t1, trap_error
 
         li      t0, SYS_MAX
         bgeu    a7, t0, trap_error
-
         la      t0, sys_table
         slli    t1, a7, 2
         add     t0, t0, t1
@@ -173,10 +165,9 @@ trap_error:
         sw      t0, 0(t1)
         j       trap_error
 
-        # ECALL return — identical to lab5-works
 trap_return:
         lw      t0, 20(sp)
-        addi    t0,  t0, 4
+        addi    t0, t0, 4
         csrw    MEPC, t0
         lw      a7, 16(sp)
         lw      t2, 12(sp)
@@ -187,31 +178,37 @@ trap_return:
         csrrw   sp,  MSCRATCH, sp
         mret
 
-        # ── interrupt dispatcher ─────────────────────────────────────
 isr_dispatch:
-        # Read PLIC requests to determine source
         li      t0, PLIC_BASE
         lw      t1, PLIC_REQUESTS(t0)
-
-        # Timer?
         andi    t2, t1, TIMER_IRQ_BIT
         bnez    t2, timer_isr
+        j       isr_return
+
+timer_isr:
+        # Clear timer terminal flag
+        li      t0, TIMER_BASE
+        li      t1, TIMER_CLR_TERM
+        sw      t1, TIMER_CLR(t0)
+
+        # Increment tick counter
+        la      t0, tick_count
+        lw      t1, 0(t0)
+        addi    t1, t1, 1
+        sw      t1, 0(t0)
+
+        # Run keypad scan directly here — every 10ms tick
+        addi    sp, sp, -4
+        sw      ra, 0(sp)
+        call    key_scan
+        lw      ra, 0(sp)
+        addi    sp, sp, 4
 
         j       isr_return
 
-
-timer_isr:
-        li      t0, TIMER_BASE
-        li      t1, TIMER_CLR_TERM
-        sw      t1, TIMER_CLR(t0)   # clear TERM
-        la      t0, scan_due
-        li      t1, 1
-        sw      t1, 0(t0)           # set flag, done
-
 isr_return:
-        # Interrupt return — go back to interrupted instruction (no MEPC+4)
         lw      t0, 20(sp)
-        csrw    MEPC, t0
+        csrw    MEPC, t0            # no +4 for interrupts
         lw      a7, 16(sp)
         lw      t2, 12(sp)
         lw      t1,  8(sp)
@@ -225,8 +222,7 @@ isr_return:
 
 sys_exit:
         li      t1, HALT_PORT
-        li      t0, 0
-        sw      t0, 0(t1)
+        sw      zero, 0(t1)
         j       sys_exit
 
 sys_lcd_char:
@@ -249,19 +245,19 @@ sys_btn_read:
         call    btn_read
         j       trap_return
 
-        # a0 ← tick_count
 sys_counter_get:
         la      t0, tick_count
         lw      a0, 0(t0)
         j       trap_return
 
-        # tick_count ← 0
 sys_counter_clr:
         la      t0, tick_count
         sw      zero, 0(t0)
         j       trap_return
 
-        # start timer (a0 = modulus)
+        # a0 = new timer modulus — restarts timer at new rate
+        # NOTE: this now also restarts the keypad scan rate.
+        # If you need independent timers, split the PLIC IRQ later.
 sys_timer_start:
         la      t1, timer_reload
         sw      a0, 0(t1)
@@ -272,11 +268,7 @@ sys_timer_start:
         j       trap_return
 
 sys_key_read:
-        addi    sp, sp, -4
-        sw      ra, 0(sp)
-        call    key_scan
-        lw      ra, 0(sp)
-        addi    sp, sp, 4
+        # Drain one char from FIFO → a0, or -1 if empty
         la      t0, fifo_head
         lw      t1, 0(t0)
         la      t2, fifo_tail
@@ -286,81 +278,101 @@ sys_key_read:
         add     t2, t2, t1
         lbu     a0, 0(t2)
         addi    t1, t1, 1
-        li      t4, FIFO_SIZE-1
-        and     t1, t1, t4
+        andi    t1, t1, FIFO_SIZE-1
         sw      t1, 0(t0)
         j       trap_return
 fifo_empty:
         li      a0, -1
         j       trap_return
 
+        # ── keypad scanner ───────────────────────────────────────────
+        # Drives each row LOW one at a time, reads columns.
+        # On DEBOUNCE_MAX consecutive pressed ticks → push to FIFO.
+        # On release → decrement counter back toward 0.
+
 key_scan:
-        li      t0, 0
+        addi    sp, sp, -16
+        sw      ra,  0(sp)
+        sw      s0,  4(sp)
+        sw      s1,  8(sp)
+        sw      s2, 12(sp)
+
+        li      s0, 0               # row index
+
 row_loop:
         li      t1, PIO_BASE
         li      t2, 1
-        sll     t2, t2, t0
-        sw      t2, PIO_CLR(t1)
+        sll     t2, t2, s0          # row bitmask
+        sw      t2, PIO_CLR(t1)     # drive row LOW (active)
         nop
         nop
         lw      t3, PIO_DATA(t1)
-        srli    t3, t3, 4
-        xori    t3, t3, 0x0F
-        sw      t2, PIO_SET(t1)
-        li      t4, 10
-2:
-        addi    t4, t4, -1
-        bnez    t4, 2b
+        srli    t3, t3, 4           # cols into bits 3:0
+        xori    t3, t3, 0x0F        # invert: 1 = pressed
+        sw      t2, PIO_SET(t1)     # deactivate row
 
-        li      t4, 0
+        li      t4, 10              # deactivation settle delay
+1:      addi    t4, t4, -1
+        bnez    t4, 1b
+
+        li      s1, 0               # col index
+
 col_loop:
         li      t5, 1
-        sll     t5, t5, t4
-        and     t5, t5, t3
+        sll     t5, t5, s1
+        and     t5, t5, t3          # t5 = this col pressed?
 
-        slli    t6, t0, 2
-        add     t6, t6, t4
+        slli    s2, s0, 2
+        add     s2, s2, s1          # key index = row*4 + col
+
         la      t1, key_debounce
-        add     t1, t1, t6
-        lbu     t2, 0(t1)
-        beqz    t5, not_pressed
-pressed:
+        add     t1, t1, s2
+        lbu     t2, 0(t1)           # current debounce counter
+
+        beqz    t5, key_released
+
+key_pressed_path:
         li      t5, DEBOUNCE_MAX
-        blt     t2, t5, inc_cnt
-        j       after_update
-inc_cnt:
+        bge     t2, t5, col_next    # already saturated, skip
         addi    t2, t2, 1
         sb      t2, 0(t1)
-        li      t5, DEBOUNCE_MAX
-        bne     t2, t5, after_update
+        blt     t2, t5, col_next    # not yet confirmed
+        # confirmed — push ASCII to FIFO
         la      t5, key_table
-        add     t5, t5, t6
-        lbu     t5, 0(t5)
-        mv      a0, t5
+        add     t5, t5, s2
+        lbu     a0, 0(t5)
         call    fifo_push
-        j       after_update
-not_pressed:
-        beqz    t2, after_update
+        j       col_next
+
+key_released:
+        beqz    t2, col_next
         addi    t2, t2, -1
         sb      t2, 0(t1)
-after_update:
-        addi    t4, t4, 1
+
+col_next:
+        addi    s1, s1, 1
         li      t5, 4
-        blt     t4, t5, col_loop
-        addi    t0, t0, 1
+        blt     s1, t5, col_loop
+
+        addi    s0, s0, 1
         li      t5, 4
-        blt     t0, t5, row_loop
+        blt     s0, t5, row_loop
+
+        lw      s2, 12(sp)
+        lw      s1,  8(sp)
+        lw      s0,  4(sp)
+        lw      ra,  0(sp)
+        addi    sp,  sp, 16
         ret
 
 fifo_push:
         la      t0, fifo_tail
         lw      t1, 0(t0)
         addi    t2, t1, 1
-        li      t3, FIFO_SIZE-1
-        and     t2, t2, t3
+        andi    t2, t2, FIFO_SIZE-1
         la      t4, fifo_head
         lw      t3, 0(t4)
-        beq     t2, t3, fifo_push_done
+        beq     t2, t3, fifo_push_done  # full, drop
         la      t4, fifo_buf
         add     t4, t4, t1
         sb      a0, 0(t4)
@@ -373,6 +385,8 @@ key_table:
         .byte   '4','5','6','-'
         .byte   '7','8','9','='
         .byte   '*','0','#','/'
+
+        # ── rest of OS unchanged ─────────────────────────────────────
 
 btn_read:
         li      t0, BTN_PORT
@@ -486,26 +500,25 @@ lcd_write:
 
 delay:
         mv      t4, a1
-1:
-        addi    t4, t4, -1
+1:      addi    t4, t4, -1
         bnez    t4, 1b
         ret
 
         .section .bss, "aw"
         .balign 4
-tick_count: .word 0
-timer_reload: .word 0
-key_debounce:  .space 16   # one byte counter per key (16 keys)
-key_state:     .space 16   # confirmed pressed/released map
-fifo_buf:      .space FIFO_SIZE
-fifo_head:     .word 0
-fifo_tail:     .word 0
-scan_due:      .word 0
-        .space  OS_STACK_SIZE
+tick_count:     .word 0
+timer_reload:   .word 0
+key_debounce:   .space 16
+key_state:      .space 16
+fifo_buf:       .space FIFO_SIZE
+fifo_head:      .word 0
+fifo_tail:      .word 0
+scan_due:       .word 0             # kept but no longer used
+                .space OS_STACK_SIZE
 os_stack_top:
 
         # ================================================================
-        # U-MODE (0x00040000)
+        # U-MODE
         # ================================================================
         .section .utext.start, "ax"
         .balign 4
