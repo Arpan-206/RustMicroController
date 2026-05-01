@@ -13,14 +13,19 @@
         .equ SYS_COUNTER_GET, 4
         .equ SYS_COUNTER_CLR, 5
         .equ SYS_TIMER_START, 6
-        .equ SYS_KEY_SCAN,    7
+        .equ SYS_KEY_READ,    7
         .equ SYS_MAX,         8
-        .equ KEY_NONE,       0xFF
+        .equ KEY_NONE,       0x00
         .equ BTN_PORT,       0x00010001
         .equ PIO_BASE,       0x00010300
         .equ PIO_DATA,       0x00
         .equ PIO_DIR,        0x04
-        .equ PIO_DIR_VAL,    0xFFFFFFF0
+        .equ PIO_DIR_VAL,    0x0000f0ff
+        .equ CLR_COL,        0x0000003f
+        .equ COL1,           0xffff013f
+        .equ COL2,           0xffff023f
+        .equ COL3,           0xffff043f
+        .equ COL4,           0xffff083f
         .equ PLIC_BASE,      0x00010400
         .equ PLIC_ENABLES,   0x04
         .equ PLIC_REQUESTS,  0x08
@@ -80,11 +85,12 @@ init:
         la      t0, tick_count
         sw      zero, 0(t0)
 
-        # PIO: rows = outputs (low), cols = inputs
+        # PIO: configure direction for keypad scan
         li      t0, PIO_BASE
         li      t1, PIO_DIR_VAL
         sw      t1, PIO_DIR(t0)
-        sw      zero, PIO_DATA(t0)
+        li      t1, CLR_COL
+        sw      t1, PIO_DATA(t0)
 
         # Default timer reload value
         la      t0, timer_reload
@@ -146,7 +152,7 @@ sys_table:
         .word   sys_counter_get
         .word   sys_counter_clr
         .word   sys_timer_start
-        .word   sys_key_scan
+        .word   sys_key_read
 
 trap_error:
         li      t1, HALT_PORT
@@ -244,8 +250,8 @@ sys_timer_start:
         sw      t1, TIMER_SET(t0)
         j       trap_return
 
-        # SYS_KEY_SCAN (7) — raw scan: a0 = 0xRC byte or KEY_NONE (0xFF)
-sys_key_scan:
+        # SYS_KEY_READ (7) — raw scan: a0 = 0xRC byte or 0 if none
+sys_key_read:
         addi    sp, sp, -4
         sw      ra, 0(sp)
         call    key_scan_raw
@@ -255,13 +261,13 @@ sys_key_scan:
 
         # ── keypad raw scan ──────────────────────────────────────────
         # Drives each col high, reads row nibble back.
-        # Returns a0 = 0xRC byte, or KEY_NONE (0xFF) if nothing pressed.
+        # Returns a0 = 0xRC byte, or 0 if nothing pressed.
 
 key_scan_raw:
         li      t0, PIO_BASE
         li      t1, 0xF
 
-        li      t2, 0xffff013f
+        li      t2, COL1
         sw      t2, PIO_DATA(t0)
         nop
         nop
@@ -269,13 +275,13 @@ key_scan_raw:
         srli    a0, a0, 8
         andi    a0, a0, 0xFF
         blt     t1, a0, ksr_done
-        li      t2, 0x0000003f
+        li      t2, CLR_COL
         sw      t2, PIO_DATA(t0)
         li      t3, 10
 ksr_d1: addi    t3, t3, -1
         bnez    t3, ksr_d1
 
-        li      t2, 0xffff023f
+        li      t2, COL2
         sw      t2, PIO_DATA(t0)
         nop
         nop
@@ -283,13 +289,13 @@ ksr_d1: addi    t3, t3, -1
         srli    a0, a0, 8
         andi    a0, a0, 0xFF
         blt     t1, a0, ksr_done
-        li      t2, 0x0000003f
+        li      t2, CLR_COL
         sw      t2, PIO_DATA(t0)
         li      t3, 10
 ksr_d2: addi    t3, t3, -1
         bnez    t3, ksr_d2
 
-        li      t2, 0xffff043f
+        li      t2, COL3
         sw      t2, PIO_DATA(t0)
         nop
         nop
@@ -297,13 +303,13 @@ ksr_d2: addi    t3, t3, -1
         srli    a0, a0, 8
         andi    a0, a0, 0xFF
         blt     t1, a0, ksr_done
-        li      t2, 0x0000003f
+        li      t2, CLR_COL
         sw      t2, PIO_DATA(t0)
         li      t3, 10
 ksr_d3: addi    t3, t3, -1
         bnez    t3, ksr_d3
 
-        li      t2, 0xffff083f
+        li      t2, COL4
         sw      t2, PIO_DATA(t0)
         nop
         nop

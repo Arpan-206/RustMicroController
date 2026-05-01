@@ -31,7 +31,7 @@ pub fn counter_clr() {
     syscall::counter_clr();
 }
 
-/// Read a debounced key from the FIFO. Returns -1 if empty.
-pub fn key_read() -> i32 {
-    syscall::key_read()
+/// Perform a raw keypad scan. Returns 0xRC if pressed, or 0 if none.
+pub fn key_scan() -> i32 {
+    syscall::key_scan()
 }
