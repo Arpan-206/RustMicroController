@@ -320,43 +320,57 @@ debounce_update:
         call    key_scan_raw
         mv      t0, a0                 # raw keycode (0 if none)
 
-        la      t1, last_raw
-        lw      t2, 0(t1)
         la      t3, debounce_cnt
         lw      t4, 0(t3)
+        la      t6, stable_raw
+        lw      t2, 0(t6)
+        bnez    t2, du_release_mode
 
-        beq     t0, t2, du_same
+        # --- press debounce (stable_raw == 0) ---
+        la      t1, last_raw
+        lw      t5, 0(t1)
+        beq     t0, t5, du_same_press
         sw      t0, 0(t1)
         beqz    t0, du_reset_cnt
         li      t4, 1
         j       du_store_cnt
 
-du_reset_cnt:
-        li      t4, 0
-        j       du_store_cnt
-
-du_same:
+du_same_press:
         li      t5, DEBOUNCE_MAX
-        bge     t4, t5, du_check_stable
+        bge     t4, t5, du_check_stable_press
         addi    t4, t4, 1
 
-du_check_stable:
-        beqz    t0, du_maybe_release
+du_check_stable_press:
+        beqz    t0, du_store_cnt
         li      t5, DEBOUNCE_MAX
         bne     t4, t5, du_store_cnt
-        la      t6, stable_raw
-        lw      t2, 0(t6)
-        beq     t2, t0, du_store_cnt
-        sw      t0, 0(t6)
+        sw      t0, 0(t6)              # stable_raw = t0
         mv      a0, t0
         call    fifo_push
         j       du_store_cnt
 
-du_maybe_release:
+        # --- release debounce (stable_raw != 0) ---
+du_release_mode:
+        beqz    t0, du_release_cnt
+        li      t4, 0
+        j       du_store_cnt
+
+du_release_cnt:
         li      t5, DEBOUNCE_MAX
-        bne     t4, t5, du_store_cnt
-        la      t6, stable_raw
-        sw      zero, 0(t6)
+        bge     t4, t5, du_release_clear
+        addi    t4, t4, 1
+        j       du_store_cnt
+
+du_release_clear:
+        sw      zero, 0(t6)            # clear stable_raw
+        la      t1, last_raw
+        sw      zero, 0(t1)            # last_raw = 0
+        li      t4, 0
+        j       du_store_cnt
+
+du_reset_cnt:
+        li      t4, 0
+        j       du_store_cnt
 
 du_store_cnt:
         sw      t4, 0(t3)
