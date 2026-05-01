@@ -581,7 +581,7 @@
 0x40400 : 00000117 ; auipc	sp,0x0
 0x40404 : 00010113 ; mv	sp,sp
 0x40408 : 00000097 ; auipc	ra,0x0
-0x4040c : 0a4080e7 ; jalr	164(ra) # 404ac <user_main>
+0x4040c : 100080e7 ; jalr	256(ra) # 40508 <user_main>
 0x40410 : 00000893 ; li	a7,0
 0x40414 : 00000073 ; ecall
 0x40418 : 0000006f ; j	40418 <USER_CODE+0x18>
@@ -597,29 +597,52 @@
 0x40440 : 00050893 ; mv	a7,a0
 0x40444 : 00000073 ; ecall
 0x40448 : 00008067 ; ret
-0x4044c : 00002537 ; lui	a0,0x2
-0x40450 : 70f50513 ; addi	a0,a0,1807 # 270f <TIMER_10MS>
-0x40454 : 00600893 ; li	a7,6
-0x40458 : 00000073 ; ecall
-0x4045c : 00008067 ; ret
-0x40460 : ff010113 ; addi	sp,sp,-16
-0x40464 : 00112623 ; sw	ra,12(sp)
-0x40468 : 00812423 ; sw	s0,8(sp)
-0x4046c : 00000097 ; auipc	ra,0x0
-0x40470 : fe0080e7 ; jalr	-32(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
-0x40474 : 01000413 ; li	s0,16
-0x40478 : 00400513 ; li	a0,4
-0x4047c : 00000097 ; auipc	ra,0x0
-0x40480 : fa0080e7 ; jalr	-96(ra) # 4041c <_ZN9rv32_bare7syscall10ecall0_ret17hb1c4b3de4dab5492E>
-0x40484 : fe050ae3 ; beqz	a0,40478 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x18>
-0x40488 : 00500513 ; li	a0,5
-0x4048c : 00000097 ; auipc	ra,0x0
-0x40490 : fb4080e7 ; jalr	-76(ra) # 40440 <_ZN9rv32_bare7syscall6ecall017h6fbe258c58a29533E>
-0x40494 : 00700513 ; li	a0,7
+0x4044c : 00050893 ; mv	a7,a0
+0x40450 : 00058513 ; mv	a0,a1
+0x40454 : 00000073 ; ecall
+0x40458 : 00008067 ; ret
+0x4045c : ff010113 ; addi	sp,sp,-16
+0x40460 : 00112623 ; sw	ra,12(sp)
+0x40464 : 00812423 ; sw	s0,8(sp)
+0x40468 : 00912223 ; sw	s1,4(sp)
+0x4046c : 00002537 ; lui	a0,0x2
+0x40470 : 70f50593 ; addi	a1,a0,1807 # 270f <TIMER_10MS>
+0x40474 : 00600513 ; li	a0,6
+0x40478 : 00000097 ; auipc	ra,0x0
+0x4047c : fd4080e7 ; jalr	-44(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
+0x40480 : 01000493 ; li	s1,16
+0x40484 : 00400513 ; li	a0,4
+0x40488 : 00000097 ; auipc	ra,0x0
+0x4048c : f94080e7 ; jalr	-108(ra) # 4041c <_ZN9rv32_bare7syscall10ecall0_ret17hb1c4b3de4dab5492E>
+0x40490 : fe050ae3 ; beqz	a0,40484 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x28>
+0x40494 : 00500513 ; li	a0,5
 0x40498 : 00000097 ; auipc	ra,0x0
-0x4049c : f84080e7 ; jalr	-124(ra) # 4041c <_ZN9rv32_bare7syscall10ecall0_ret17hb1c4b3de4dab5492E>
-0x404a0 : fc854ce3 ; blt	a0,s0,40478 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x18>
+0x4049c : fa8080e7 ; jalr	-88(ra) # 40440 <_ZN9rv32_bare7syscall6ecall017h6fbe258c58a29533E>
+0x404a0 : 00700513 ; li	a0,7
 0x404a4 : 00000097 ; auipc	ra,0x0
-0x404a8 : f84080e7 ; jalr	-124(ra) # 40428 <_ZN9rv32_bare7syscall4exit17ha8d7595f88e09683E>
-0x404ac : 00000097 ; auipc	ra,0x0
-0x404b0 : fb4080e7 ; jalr	-76(ra) # 40460 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E>
+0x404a8 : f78080e7 ; jalr	-136(ra) # 4041c <_ZN9rv32_bare7syscall10ecall0_ret17hb1c4b3de4dab5492E>
+0x404ac : 00050413 ; mv	s0,a0
+0x404b0 : 00100513 ; li	a0,1
+0x404b4 : 05b00593 ; li	a1,91
+0x404b8 : 00000097 ; auipc	ra,0x0
+0x404bc : f94080e7 ; jalr	-108(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
+0x404c0 : 01841513 ; slli	a0,s0,0x18
+0x404c4 : 01c55513 ; srli	a0,a0,0x1c
+0x404c8 : 03050593 ; addi	a1,a0,48
+0x404cc : 00100513 ; li	a0,1
+0x404d0 : 00000097 ; auipc	ra,0x0
+0x404d4 : f7c080e7 ; jalr	-132(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
+0x404d8 : 00f47513 ; andi	a0,s0,15
+0x404dc : 03050593 ; addi	a1,a0,48
+0x404e0 : 00100513 ; li	a0,1
+0x404e4 : 00000097 ; auipc	ra,0x0
+0x404e8 : f68080e7 ; jalr	-152(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
+0x404ec : 00100513 ; li	a0,1
+0x404f0 : 05d00593 ; li	a1,93
+0x404f4 : 00000097 ; auipc	ra,0x0
+0x404f8 : f58080e7 ; jalr	-168(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
+0x404fc : f89444e3 ; blt	s0,s1,40484 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x28>
+0x40500 : 00000097 ; auipc	ra,0x0
+0x40504 : f28080e7 ; jalr	-216(ra) # 40428 <_ZN9rv32_bare7syscall4exit17ha8d7595f88e09683E>
+0x40508 : 00000097 ; auipc	ra,0x0
+0x4050c : f54080e7 ; jalr	-172(ra) # 4045c <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E>
