@@ -101,7 +101,7 @@ pub fn timer_start(modulus: u32) {
     ecall1(Syscall::TimerStart, modulus);
 }
 
-/// Perform a raw keypad scan. Returns 0xRC if pressed, or 0 if none.
+/// Read next buffered keycode. Returns 0 if none.
 pub fn key_scan() -> i32 {
     ecall0_ret(Syscall::KeyScan) as i32
 }

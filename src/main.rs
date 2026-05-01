@@ -9,7 +9,13 @@ use core::panic::PanicInfo;
 
 #[no_mangle]
 pub extern "C" fn user_main() {
-    keyboard::wait_for_keypress_and_halt();
+    io::timer_start(io::TIMER_10MS);
+
+    loop {
+        if let Some(ch) = keyboard::read_key_nonblocking() {
+            syscall::lcd_char(ch);
+        }
+    }
 }
 
 #[panic_handler]

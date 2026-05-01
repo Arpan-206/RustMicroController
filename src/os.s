@@ -16,6 +16,8 @@
         .equ SYS_KEY_READ,    7
         .equ SYS_MAX,         8
         .equ KEY_NONE,       0x00
+        .equ DEBOUNCE_MAX,   3
+        .equ FIFO_SIZE,      16
         .equ BTN_PORT,       0x00010001
         .equ PIO_BASE,       0x00010300
         .equ PIO_DATA,       0x00
@@ -187,6 +189,12 @@ timer_isr:
         addi    t1, t1, 1
         sw      t1, 0(t0)
 
+        addi    sp, sp, -4
+        sw      ra, 0(sp)
+        call    debounce_update
+        lw      ra, 0(sp)
+        addi    sp, sp, 4
+
         j       isr_return
 
 isr_return:
@@ -247,13 +255,22 @@ sys_timer_start:
         sw      t1, TIMER_SET(t0)
         j       trap_return
 
-        # SYS_KEY_READ (7) — raw scan: a0 = 0xRC byte or 0 if none
+        # SYS_KEY_READ (7) — returns next buffered keycode or 0 if none
 sys_key_read:
-        addi    sp, sp, -4
-        sw      ra, 0(sp)
-        call    key_scan_raw
-        lw      ra, 0(sp)
-        addi    sp, sp, 4
+        la      t0, fifo_head
+        lw      t1, 0(t0)
+        la      t2, fifo_tail
+        lw      t3, 0(t2)
+        beq     t1, t3, fifo_empty
+        la      t2, fifo_buf
+        add     t2, t2, t1
+        lbu     a0, 0(t2)
+        addi    t1, t1, 1
+        andi    t1, t1, FIFO_SIZE-1
+        sw      t1, 0(t0)
+        j       trap_return
+fifo_empty:
+        li      a0, KEY_NONE
         j       trap_return
 
         # ── keypad raw scan ──────────────────────────────────────────
@@ -292,6 +309,74 @@ ksr_col_loop:
 ksr_done:
         lw      ra, 0(sp)
         addi    sp, sp, 4
+        ret
+
+        # ── debounce + FIFO ─────────────────────────────────────────
+        # Uses key_scan_raw and enqueues on new stable press.
+
+debounce_update:
+        addi    sp, sp, -4
+        sw      ra, 0(sp)
+        call    key_scan_raw
+        mv      t0, a0                 # raw keycode (0 if none)
+
+        la      t1, last_raw
+        lw      t2, 0(t1)
+        la      t3, debounce_cnt
+        lw      t4, 0(t3)
+
+        beq     t0, t2, du_same
+        sw      t0, 0(t1)
+        beqz    t0, du_reset_cnt
+        li      t4, 1
+        j       du_store_cnt
+
+du_reset_cnt:
+        li      t4, 0
+        j       du_store_cnt
+
+du_same:
+        li      t5, DEBOUNCE_MAX
+        bge     t4, t5, du_check_stable
+        addi    t4, t4, 1
+
+du_check_stable:
+        beqz    t0, du_maybe_release
+        li      t5, DEBOUNCE_MAX
+        bne     t4, t5, du_store_cnt
+        la      t6, stable_raw
+        lw      t2, 0(t6)
+        beq     t2, t0, du_store_cnt
+        sw      t0, 0(t6)
+        mv      a0, t0
+        call    fifo_push
+        j       du_store_cnt
+
+du_maybe_release:
+        li      t5, DEBOUNCE_MAX
+        bne     t4, t5, du_store_cnt
+        la      t6, stable_raw
+        sw      zero, 0(t6)
+
+du_store_cnt:
+        sw      t4, 0(t3)
+        lw      ra, 0(sp)
+        addi    sp, sp, 4
+        ret
+
+fifo_push:
+        la      t0, fifo_tail
+        lw      t1, 0(t0)
+        addi    t2, t1, 1
+        andi    t2, t2, FIFO_SIZE-1
+        la      t3, fifo_head
+        lw      t4, 0(t3)
+        beq     t2, t4, fp_done
+        la      t3, fifo_buf
+        add     t3, t3, t1
+        sb      a0, 0(t3)
+        sw      t2, 0(t0)
+fp_done:
         ret
 
         # ── rest of OS ───────────────────────────────────────────────
@@ -416,6 +501,13 @@ delay:
         .balign 4
 tick_count:     .word 0
 timer_reload:   .word 0
+debounce_cnt:   .word 0
+last_raw:       .word 0
+stable_raw:     .word 0
+fifo_buf:       .space FIFO_SIZE
+fifo_head:      .word 0
+fifo_tail:      .word 0
+scan_due:       .word 0
                 .space OS_STACK_SIZE
 os_stack_top:
 

@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::{io, syscall};
+use crate::io;
 
 const KEYMAP: [[u8; 4]; 4] = [
     [b'1', b'2', b'3', b'+'],
@@ -32,25 +32,11 @@ fn keycode_to_ascii(key: u8) -> Option<u8> {
     Some(KEYMAP[row_idx][col_idx])
 }
 
-/// Poll the keypad once per 10ms tick until a key press is detected,
-/// then halt the system.
-pub fn wait_for_keypress_and_halt() -> ! {
-    // Ensure 10ms timer is running for scan cadence.
-    io::timer_start(io::TIMER_10MS);
-
-    loop {
-        let ticks = io::counter_get();
-        if ticks == 0 {
-            continue;
-        }
-        io::counter_clr();
-
-        let key = io::key_scan();
-        if key > 0x0f {
-            if let Some(ch) = keycode_to_ascii(key as u8) {
-                syscall::lcd_char(ch);
-            }
-            syscall::exit();
-        }
+/// Check the keyboard FIFO once and return a mapped ASCII character if available.
+pub fn read_key_nonblocking() -> Option<u8> {
+    let key = io::key_scan();
+    if key > 0x0f {
+        return keycode_to_ascii(key as u8);
     }
+    None
 }
