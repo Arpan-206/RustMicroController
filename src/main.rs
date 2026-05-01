@@ -3,7 +3,10 @@
 
 mod io;
 mod keyboard;
+mod lcd;
 mod syscall;
+mod ui;
+mod utils;
 
 use core::panic::PanicInfo;
 
@@ -11,9 +14,16 @@ use core::panic::PanicInfo;
 pub extern "C" fn user_main() {
     io::timer_start(io::TIMER_10MS);
 
+    let mut state = ui::UiState::new();
+    lcd::clear();
+    ui::render_line1(&state);
+    ui::render_line2(&state);
+
     loop {
         if let Some(ch) = keyboard::read_key_nonblocking() {
-            syscall::lcd_char(ch);
+            ui::handle_key(&mut state, ch);
+            ui::render_line1(&state);
+            ui::render_line2(&state);
         }
     }
 }
