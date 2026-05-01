@@ -189,11 +189,23 @@ timer_isr:
         addi    t1, t1, 1
         sw      t1, 0(t0)
 
-        addi    sp, sp, -4
-        sw      ra, 0(sp)
+        addi    sp, sp, -28
+        sw      a0, 0(sp)
+        sw      a1, 4(sp)
+        sw      t3, 8(sp)
+        sw      t4, 12(sp)
+        sw      t5, 16(sp)
+        sw      t6, 20(sp)
+        sw      ra, 24(sp)
         call    debounce_update
-        lw      ra, 0(sp)
-        addi    sp, sp, 4
+        lw      ra, 24(sp)
+        lw      t6, 20(sp)
+        lw      t5, 16(sp)
+        lw      t4, 12(sp)
+        lw      t3, 8(sp)
+        lw      a1, 4(sp)
+        lw      a0, 0(sp)
+        addi    sp, sp, 28
 
         j       isr_return
 
@@ -327,6 +339,14 @@ debounce_update:
         bnez    t2, du_release_mode
 
         # --- press debounce (stable_raw == 0) ---
+        la      t5, cooldown_cnt
+        lw      t1, 0(t5)
+        beqz    t1, du_press_ok
+        addi    t1, t1, -1
+        sw      t1, 0(t5)
+        j       du_store_cnt
+
+du_press_ok:
         la      t1, last_raw
         lw      t5, 0(t1)
         beq     t0, t5, du_same_press
@@ -365,6 +385,9 @@ du_release_clear:
         sw      zero, 0(t6)            # clear stable_raw
         la      t1, last_raw
         sw      zero, 0(t1)            # last_raw = 0
+        la      t5, cooldown_cnt
+        li      t1, DEBOUNCE_MAX
+        sw      t1, 0(t5)              # short cooldown after release
         li      t4, 0
         j       du_store_cnt
 
@@ -516,6 +539,7 @@ delay:
 tick_count:     .word 0
 timer_reload:   .word 0
 debounce_cnt:   .word 0
+cooldown_cnt:   .word 0
 last_raw:       .word 0
 stable_raw:     .word 0
 fifo_buf:       .space FIFO_SIZE
