@@ -581,7 +581,7 @@
 0x40400 : 00000117 ; auipc	sp,0x0
 0x40404 : 00010113 ; mv	sp,sp
 0x40408 : 00000097 ; auipc	ra,0x0
-0x4040c : 100080e7 ; jalr	256(ra) # 40508 <user_main>
+0x4040c : 210080e7 ; jalr	528(ra) # 40618 <user_main>
 0x40410 : 00000893 ; li	a7,0
 0x40414 : 00000073 ; ecall
 0x40418 : 0000006f ; j	40418 <USER_CODE+0x18>
@@ -601,48 +601,116 @@
 0x40450 : 00058513 ; mv	a0,a1
 0x40454 : 00000073 ; ecall
 0x40458 : 00008067 ; ret
-0x4045c : ff010113 ; addi	sp,sp,-16
-0x40460 : 00112623 ; sw	ra,12(sp)
-0x40464 : 00812423 ; sw	s0,8(sp)
-0x40468 : 00912223 ; sw	s1,4(sp)
-0x4046c : 00002537 ; lui	a0,0x2
-0x40470 : 70f50593 ; addi	a1,a0,1807 # 270f <TIMER_10MS>
-0x40474 : 00600513 ; li	a0,6
-0x40478 : 00000097 ; auipc	ra,0x0
-0x4047c : fd4080e7 ; jalr	-44(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
-0x40480 : 01000493 ; li	s1,16
-0x40484 : 00400513 ; li	a0,4
-0x40488 : 00000097 ; auipc	ra,0x0
-0x4048c : f94080e7 ; jalr	-108(ra) # 4041c <_ZN9rv32_bare7syscall10ecall0_ret17hb1c4b3de4dab5492E>
-0x40490 : fe050ae3 ; beqz	a0,40484 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x28>
-0x40494 : 00500513 ; li	a0,5
-0x40498 : 00000097 ; auipc	ra,0x0
-0x4049c : fa8080e7 ; jalr	-88(ra) # 40440 <_ZN9rv32_bare7syscall6ecall017h6fbe258c58a29533E>
-0x404a0 : 00700513 ; li	a0,7
-0x404a4 : 00000097 ; auipc	ra,0x0
-0x404a8 : f78080e7 ; jalr	-136(ra) # 4041c <_ZN9rv32_bare7syscall10ecall0_ret17hb1c4b3de4dab5492E>
-0x404ac : 00050413 ; mv	s0,a0
-0x404b0 : 00100513 ; li	a0,1
-0x404b4 : 05b00593 ; li	a1,91
-0x404b8 : 00000097 ; auipc	ra,0x0
-0x404bc : f94080e7 ; jalr	-108(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
-0x404c0 : 01841513 ; slli	a0,s0,0x18
-0x404c4 : 01c55513 ; srli	a0,a0,0x1c
-0x404c8 : 03050593 ; addi	a1,a0,48
-0x404cc : 00100513 ; li	a0,1
+0x4045c : fe010113 ; addi	sp,sp,-32
+0x40460 : 00112e23 ; sw	ra,28(sp)
+0x40464 : 00812c23 ; sw	s0,24(sp)
+0x40468 : 00912a23 ; sw	s1,20(sp)
+0x4046c : 01212823 ; sw	s2,16(sp)
+0x40470 : 01312623 ; sw	s3,12(sp)
+0x40474 : 01412423 ; sw	s4,8(sp)
+0x40478 : 00002537 ; lui	a0,0x2
+0x4047c : 70f50593 ; addi	a1,a0,1807 # 270f <TIMER_10MS>
+0x40480 : 00600513 ; li	a0,6
+0x40484 : 00000097 ; auipc	ra,0x0
+0x40488 : fc8080e7 ; jalr	-56(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
+0x4048c : 00500493 ; li	s1,5
+0x40490 : 00a00913 ; li	s2,10
+0x40494 : 0a000993 ; li	s3,160
+0x40498 : 06f00a13 ; li	s4,111
+0x4049c : 00400513 ; li	a0,4
+0x404a0 : 00000097 ; auipc	ra,0x0
+0x404a4 : f7c080e7 ; jalr	-132(ra) # 4041c <_ZN9rv32_bare7syscall10ecall0_ret17hb1c4b3de4dab5492E>
+0x404a8 : fe050ae3 ; beqz	a0,4049c <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x40>
+0x404ac : 00500513 ; li	a0,5
+0x404b0 : 00000097 ; auipc	ra,0x0
+0x404b4 : f90080e7 ; jalr	-112(ra) # 40440 <_ZN9rv32_bare7syscall6ecall017h6fbe258c58a29533E>
+0x404b8 : 00700513 ; li	a0,7
+0x404bc : 00000097 ; auipc	ra,0x0
+0x404c0 : f60080e7 ; jalr	-160(ra) # 4041c <_ZN9rv32_bare7syscall10ecall0_ret17hb1c4b3de4dab5492E>
+0x404c4 : 00050413 ; mv	s0,a0
+0x404c8 : 00100513 ; li	a0,1
+0x404cc : 05b00593 ; li	a1,91
 0x404d0 : 00000097 ; auipc	ra,0x0
 0x404d4 : f7c080e7 ; jalr	-132(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
-0x404d8 : 00f47513 ; andi	a0,s0,15
-0x404dc : 03050593 ; addi	a1,a0,48
-0x404e0 : 00100513 ; li	a0,1
-0x404e4 : 00000097 ; auipc	ra,0x0
-0x404e8 : f68080e7 ; jalr	-152(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
-0x404ec : 00100513 ; li	a0,1
-0x404f0 : 05d00593 ; li	a1,93
+0x404d8 : 01d45593 ; srli	a1,s0,0x1d
+0x404dc : 01c45513 ; srli	a0,s0,0x1c
+0x404e0 : 0095e663 ; bltu	a1,s1,404ec <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x90>
+0x404e4 : 03750593 ; addi	a1,a0,55
+0x404e8 : 0080006f ; j	404f0 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x94>
+0x404ec : 03050593 ; addi	a1,a0,48
+0x404f0 : 00100513 ; li	a0,1
 0x404f4 : 00000097 ; auipc	ra,0x0
 0x404f8 : f58080e7 ; jalr	-168(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
-0x404fc : f89444e3 ; blt	s0,s1,40484 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x28>
-0x40500 : 00000097 ; auipc	ra,0x0
-0x40504 : f28080e7 ; jalr	-216(ra) # 40428 <_ZN9rv32_bare7syscall4exit17ha8d7595f88e09683E>
-0x40508 : 00000097 ; auipc	ra,0x0
-0x4050c : f54080e7 ; jalr	-172(ra) # 4045c <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E>
+0x404fc : 00441513 ; slli	a0,s0,0x4
+0x40500 : 01c55513 ; srli	a0,a0,0x1c
+0x40504 : 01256663 ; bltu	a0,s2,40510 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0xb4>
+0x40508 : 03750593 ; addi	a1,a0,55
+0x4050c : 0080006f ; j	40514 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0xb8>
+0x40510 : 03050593 ; addi	a1,a0,48
+0x40514 : 00100513 ; li	a0,1
+0x40518 : 00000097 ; auipc	ra,0x0
+0x4051c : f34080e7 ; jalr	-204(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
+0x40520 : 00841513 ; slli	a0,s0,0x8
+0x40524 : 01c55513 ; srli	a0,a0,0x1c
+0x40528 : 01256663 ; bltu	a0,s2,40534 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0xd8>
+0x4052c : 03750593 ; addi	a1,a0,55
+0x40530 : 0080006f ; j	40538 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0xdc>
+0x40534 : 03050593 ; addi	a1,a0,48
+0x40538 : 00100513 ; li	a0,1
+0x4053c : 00000097 ; auipc	ra,0x0
+0x40540 : f10080e7 ; jalr	-240(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
+0x40544 : 00c41513 ; slli	a0,s0,0xc
+0x40548 : 01c55513 ; srli	a0,a0,0x1c
+0x4054c : 01256663 ; bltu	a0,s2,40558 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0xfc>
+0x40550 : 03750593 ; addi	a1,a0,55
+0x40554 : 0080006f ; j	4055c <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x100>
+0x40558 : 03050593 ; addi	a1,a0,48
+0x4055c : 00100513 ; li	a0,1
+0x40560 : 00000097 ; auipc	ra,0x0
+0x40564 : eec080e7 ; jalr	-276(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
+0x40568 : 01041513 ; slli	a0,s0,0x10
+0x4056c : 01c55513 ; srli	a0,a0,0x1c
+0x40570 : 01256663 ; bltu	a0,s2,4057c <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x120>
+0x40574 : 03750593 ; addi	a1,a0,55
+0x40578 : 0080006f ; j	40580 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x124>
+0x4057c : 03050593 ; addi	a1,a0,48
+0x40580 : 00100513 ; li	a0,1
+0x40584 : 00000097 ; auipc	ra,0x0
+0x40588 : ec8080e7 ; jalr	-312(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
+0x4058c : 01441513 ; slli	a0,s0,0x14
+0x40590 : 01c55513 ; srli	a0,a0,0x1c
+0x40594 : 01256663 ; bltu	a0,s2,405a0 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x144>
+0x40598 : 03750593 ; addi	a1,a0,55
+0x4059c : 0080006f ; j	405a4 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x148>
+0x405a0 : 03050593 ; addi	a1,a0,48
+0x405a4 : 00100513 ; li	a0,1
+0x405a8 : 00000097 ; auipc	ra,0x0
+0x405ac : ea4080e7 ; jalr	-348(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
+0x405b0 : 0ff47593 ; zext.b	a1,s0
+0x405b4 : 01841513 ; slli	a0,s0,0x18
+0x405b8 : 01c55513 ; srli	a0,a0,0x1c
+0x405bc : 0135e663 ; bltu	a1,s3,405c8 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x16c>
+0x405c0 : 03750593 ; addi	a1,a0,55
+0x405c4 : 0080006f ; j	405cc <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x170>
+0x405c8 : 03050593 ; addi	a1,a0,48
+0x405cc : 00100513 ; li	a0,1
+0x405d0 : 00000097 ; auipc	ra,0x0
+0x405d4 : e7c080e7 ; jalr	-388(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
+0x405d8 : 00f47513 ; andi	a0,s0,15
+0x405dc : 01256663 ; bltu	a0,s2,405e8 <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x18c>
+0x405e0 : 03750593 ; addi	a1,a0,55
+0x405e4 : 0080006f ; j	405ec <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x190>
+0x405e8 : 03050593 ; addi	a1,a0,48
+0x405ec : 00100513 ; li	a0,1
+0x405f0 : 00000097 ; auipc	ra,0x0
+0x405f4 : e5c080e7 ; jalr	-420(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
+0x405f8 : 00100513 ; li	a0,1
+0x405fc : 05d00593 ; li	a1,93
+0x40600 : 00000097 ; auipc	ra,0x0
+0x40604 : e4c080e7 ; jalr	-436(ra) # 4044c <_ZN9rv32_bare7syscall6ecall117h107d45a6397858d8E>
+0x40608 : ff040413 ; addi	s0,s0,-16
+0x4060c : e88a68e3 ; bltu	s4,s0,4049c <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E+0x40>
+0x40610 : 00000097 ; auipc	ra,0x0
+0x40614 : e18080e7 ; jalr	-488(ra) # 40428 <_ZN9rv32_bare7syscall4exit17ha8d7595f88e09683E>
+0x40618 : 00000097 ; auipc	ra,0x0
+0x4061c : e44080e7 ; jalr	-444(ra) # 4045c <_ZN9rv32_bare8keyboard26wait_for_keypress_and_halt17hb80ced3f97db4a85E>
