@@ -31,7 +31,7 @@ pub fn counter_clr() {
     syscall::counter_clr();
 }
 
-/// Read next buffered keycode. Returns 0 if none.
+/// Read next debounced keycode from FIFO. Returns 0 if none.
 pub fn key_scan() -> i32 {
     syscall::key_scan()
 }

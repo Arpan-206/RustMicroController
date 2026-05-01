@@ -101,7 +101,7 @@ pub fn timer_start(modulus: u32) {
     ecall1(Syscall::TimerStart, modulus);
 }
 
-/// Read next buffered keycode. Returns 0 if none.
+/// Read next debounced keycode from FIFO. Returns 0 if none.
 pub fn key_scan() -> i32 {
     ecall0_ret(Syscall::KeyScan) as i32
 }

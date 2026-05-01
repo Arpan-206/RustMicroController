@@ -32,11 +32,20 @@ fn keycode_to_ascii(key: u8) -> Option<u8> {
     Some(KEYMAP[row_idx][col_idx])
 }
 
-/// Check the keyboard FIFO once and return a mapped ASCII character if available.
+/// Return the next debounced key from the FIFO, if any.
 pub fn read_key_nonblocking() -> Option<u8> {
     let key = io::key_scan();
     if key > 0x0f {
         return keycode_to_ascii(key as u8);
     }
     None
+}
+
+/// Block until a debounced key is available, then return it.
+pub fn read_key_blocking() -> u8 {
+    loop {
+        if let Some(ch) = read_key_nonblocking() {
+            return ch;
+        }
+    }
 }

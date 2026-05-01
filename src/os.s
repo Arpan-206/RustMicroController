@@ -189,23 +189,31 @@ timer_isr:
         addi    t1, t1, 1
         sw      t1, 0(t0)
 
-        addi    sp, sp, -28
+        addi    sp, sp, -44
         sw      a0, 0(sp)
         sw      a1, 4(sp)
-        sw      t3, 8(sp)
-        sw      t4, 12(sp)
-        sw      t5, 16(sp)
-        sw      t6, 20(sp)
-        sw      ra, 24(sp)
+        sw      a2, 8(sp)
+        sw      a3, 12(sp)
+        sw      a4, 16(sp)
+        sw      a5, 20(sp)
+        sw      t3, 24(sp)
+        sw      t4, 28(sp)
+        sw      t5, 32(sp)
+        sw      t6, 36(sp)
+        sw      ra, 40(sp)
         call    debounce_update
-        lw      ra, 24(sp)
-        lw      t6, 20(sp)
-        lw      t5, 16(sp)
-        lw      t4, 12(sp)
-        lw      t3, 8(sp)
+        lw      ra, 40(sp)
+        lw      t6, 36(sp)
+        lw      t5, 32(sp)
+        lw      t4, 28(sp)
+        lw      t3, 24(sp)
+        lw      a5, 20(sp)
+        lw      a4, 16(sp)
+        lw      a3, 12(sp)
+        lw      a2, 8(sp)
         lw      a1, 4(sp)
         lw      a0, 0(sp)
-        addi    sp, sp, 28
+        addi    sp, sp, 44
 
         j       isr_return
 
@@ -267,7 +275,7 @@ sys_timer_start:
         sw      t1, TIMER_SET(t0)
         j       trap_return
 
-        # SYS_KEY_READ (7) — returns next buffered keycode or 0 if none
+        # SYS_KEY_READ (7) — returns next debounced keycode or 0 if none
 sys_key_read:
         la      t0, fifo_head
         lw      t1, 0(t0)
@@ -323,80 +331,124 @@ ksr_done:
         addi    sp, sp, 4
         ret
 
-        # ── debounce + FIFO ─────────────────────────────────────────
-        # Uses key_scan_raw and enqueues on new stable press.
+        # ── keypad full scan (internal) ─────────────────────────────
+        # Returns a0 = 16-bit bitmap (bit row*4+col set if pressed).
+
+scan_all_keys:
+        addi    sp, sp, -4
+        sw      ra, 0(sp)
+        li      t0, PIO_BASE
+        li      t1, 0               # bitmap
+        li      t2, 0               # col index
+        li      t6, COL_BASE
+
+sak_col_loop:
+        li      t3, 0x0100
+        sll     t3, t3, t2          # select column bit (bit 8-11)
+        or      t4, t6, t3
+        sw      t4, PIO_DATA(t0)
+        nop
+        nop
+        lw      t5, PIO_DATA(t0)
+        srli    t5, t5, 8
+        andi    t5, t5, 0xF0        # row bits in upper nibble
+        li      a0, 0x10
+        li      a1, 0
+
+sak_row_loop:
+        and     a2, t5, a0
+        beqz    a2, sak_row_next
+        slli    a2, a1, 2
+        add     a2, a2, t2
+        li      a3, 1
+        sll     a3, a3, a2
+        or      t1, t1, a3
+
+sak_row_next:
+        slli    a0, a0, 1
+        addi    a1, a1, 1
+        li      a2, 4
+        blt     a1, a2, sak_row_loop
+
+        li      t4, CLR_COL
+        sw      t4, PIO_DATA(t0)
+        li      a1, 10
+        call    delay
+
+        addi    t2, t2, 1
+        li      t3, 4
+        blt     t2, t3, sak_col_loop
+
+        mv      a0, t1
+        lw      ra, 0(sp)
+        addi    sp, sp, 4
+        ret
+
+        # ── debounce update (internal) ─────────────────────────────
+        # Updates per-key saturating counters and stable state.
 
 debounce_update:
         addi    sp, sp, -4
         sw      ra, 0(sp)
-        call    key_scan_raw
-        mv      t0, a0                 # raw keycode (0 if none)
+        call    scan_all_keys
+        mv      t0, a0              # bitmap
+        li      t1, 0               # key index
+        la      t2, debounce_cnt
+        la      t3, stable_state
 
-        la      t3, debounce_cnt
-        lw      t4, 0(t3)
-        la      t6, stable_raw
-        lw      t2, 0(t6)
-        bnez    t2, du_release_mode
+        # loop over 16 keys
 
-        # --- press debounce (stable_raw == 0) ---
-        la      t5, cooldown_cnt
-        lw      t1, 0(t5)
-        beqz    t1, du_press_ok
-        addi    t1, t1, -1
-        sw      t1, 0(t5)
-        j       du_store_cnt
-
-du_press_ok:
-        la      t1, last_raw
-        lw      t5, 0(t1)
-        beq     t0, t5, du_same_press
-        sw      t0, 0(t1)
-        beqz    t0, du_reset_cnt
+du_loop:
         li      t4, 1
-        j       du_store_cnt
+        sll     t4, t4, t1
+        and     t5, t0, t4          # pressed?
+        add     t6, t2, t1
+        lbu     a0, 0(t6)           # count
+        add     a1, t3, t1
+        lbu     a2, 0(a1)           # stable state
 
-du_same_press:
-        li      t5, DEBOUNCE_MAX
-        bge     t4, t5, du_check_stable_press
-        addi    t4, t4, 1
+        beqz    t5, du_not_pressed
+        li      t4, DEBOUNCE_MAX
+        bge     a0, t4, du_pressed_done
+        addi    a0, a0, 1
+        sb      a0, 0(t6)
+        li      t4, DEBOUNCE_MAX
+        bne     a0, t4, du_pressed_done
+        lbu     a2, 0(a1)
+        bnez    a2, du_pressed_done
+        li      a2, 1
+        sb      a2, 0(a1)
 
-du_check_stable_press:
-        beqz    t0, du_store_cnt
-        li      t5, DEBOUNCE_MAX
-        bne     t4, t5, du_store_cnt
-        sw      t0, 0(t6)              # stable_raw = t0
-        mv      a0, t0
+        # compute keycode 0xRC from index t1
+        srli    a2, t1, 2
+        andi    a3, t1, 3
+        li      t4, 1
+        sll     a2, t4, a2          # row nibble (1,2,4,8)
+        sll     a3, t4, a3          # col nibble (1,2,4,8)
+        slli    a2, a2, 4
+        or      a2, a2, a3
+        mv      a0, a2
         call    fifo_push
-        j       du_store_cnt
+        j       du_next
 
-        # --- release debounce (stable_raw != 0) ---
-du_release_mode:
-        beqz    t0, du_release_cnt
-        li      t4, 0
-        j       du_store_cnt
+du_pressed_done:
+        j       du_next
 
-du_release_cnt:
-        li      t5, DEBOUNCE_MAX
-        bge     t4, t5, du_release_clear
-        addi    t4, t4, 1
-        j       du_store_cnt
+du_not_pressed:
+        beqz    a0, du_clear_stable
+        addi    a0, a0, -1
+        sb      a0, 0(t6)
+        bnez    a0, du_next
 
-du_release_clear:
-        sw      zero, 0(t6)            # clear stable_raw
-        la      t1, last_raw
-        sw      zero, 0(t1)            # last_raw = 0
-        la      t5, cooldown_cnt
-        li      t1, DEBOUNCE_MAX
-        sw      t1, 0(t5)              # short cooldown after release
-        li      t4, 0
-        j       du_store_cnt
+du_clear_stable:
+        sb      zero, 0(a1)
 
-du_reset_cnt:
-        li      t4, 0
-        j       du_store_cnt
 
-du_store_cnt:
-        sw      t4, 0(t3)
+du_next:
+        addi    t1, t1, 1
+        li      t4, 16
+        blt     t1, t4, du_loop
+
         lw      ra, 0(sp)
         addi    sp, sp, 4
         ret
@@ -538,14 +590,11 @@ delay:
         .balign 4
 tick_count:     .word 0
 timer_reload:   .word 0
-debounce_cnt:   .word 0
-cooldown_cnt:   .word 0
-last_raw:       .word 0
-stable_raw:     .word 0
+debounce_cnt:   .space 16
+stable_state:   .space 16
 fifo_buf:       .space FIFO_SIZE
 fifo_head:      .word 0
 fifo_tail:      .word 0
-scan_due:       .word 0
                 .space OS_STACK_SIZE
 os_stack_top:
 
