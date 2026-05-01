@@ -22,10 +22,7 @@
         .equ PIO_DIR,        0x04
         .equ PIO_DIR_VAL,    0x0000f0ff
         .equ CLR_COL,        0x0000003f
-        .equ COL1,           0xffff013f
-        .equ COL2,           0xffff023f
-        .equ COL3,           0xffff043f
-        .equ COL4,           0xffff083f
+        .equ COL_BASE,       0xffff003f
         .equ PLIC_BASE,      0x00010400
         .equ PLIC_ENABLES,   0x04
         .equ PLIC_REQUESTS,  0x08
@@ -264,62 +261,37 @@ sys_key_read:
         # Returns a0 = 0xRC byte, or 0 if nothing pressed.
 
 key_scan_raw:
+        addi    sp, sp, -4
+        sw      ra, 0(sp)
         li      t0, PIO_BASE
         li      t1, 0xF
+        li      t2, 0               # col index
+        li      t5, COL_BASE
 
-        li      t2, COL1
-        sw      t2, PIO_DATA(t0)
+ksr_col_loop:
+        li      t3, 0x0100
+        sll     t3, t3, t2          # select column bit (bit 8-11)
+        or      t4, t5, t3          # COL_BASE | col bit
+        sw      t4, PIO_DATA(t0)
         nop
         nop
         lw      a0, PIO_DATA(t0)
         srli    a0, a0, 8
         andi    a0, a0, 0xFF
         blt     t1, a0, ksr_done
-        li      t2, CLR_COL
-        sw      t2, PIO_DATA(t0)
-        li      t3, 10
-ksr_d1: addi    t3, t3, -1
-        bnez    t3, ksr_d1
+        li      t4, CLR_COL
+        sw      t4, PIO_DATA(t0)
+        li      a1, 10
+        call    delay
 
-        li      t2, COL2
-        sw      t2, PIO_DATA(t0)
-        nop
-        nop
-        lw      a0, PIO_DATA(t0)
-        srli    a0, a0, 8
-        andi    a0, a0, 0xFF
-        blt     t1, a0, ksr_done
-        li      t2, CLR_COL
-        sw      t2, PIO_DATA(t0)
-        li      t3, 10
-ksr_d2: addi    t3, t3, -1
-        bnez    t3, ksr_d2
-
-        li      t2, COL3
-        sw      t2, PIO_DATA(t0)
-        nop
-        nop
-        lw      a0, PIO_DATA(t0)
-        srli    a0, a0, 8
-        andi    a0, a0, 0xFF
-        blt     t1, a0, ksr_done
-        li      t2, CLR_COL
-        sw      t2, PIO_DATA(t0)
-        li      t3, 10
-ksr_d3: addi    t3, t3, -1
-        bnez    t3, ksr_d3
-
-        li      t2, COL4
-        sw      t2, PIO_DATA(t0)
-        nop
-        nop
-        lw      a0, PIO_DATA(t0)
-        srli    a0, a0, 8
-        andi    a0, a0, 0xFF
-        blt     t1, a0, ksr_done
+        addi    t2, t2, 1
+        li      t3, 4
+        blt     t2, t3, ksr_col_loop
 
         li      a0, KEY_NONE
 ksr_done:
+        lw      ra, 0(sp)
+        addi    sp, sp, 4
         ret
 
         # ── rest of OS ───────────────────────────────────────────────
