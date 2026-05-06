@@ -17,25 +17,12 @@ enum Syscall {
 
 #[inline(never)]
 fn ecall0(nr: Syscall) {
-    unsafe {
-        core::arch::asm!(
-            "ecall",
-            in("a7") nr as u32,
-            options(nostack)
-        );
-    }
+    let _ = ecall0_ret(nr);
 }
 
 #[inline(never)]
 fn ecall1(nr: Syscall, arg: u32) {
-    unsafe {
-        core::arch::asm!(
-            "ecall",
-            in("a7") nr as u32,
-            in("a0") arg,
-            options(nostack)
-        );
-    }
+    let _ = ecall1_ret(nr, arg);
 }
 
 #[inline(never)]

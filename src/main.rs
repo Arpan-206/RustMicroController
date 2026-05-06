@@ -5,25 +5,43 @@ mod io;
 mod keyboard;
 mod lcd;
 mod syscall;
-mod ui;
-mod utils;
 
 use core::panic::PanicInfo;
+
+const LCD_WIDTH: usize = 16;
+
+fn render_line1(line: &[u8; LCD_WIDTH]) {
+    lcd::print_str(b"\r");
+    lcd::print_str(line);
+}
+
+fn render_line2(line: &[u8; LCD_WIDTH]) {
+    lcd::print_str(b"\n");
+    lcd::print_str(line);
+}
 
 #[no_mangle]
 pub extern "C" fn user_main() {
     io::timer_start(io::TIMER_10MS);
 
-    let mut state = ui::UiState::new();
     lcd::clear();
-    ui::render_line1(&state);
-    ui::render_line2(&state);
+
+    let mut line = [b' '; LCD_WIDTH];
+    let blank = [b' '; LCD_WIDTH];
+    let mut len: usize = 0;
+
+    render_line1(&line);
+    render_line2(&blank);
 
     loop {
         if let Some(ch) = keyboard::read_key_nonblocking() {
-            ui::handle_key(&mut state, ch);
-            ui::render_line1(&state);
-            ui::render_line2(&state);
+            if (b'0'..=b'9').contains(&ch) {
+                if len < LCD_WIDTH {
+                    line[len] = ch;
+                    len += 1;
+                }
+                render_line1(&line);
+            }
         }
     }
 }

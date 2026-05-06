@@ -163,14 +163,7 @@ trap_return:
         lw      t0, 20(sp)
         addi    t0, t0, 4
         csrw    MEPC, t0
-        lw      a7, 16(sp)
-        lw      t2, 12(sp)
-        lw      t1,  8(sp)
-        lw      t0,  4(sp)
-        lw      ra,  0(sp)
-        addi    sp,  sp, 24
-        csrrw   sp,  MSCRATCH, sp
-        mret
+        j       restore_and_mret
 
 isr_dispatch:
         li      t0, PLIC_BASE
@@ -220,6 +213,9 @@ timer_isr:
 isr_return:
         lw      t0, 20(sp)
         csrw    MEPC, t0
+        j       restore_and_mret
+
+restore_and_mret:
         lw      a7, 16(sp)
         lw      t2, 12(sp)
         lw      t1,  8(sp)
@@ -231,30 +227,26 @@ isr_return:
 
         # ── syscall implementations ──────────────────────────────────
 
+sys_call_and_return:
+        jalr    ra, t0, 0
+        j       trap_return
+
 sys_exit:
         li      t1, HALT_PORT
         sw      zero, 0(t1)
         j       sys_exit
 
 sys_lcd_char:
-        addi    sp, sp, -4
-        sw      ra, 0(sp)
-        call    lcd_print_char
-        lw      ra, 0(sp)
-        addi    sp, sp, 4
-        j       trap_return
+        la      t0, lcd_print_char
+        j       sys_call_and_return
 
 sys_lcd_clear:
-        addi    sp, sp, -4
-        sw      ra, 0(sp)
-        call    lcd_clear
-        lw      ra, 0(sp)
-        addi    sp, sp, 4
-        j       trap_return
+        la      t0, lcd_clear
+        j       sys_call_and_return
 
 sys_btn_read:
-        call    btn_read
-        j       trap_return
+        la      t0, btn_read
+        j       sys_call_and_return
 
 sys_counter_get:
         la      t0, tick_count
@@ -501,37 +493,31 @@ lpc_done:
         addi    sp, sp, 4
         ret
 
-lcd_new_line:
+lcd_send_cmd:
         addi    sp, sp, -4
         sw      ra, 0(sp)
         li      a2, LCD_BASE
-        li      a0, lcd_cmd_line2
         li      a3, lcd_ctrl_cmd
         call    lcd_send
         lw      ra, 0(sp)
         addi    sp, sp, 4
         ret
 
+lcd_new_line:
+        li      a0, lcd_cmd_line2
+        j       lcd_send_cmd
+
 lcd_home_line:
-        addi    sp, sp, -4
-        sw      ra, 0(sp)
-        li      a2, LCD_BASE
         li      a0, lcd_cmd_line1
-        li      a3, lcd_ctrl_cmd
-        call    lcd_send
-        lw      ra, 0(sp)
-        addi    sp, sp, 4
-        ret
+        j       lcd_send_cmd
 
 lcd_clear:
         addi    sp, sp, -4
         sw      ra, 0(sp)
-        li      a2, LCD_BASE
-        li      a3, lcd_ctrl_cmd
         li      a0, lcd_cmd_clear
-        call    lcd_send
+        call    lcd_send_cmd
         li      a0, lcd_cmd_home
-        call    lcd_send
+        call    lcd_send_cmd
         lw      ra, 0(sp)
         addi    sp, sp, 4
         ret
