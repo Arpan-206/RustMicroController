@@ -10,18 +10,10 @@ use core::panic::PanicInfo;
 
 const LCD_WIDTH: usize = 16;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum Phase {
-    Num1,
-    Num2,
-    OpSelect,
-    ShowResult,
-}
-
 #[derive(Clone, Copy)]
 enum Op {
-    Add,
-    Sub,
+    Mul,
+    Div,
 }
 
 fn render_line1(line: &[u8; LCD_WIDTH]) {
@@ -88,8 +80,26 @@ fn write_i32(buf: &mut [u8; LCD_WIDTH], n: i32) -> usize {
 
 fn compute_result(a: i32, b: i32, op: Op) -> Option<i32> {
     match op {
-        Op::Add => a.checked_add(b),
-        Op::Sub => a.checked_sub(b),
+        Op::Mul => a.checked_mul(b),
+        Op::Div => a.checked_div(b),
+    }
+}
+
+fn op_char(op: Op) -> u8 {
+    match op {
+        Op::Mul => b'*',
+        Op::Div => b'/',
+    }
+}
+
+fn show_result(line1: &mut [u8; LCD_WIDTH], value1: i32, value2: i32, op: Op) {
+    if let Some(result) = compute_result(value1, value2, op) {
+        write_i32(line1, result);
+    } else {
+        clear_line(line1);
+        line1[0] = b'E';
+        line1[1] = b'R';
+        line1[2] = b'R';
     }
 }
 
@@ -106,81 +116,56 @@ pub extern "C" fn user_main() {
     let mut value1: i32 = 0;
     let mut value2: i32 = 0;
     let mut op: Option<Op> = None;
-    let mut phase = Phase::Num1;
 
     render_line1(&line1);
     render_line2(&line2);
 
     loop {
         if let Some(ch) = keyboard::read_key_nonblocking() {
-            match phase {
-                Phase::Num1 => {
-                    if (b'0'..=b'9').contains(&ch) {
-                        if append_digit(&mut line1, &mut len1, &mut value1, ch) {
-                            render_line1(&line1);
-                        }
-                    } else if ch == b'A' && len1 > 0 {
-                        phase = Phase::Num2;
-                    }
-                }
-                Phase::Num2 => {
-                    if (b'0'..=b'9').contains(&ch) {
-                        if append_digit(&mut line2, &mut len2, &mut value2, ch) {
-                            render_line2(&line2);
-                        }
-                    } else if ch == b'A' && len2 > 0 {
-                        phase = Phase::OpSelect;
-                    }
-                }
-                Phase::OpSelect => {
-                    if ch == b'+' {
-                        op = Some(Op::Add);
-                    } else if ch == b'-' {
-                        op = Some(Op::Sub);
-                    } else if ch == b'A' {
-                        if let Some(selected) = op {
-                            clear_line(&mut line1);
-                            clear_line(&mut line2);
-                            if let Some(result) = compute_result(value1, value2, selected) {
-                                write_i32(&mut line1, result);
-                            } else {
-                                line1[0] = b'E';
-                                line1[1] = b'R';
-                                line1[2] = b'R';
-                            }
-                            render_line1(&line1);
-                            render_line2(&line2);
-                            phase = Phase::ShowResult;
-                        }
-                    }
-                }
-                Phase::ShowResult => {
-                    if (b'0'..=b'9').contains(&ch) {
-                        clear_line(&mut line1);
-                        clear_line(&mut line2);
-                        len1 = 0;
-                        len2 = 0;
-                        value1 = 0;
-                        value2 = 0;
-                        op = None;
-                        phase = Phase::Num1;
+            if ch == b'C' {
+                clear_line(&mut line1);
+                clear_line(&mut line2);
+                len1 = 0;
+                len2 = 0;
+                value1 = 0;
+                value2 = 0;
+                op = None;
+                render_line1(&line1);
+                render_line2(&line2);
+                continue;
+            }
 
-                        if append_digit(&mut line1, &mut len1, &mut value1, ch) {
-                            render_line1(&line1);
-                            render_line2(&line2);
-                        }
-                    } else if ch == b'A' {
-                        clear_line(&mut line1);
-                        clear_line(&mut line2);
-                        len1 = 0;
-                        len2 = 0;
-                        value1 = 0;
-                        value2 = 0;
-                        op = None;
-                        phase = Phase::Num1;
+            if (b'0'..=b'9').contains(&ch) {
+                if op.is_none() {
+                    if append_digit(&mut line1, &mut len1, &mut value1, ch) {
                         render_line1(&line1);
-                        render_line2(&line2);
                     }
+                } else if append_digit(&mut line2, &mut len2, &mut value2, ch) {
+                    render_line2(&line2);
+                    if let Some(selected) = op {
+                        show_result(&mut line1, value1, value2, selected);
+                        render_line1(&line1);
+                    }
+                }
+                continue;
+            }
+
+            if ch == b'A' || ch == b'B' {
+                if len1 == 0 {
+                    continue;
+                }
+
+                let selected = if ch == b'A' { Op::Mul } else { Op::Div };
+                op = Some(selected);
+
+                if len2 == 0 {
+                    if len1 < LCD_WIDTH {
+                        line1[len1] = op_char(selected);
+                    }
+                    render_line1(&line1);
+                } else {
+                    show_result(&mut line1, value1, value2, selected);
+                    render_line1(&line1);
                 }
             }
         }
