@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-pub use crate::syscall::{btn_read, counter_clr, counter_get, key_scan, timer_start};
+pub use crate::syscall::{key_scan, timer_start};
 
 /// Button bit masks (from hardware spec).
 pub const BTN_START: u8 = 0x01;
