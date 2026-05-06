@@ -12,6 +12,8 @@ const LCD_WIDTH: usize = 16;
 
 #[derive(Clone, Copy)]
 enum Op {
+    Add,
+    Sub,
     Mul,
     Div,
 }
@@ -80,6 +82,8 @@ fn write_i32(buf: &mut [u8; LCD_WIDTH], n: i32) -> usize {
 
 fn compute_result(a: i32, b: i32, op: Op) -> Option<i32> {
     match op {
+        Op::Add => a.checked_add(b),
+        Op::Sub => a.checked_sub(b),
         Op::Mul => a.checked_mul(b),
         Op::Div => a.checked_div(b),
     }
@@ -87,6 +91,8 @@ fn compute_result(a: i32, b: i32, op: Op) -> Option<i32> {
 
 fn op_char(op: Op) -> u8 {
     match op {
+        Op::Add => b'+',
+        Op::Sub => b'-',
         Op::Mul => b'*',
         Op::Div => b'/',
     }
@@ -100,6 +106,15 @@ fn show_result(line1: &mut [u8; LCD_WIDTH], value1: i32, value2: i32, op: Op) {
         line1[0] = b'E';
         line1[1] = b'R';
         line1[2] = b'R';
+    }
+}
+
+fn show_op_on_line1(line1: &mut [u8; LCD_WIDTH], len1: usize, op: Op) {
+    if len1 < LCD_WIDTH {
+        line1[len1] = b' ';
+    }
+    if len1 + 1 < LCD_WIDTH {
+        line1[len1 + 1] = op_char(op);
     }
 }
 
@@ -135,14 +150,9 @@ pub extern "C" fn user_main() {
                 continue;
             }
 
-            if (b'0'..=b'9').contains(&ch) {
-                if op.is_none() {
-                    if append_digit(&mut line1, &mut len1, &mut value1, ch) {
-                        render_line1(&line1);
-                    }
-                } else if append_digit(&mut line2, &mut len2, &mut value2, ch) {
-                    render_line2(&line2);
-                    if let Some(selected) = op {
+            if ch == b'=' {
+                if let Some(selected) = op {
+                    if len2 > 0 {
                         show_result(&mut line1, value1, value2, selected);
                         render_line1(&line1);
                     }
@@ -150,23 +160,30 @@ pub extern "C" fn user_main() {
                 continue;
             }
 
-            if ch == b'A' || ch == b'B' {
-                if len1 == 0 {
+            if (b'0'..=b'9').contains(&ch) {
+                if op.is_none() {
+                    if append_digit(&mut line1, &mut len1, &mut value1, ch) {
+                        render_line1(&line1);
+                    }
+                } else if append_digit(&mut line2, &mut len2, &mut value2, ch) {
+                    render_line2(&line2);
+                }
+                continue;
+            }
+
+            if ch == b'+' || ch == b'-' || ch == b'A' || ch == b'B' {
+                if len1 == 0 || len2 > 0 {
                     continue;
                 }
-
-                let selected = if ch == b'A' { Op::Mul } else { Op::Div };
+                let selected = match ch {
+                    b'+' => Op::Add,
+                    b'-' => Op::Sub,
+                    b'A' => Op::Mul,
+                    _ => Op::Div,
+                };
                 op = Some(selected);
-
-                if len2 == 0 {
-                    if len1 < LCD_WIDTH {
-                        line1[len1] = op_char(selected);
-                    }
-                    render_line1(&line1);
-                } else {
-                    show_result(&mut line1, value1, value2, selected);
-                    render_line1(&line1);
-                }
+                show_op_on_line1(&mut line1, len1, selected);
+                render_line1(&line1);
             }
         }
     }
