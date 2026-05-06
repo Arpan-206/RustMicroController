@@ -6,7 +6,7 @@ const KEYMAP: [[u8; 4]; 4] = [
     [b'1', b'2', b'3', b'+'],
     [b'4', b'5', b'6', b'-'],
     [b'7', b'8', b'9', b'='],
-    [b'A', b'0', b'B', b'C'],
+    [b'*', b'0', b'/', b'C'],
 ];
 
 fn keycode_to_ascii(key: u8) -> Option<u8> {

@@ -384,11 +384,13 @@ debounce_update:
         sw      ra, 0(sp)
         call    scan_all_keys
         mv      t0, a0              # bitmap
+        # If more than one key is pressed, ignore this scan to avoid ghosting.
         beqz    t0, du_start
         addi    t4, t0, -1
         and     t4, t4, t0
         beqz    t4, du_start
         li      t0, 0
+
 
 du_start:
         li      t1, 0               # key index
