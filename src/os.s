@@ -16,7 +16,7 @@
         .equ SYS_KEY_READ,    7
         .equ SYS_MAX,         8
         .equ KEY_NONE,       0x00
-        .equ DEBOUNCE_MAX,   3
+        .equ DEBOUNCE_MAX,   5
         .equ FIFO_SIZE,      16
         .equ BTN_PORT,       0x00010001
         .equ PIO_BASE,       0x00010300
@@ -384,6 +384,13 @@ debounce_update:
         sw      ra, 0(sp)
         call    scan_all_keys
         mv      t0, a0              # bitmap
+        beqz    t0, du_start
+        addi    t4, t0, -1
+        and     t4, t4, t0
+        beqz    t4, du_start
+        li      t0, 0
+
+du_start:
         li      t1, 0               # key index
         la      t2, debounce_cnt
         la      t3, stable_state

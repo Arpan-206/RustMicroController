@@ -9,6 +9,7 @@ mod syscall;
 use core::panic::PanicInfo;
 
 const LCD_WIDTH: usize = 16;
+const RESET_MSG: [u8; LCD_WIDTH] = *b"C to reset      ";
 
 #[derive(Clone, Copy)]
 enum Op {
@@ -109,6 +110,30 @@ fn show_result(line1: &mut [u8; LCD_WIDTH], value1: i32, value2: i32, op: Op) {
     }
 }
 
+fn show_reset_message(line2: &mut [u8; LCD_WIDTH]) {
+    *line2 = RESET_MSG;
+}
+
+fn reset_state(
+    line1: &mut [u8; LCD_WIDTH],
+    line2: &mut [u8; LCD_WIDTH],
+    len1: &mut usize,
+    len2: &mut usize,
+    value1: &mut i32,
+    value2: &mut i32,
+    op: &mut Option<Op>,
+    locked: &mut bool,
+) {
+    clear_line(line1);
+    clear_line(line2);
+    *len1 = 0;
+    *len2 = 0;
+    *value1 = 0;
+    *value2 = 0;
+    *op = None;
+    *locked = false;
+}
+
 fn show_op_on_line1(line1: &mut [u8; LCD_WIDTH], len1: usize, op: Op) {
     if len1 < LCD_WIDTH {
         line1[len1] = b' ';
@@ -131,20 +156,42 @@ pub extern "C" fn user_main() {
     let mut value1: i32 = 0;
     let mut value2: i32 = 0;
     let mut op: Option<Op> = None;
+    let mut locked: bool = false;
 
     render_line1(&line1);
     render_line2(&line2);
 
     loop {
         if let Some(ch) = keyboard::read_key_nonblocking() {
+            if locked {
+                if ch == b'C' {
+                    reset_state(
+                        &mut line1,
+                        &mut line2,
+                        &mut len1,
+                        &mut len2,
+                        &mut value1,
+                        &mut value2,
+                        &mut op,
+                        &mut locked,
+                    );
+                    render_line1(&line1);
+                    render_line2(&line2);
+                }
+                continue;
+            }
+
             if ch == b'C' {
-                clear_line(&mut line1);
-                clear_line(&mut line2);
-                len1 = 0;
-                len2 = 0;
-                value1 = 0;
-                value2 = 0;
-                op = None;
+                reset_state(
+                    &mut line1,
+                    &mut line2,
+                    &mut len1,
+                    &mut len2,
+                    &mut value1,
+                    &mut value2,
+                    &mut op,
+                    &mut locked,
+                );
                 render_line1(&line1);
                 render_line2(&line2);
                 continue;
@@ -153,8 +200,13 @@ pub extern "C" fn user_main() {
             if ch == b'=' {
                 if let Some(selected) = op {
                     if len2 > 0 {
+                        clear_line(&mut line1);
+                        clear_line(&mut line2);
                         show_result(&mut line1, value1, value2, selected);
+                        show_reset_message(&mut line2);
                         render_line1(&line1);
+                        render_line2(&line2);
+                        locked = true;
                     }
                 }
                 continue;
