@@ -1,6 +1,13 @@
 # ── constants ──────────────────────────────────────────────
         .equ HALT_PORT,      0x00010700
         .equ LCD_BASE,       0x00010100
+        .equ VDU_BASE,       0x00010600
+        .equ VDU_MODE,       0x04
+        .equ VDU_STATUS,     0x08
+        .equ VDU_WIDTH,      0x10
+        .equ VDU_HEIGHT,     0x14
+        .equ FRAME_BASE,     0x00100000
+        .equ VDU_VBLANK_BIT, 0x04
         .equ MPP_MASK,       0x00001800
         .equ CAUSE_ECALL_U,  8
         .equ CAUSE_M_EXT,    0x8000000B
@@ -14,7 +21,13 @@
         .equ SYS_COUNTER_CLR, 5
         .equ SYS_TIMER_START, 6
         .equ SYS_KEY_READ,    7
-        .equ SYS_MAX,         8
+        .equ SYS_VDU_INIT,    8
+        .equ SYS_VDU_PIXEL,   9
+        .equ SYS_VDU_FILL,    10
+        .equ SYS_VDU_VSYNC,   11
+        .equ SYS_VDU_GETW,    12
+        .equ SYS_VDU_GETH,    13
+        .equ SYS_MAX,         14
         .equ KEY_NONE,       0x00
         .equ DEBOUNCE_MAX,   5
         .equ FIFO_SIZE,      16
@@ -152,6 +165,12 @@ sys_table:
         .word   sys_counter_clr
         .word   sys_timer_start
         .word   sys_key_read
+        .word   sys_vdu_init
+        .word   sys_vdu_pixel
+        .word   sys_vdu_fill
+        .word   sys_vdu_vsync
+        .word   sys_vdu_getw
+        .word   sys_vdu_geth
 
 trap_error:
         li      t1, HALT_PORT
@@ -283,6 +302,190 @@ sys_key_read:
         j       trap_return
 fifo_empty:
         li      a0, KEY_NONE
+        j       trap_return
+
+        #;--- vdu syscalls ---
+sys_vdu_init:
+        addi    sp, sp, -16
+        sw      s0, 0(sp)
+        sw      s1, 4(sp)
+        sw      s2, 8(sp)
+        sw      s3, 12(sp)
+
+        la      s0, vdu_mode
+        sw      a0, 0(s0)
+        li      s0, VDU_BASE
+        sw      a0, VDU_MODE(s0)
+
+        li      a0, 0
+        jal     vdu_fill_impl
+
+        lw      s3, 12(sp)
+        lw      s2, 8(sp)
+        lw      s1, 4(sp)
+        lw      s0, 0(sp)
+        addi    sp, sp, 16
+        j       trap_return
+
+sys_vdu_pixel:
+        addi    sp, sp, -16
+        sw      s0, 0(sp)
+        sw      s1, 4(sp)
+        sw      s2, 8(sp)
+        sw      s3, 12(sp)
+
+        li      s0, VDU_BASE
+        lw      s1, VDU_WIDTH(s0)
+        bgeu    a0, s1, vdu_pixel_done
+        lw      s2, VDU_HEIGHT(s0)
+        bgeu    a1, s2, vdu_pixel_done
+        la      s3, vdu_mode
+        lw      s3, 0(s3)
+
+        mul     s2, a1, s1
+        add     s2, s2, a0
+        li      s0, FRAME_BASE
+        beqz    s3, vdu_pixel_8bpp
+        slli    s2, s2, 1
+        add     s0, s0, s2
+        sh      a2, 0(s0)
+        j       vdu_pixel_done
+
+vdu_pixel_8bpp:
+        add     s0, s0, s2
+        sb      a2, 0(s0)
+
+vdu_pixel_done:
+        lw      s3, 12(sp)
+        lw      s2, 8(sp)
+        lw      s1, 4(sp)
+        lw      s0, 0(sp)
+        addi    sp, sp, 16
+        j       trap_return
+
+sys_vdu_fill:
+        addi    sp, sp, -16
+        sw      s0, 0(sp)
+        sw      s1, 4(sp)
+        sw      s2, 8(sp)
+        sw      s3, 12(sp)
+
+        jal     vdu_fill_impl
+
+        lw      s3, 12(sp)
+        lw      s2, 8(sp)
+        lw      s1, 4(sp)
+        lw      s0, 0(sp)
+        addi    sp, sp, 16
+        j       trap_return
+
+vdu_fill_impl:
+        li      s0, VDU_BASE
+        lw      s1, VDU_WIDTH(s0)
+        lw      s2, VDU_HEIGHT(s0)
+        mul     s1, s1, s2
+
+        la      s3, vdu_mode
+        lw      s3, 0(s3)
+
+        li      s0, FRAME_BASE
+        beqz    s3, vdu_fill_8bpp
+
+vdu_fill_16bpp:
+        li      s2, 0xffff
+        and     s2, a0, s2
+        slli    s3, s2, 16
+        or      s2, s2, s3
+        srli    s1, s1, 1
+vdu_fill_16_loop:
+        beqz    s1, vdu_fill_done
+        sw      s2, 0(s0)
+        addi    s0, s0, 4
+        addi    s1, s1, -1
+        bnez    s1, vdu_fill_16_loop
+        j       vdu_fill_done
+
+vdu_fill_8bpp:
+        andi    s2, a0, 0xff
+        slli    s3, s2, 8
+        or      s2, s2, s3
+        slli    s3, s2, 16
+        or      s2, s2, s3
+        srli    s1, s1, 2
+vdu_fill_8_loop:
+        beqz    s1, vdu_fill_done
+        sw      s2, 0(s0)
+        addi    s0, s0, 4
+        addi    s1, s1, -1
+        bnez    s1, vdu_fill_8_loop
+
+vdu_fill_done:
+        ret
+
+sys_vdu_vsync:
+        addi    sp, sp, -16
+        sw      s0, 0(sp)
+        sw      s1, 4(sp)
+        sw      s2, 8(sp)
+        sw      s3, 12(sp)
+
+        li      s0, VDU_BASE
+        li      s1, VDU_VBLANK_BIT
+
+vdu_vsync_wait_low1:
+        lw      s2, VDU_STATUS(s0)
+        and     s2, s2, s1
+        bnez    s2, vdu_vsync_wait_low1
+
+vdu_vsync_wait_high:
+        lw      s2, VDU_STATUS(s0)
+        and     s2, s2, s1
+        beqz    s2, vdu_vsync_wait_high
+
+vdu_vsync_wait_low2:
+        lw      s2, VDU_STATUS(s0)
+        and     s2, s2, s1
+        bnez    s2, vdu_vsync_wait_low2
+
+        lw      s3, 12(sp)
+        lw      s2, 8(sp)
+        lw      s1, 4(sp)
+        lw      s0, 0(sp)
+        addi    sp, sp, 16
+        j       trap_return
+
+sys_vdu_getw:
+        addi    sp, sp, -16
+        sw      s0, 0(sp)
+        sw      s1, 4(sp)
+        sw      s2, 8(sp)
+        sw      s3, 12(sp)
+
+        li      s0, VDU_BASE
+        lw      a0, VDU_WIDTH(s0)
+
+        lw      s3, 12(sp)
+        lw      s2, 8(sp)
+        lw      s1, 4(sp)
+        lw      s0, 0(sp)
+        addi    sp, sp, 16
+        j       trap_return
+
+sys_vdu_geth:
+        addi    sp, sp, -16
+        sw      s0, 0(sp)
+        sw      s1, 4(sp)
+        sw      s2, 8(sp)
+        sw      s3, 12(sp)
+
+        li      s0, VDU_BASE
+        lw      a0, VDU_HEIGHT(s0)
+
+        lw      s3, 12(sp)
+        lw      s2, 8(sp)
+        lw      s1, 4(sp)
+        lw      s0, 0(sp)
+        addi    sp, sp, 16
         j       trap_return
 
         # ── keypad raw scan ──────────────────────────────────────────
@@ -585,6 +788,7 @@ delay:
         .balign 4
 tick_count:     .word 0
 timer_reload:   .word 0
+vdu_mode:       .word 0
 debounce_cnt:   .space 16
 stable_state:   .space 16
 fifo_buf:       .space FIFO_SIZE
