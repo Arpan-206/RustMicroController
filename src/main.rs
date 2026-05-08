@@ -2,20 +2,23 @@
 #![no_main]
 
 mod display;
+mod plasma;
 mod syscall;
 
 use core::panic::PanicInfo;
+use plasma::Plasma;
 
 #[no_mangle]
 pub extern "C" fn user_main() {
-    let mut ball = display::AnimSprite::new(&display::BALL, 100, 100, 2, 1, display::BLACK);
+    // Change the argument to switch plasma variant: 0, 1, or 2.
+    let mut plasma = Plasma::new(0);
+    let mut line_buf = [0u8; 640];
 
-    syscall::vdu_init(0);
-    display::fill(display::BLACK);
+    syscall::vdu_init(0); // 8bpp mode, clears framebuffer
 
     loop {
-        ball.update();
-        ball.bounce(syscall::vdu_width() as i32, syscall::vdu_height() as i32);
+        plasma.render(&mut line_buf);
+        plasma.tick();
         syscall::vdu_vsync();
     }
 }

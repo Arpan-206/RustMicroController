@@ -27,7 +27,8 @@
         .equ SYS_VDU_VSYNC,   11
         .equ SYS_VDU_GETW,    12
         .equ SYS_VDU_GETH,    13
-        .equ SYS_MAX,         14
+        .equ SYS_VDU_HLINE_BUF, 14
+        .equ SYS_MAX,         15
         .equ KEY_NONE,       0x00
         .equ DEBOUNCE_MAX,   5
         .equ FIFO_SIZE,      16
@@ -157,20 +158,21 @@ trap_entry:
         jr      t0
 
 sys_table:
-        .word   sys_exit
-        .word   sys_lcd_char
-        .word   sys_lcd_clear
-        .word   sys_btn_read
-        .word   sys_counter_get
-        .word   sys_counter_clr
-        .word   sys_timer_start
-        .word   sys_key_read
-        .word   sys_vdu_init
-        .word   sys_vdu_pixel
-        .word   sys_vdu_fill
-        .word   sys_vdu_vsync
-        .word   sys_vdu_getw
-        .word   sys_vdu_geth
+        .word   sys_exit           # 0
+        .word   sys_lcd_char       # 1
+        .word   sys_lcd_clear      # 2
+        .word   sys_btn_read       # 3
+        .word   sys_counter_get    # 4
+        .word   sys_counter_clr    # 5
+        .word   sys_timer_start    # 6
+        .word   sys_key_read       # 7
+        .word   sys_vdu_init       # 8
+        .word   sys_vdu_pixel      # 9
+        .word   sys_vdu_fill       # 10
+        .word   sys_vdu_vsync      # 11
+        .word   sys_vdu_getw       # 12
+        .word   sys_vdu_geth       # 13
+        .word   sys_vdu_hline_buf  # 14
 
 trap_error:
         li      t1, HALT_PORT
@@ -486,6 +488,45 @@ sys_vdu_geth:
         lw      s1, 4(sp)
         lw      s0, 0(sp)
         addi    sp, sp, 16
+        j       trap_return
+
+        # SYS_VDU_HLINE_BUF (14)
+        # a0 = y coordinate
+        # a1 = pointer to [u8; 640] colour buffer (user address)
+        # a2 = length (must be 640)
+        # Writes buf[0..len] to framebuffer row y in 8bpp mode.
+sys_vdu_hline_buf:
+        addi    sp, sp, -20
+        sw      s0, 0(sp)
+        sw      s1, 4(sp)
+        sw      s2, 8(sp)
+        sw      s3, 12(sp)
+        sw      s4, 16(sp)
+
+        # compute dst = FRAME_BASE + y*640
+        li      s0, 640
+        mul     s1, a0, s0
+        li      s0, FRAME_BASE
+        add     s0, s0, s1      # s0 = dst pointer
+        mv      s1, a1          # s1 = src pointer
+        mv      s2, a2          # s2 = remaining count
+
+hline_buf_loop:
+        beqz    s2, hline_buf_done
+        lbu     s3, 0(s1)
+        sb      s3, 0(s0)
+        addi    s0, s0, 1
+        addi    s1, s1, 1
+        addi    s2, s2, -1
+        j       hline_buf_loop
+
+hline_buf_done:
+        lw      s4, 16(sp)
+        lw      s3, 12(sp)
+        lw      s2, 8(sp)
+        lw      s1, 4(sp)
+        lw      s0, 0(sp)
+        addi    sp, sp, 20
         j       trap_return
 
         # ── keypad raw scan ──────────────────────────────────────────

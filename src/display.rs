@@ -39,6 +39,12 @@ pub fn fill(colour: u8) {
     syscall::vdu_fill(colour as u32);
 }
 
+/// Write a full 640-byte scanline buffer to framebuffer row `y` (8bpp mode).
+#[inline(always)]
+pub fn vdu_hline_buf(y: u32, buf: &[u8; 640]) {
+    syscall::vdu_hline_buf(y, buf);
+}
+
 pub fn hline(x: i32, y: i32, len: i32, colour: u8) {
     if len <= 0 {
         return;

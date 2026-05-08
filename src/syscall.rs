@@ -17,6 +17,7 @@ enum Syscall {
     VduVsync = 11,
     VduGetW = 12,
     VduGetH = 13,
+    VduHlineBuf = 14,
 }
 
 // ── raw ecall primitives ────────────────────────────────────────────
@@ -135,4 +136,9 @@ pub fn vdu_width() -> u32 {
 
 pub fn vdu_height() -> u32 {
     ecall0_ret(Syscall::VduGetH)
+}
+
+/// Write a full 640-byte scanline to framebuffer row `y` (8bpp mode).
+pub fn vdu_hline_buf(y: u32, buf: &[u8; 640]) {
+    ecall3(Syscall::VduHlineBuf, y, buf.as_ptr() as u32, 640);
 }
