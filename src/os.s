@@ -11,8 +11,8 @@
         .equ MPP_MASK,       0x00001800
         .equ CAUSE_ECALL_U,  8
         .equ CAUSE_M_EXT,    0x8000000B
-        .equ OS_STACK_SIZE,  256
-        .equ USER_STACK_SIZE, 1024
+        .equ OS_STACK_SIZE,  768
+        .equ USER_STACK_SIZE, 1536
         .equ SYS_EXIT,        0
         .equ SYS_LCD_CHAR,    1
         .equ SYS_LCD_CLEAR,   2

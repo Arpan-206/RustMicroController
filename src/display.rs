@@ -35,8 +35,16 @@ fn plot(x: i32, y: i32, colour: u8) {
     }
 }
 
+pub fn pixel(x: i32, y: i32, colour: u8) {
+    plot(x, y, colour);
+}
+
 pub fn fill(colour: u8) {
     syscall::vdu_fill(colour as u32);
+}
+
+pub fn clear_screen(colour: u8) {
+    fill(colour);
 }
 
 /// Write a full 640-byte scanline buffer to framebuffer row `y` (8bpp mode).
@@ -70,6 +78,10 @@ pub fn rect(x: i32, y: i32, w: i32, h: i32, colour: u8) {
     for i in 0..h {
         hline(x, y + i, w, colour);
     }
+}
+
+pub fn filled_rect(x: i32, y: i32, w: i32, h: i32, colour: u8) {
+    rect(x, y, w, h, colour);
 }
 
 pub fn line(x0: i32, y0: i32, x1: i32, y1: i32, colour: u8) {
