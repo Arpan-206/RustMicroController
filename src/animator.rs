@@ -1,4 +1,4 @@
-use crate::display::{draw_rect, fill_circle, fill_triangle, Colour};
+use crate::display::{draw_line, draw_rect, fill_circle, fill_triangle, Colour};
 use crate::generated_scene::{self, Kf};
 use crate::{io, syscall};
 
@@ -31,6 +31,8 @@ impl Shape {
             fill_triangle(self.x0, self.y0, self.x1, self.y1, self.x2, self.y2, colour);
         } else if kind == generated_scene::KIND_CIRCLE {
             fill_circle(self.x0, self.y0, self.x1, colour);
+        } else if kind == generated_scene::KIND_LINE {
+            draw_line(self.x0, self.y0, self.x1, self.y1, self.x2, Colour(colour));
         }
     }
 }

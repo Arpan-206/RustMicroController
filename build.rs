@@ -10,6 +10,8 @@ struct Colour {
     b: u8,
 }
 
+type Rgb = Colour;
+
 #[derive(Deserialize)]
 struct SceneFile {
     background: Colour,
@@ -23,6 +25,7 @@ enum Object {
     Rect { id: String, colour: Colour },
     Triangle { id: String, colour: Colour },
     Circle { id: String, colour: Colour },
+    Line { id: String, colour: Rgb },
 }
 
 #[derive(Deserialize)]
@@ -51,6 +54,15 @@ enum Keyframe {
         cx: u16,
         cy: u16,
         r: u16,
+    },
+    AtLine {
+        frame: u32,
+        id: String,
+        x0: u16,
+        y0: u16,
+        x1: u16,
+        y1: u16,
+        thickness: u16,
     },
 }
 
@@ -106,6 +118,7 @@ fn generate_scene() {
     output.push_str("pub const KIND_RECT: u8 = 0;\n");
     output.push_str("pub const KIND_TRIANGLE: u8 = 1;\n");
     output.push_str("pub const KIND_CIRCLE: u8 = 2;\n\n");
+    output.push_str("pub const KIND_LINE: u8 = 3;\n\n");
     output.push_str("#[derive(Copy, Clone)]\n");
     output.push_str("pub struct Obj {\n");
     output.push_str("    pub kind: u8,\n");
@@ -252,6 +265,26 @@ fn keyframe_for_object(object: &Object, keyframe: &Keyframe) -> Option<Generated
             x2: 0,
             y2: 0,
         }),
+        (
+            Object::Line { id, .. },
+            Keyframe::AtLine {
+                frame,
+                id: key_id,
+                x0,
+                y0,
+                x1,
+                y1,
+                thickness,
+            },
+        ) if key_id == id => Some(GeneratedKf {
+            frame: frame_to_u16(*frame),
+            x0: *x0,
+            y0: *y0,
+            x1: *x1,
+            y1: *y1,
+            x2: *thickness,
+            y2: 0,
+        }),
         _ => None,
     }
 }
@@ -260,7 +293,8 @@ fn keyframe_matches_object(object: &Object, keyframe: &Keyframe) -> bool {
     match (object, keyframe) {
         (Object::Rect { id, .. }, Keyframe::At { id: key_id, .. })
         | (Object::Triangle { id, .. }, Keyframe::AtTriangle { id: key_id, .. })
-        | (Object::Circle { id, .. }, Keyframe::AtCircle { id: key_id, .. }) => key_id == id,
+        | (Object::Circle { id, .. }, Keyframe::AtCircle { id: key_id, .. })
+        | (Object::Line { id, .. }, Keyframe::AtLine { id: key_id, .. }) => key_id == id,
         _ => false,
     }
 }
@@ -269,13 +303,17 @@ fn keyframe_id(keyframe: &Keyframe) -> &str {
     match keyframe {
         Keyframe::At { id, .. }
         | Keyframe::AtTriangle { id, .. }
-        | Keyframe::AtCircle { id, .. } => id,
+        | Keyframe::AtCircle { id, .. }
+        | Keyframe::AtLine { id, .. } => id,
     }
 }
 
 fn object_id(object: &Object) -> &str {
     match object {
-        Object::Rect { id, .. } | Object::Triangle { id, .. } | Object::Circle { id, .. } => id,
+        Object::Rect { id, .. }
+        | Object::Triangle { id, .. }
+        | Object::Circle { id, .. }
+        | Object::Line { id, .. } => id,
     }
 }
 
@@ -283,7 +321,8 @@ fn object_colour(object: &Object) -> &Colour {
     match object {
         Object::Rect { colour, .. }
         | Object::Triangle { colour, .. }
-        | Object::Circle { colour, .. } => colour,
+        | Object::Circle { colour, .. }
+        | Object::Line { colour, .. } => colour,
     }
 }
 
@@ -292,7 +331,15 @@ fn object_kind_name(object: &Object) -> &'static str {
         Object::Rect { .. } => "KIND_RECT",
         Object::Triangle { .. } => "KIND_TRIANGLE",
         Object::Circle { .. } => "KIND_CIRCLE",
+        Object::Line { .. } => "KIND_LINE",
     }
+}
+
+fn frame_to_u16(frame: u32) -> u16 {
+    if frame > u16::MAX as u32 {
+        panic!("line keyframe frame out of range");
+    }
+    frame as u16
 }
 
 fn pack_colour(colour: &Colour) -> u8 {

@@ -2,34 +2,45 @@
     background: (r: 0, g: 0, b: 0),
     fps: 30,
     objects: [
-        Rect(id: "sq", colour: (r: 7, g: 7, b: 3)),
-        Triangle(id: "tri", colour: (r: 7, g: 0, b: 2)),
-        Circle(id: "sun", colour: (r: 0, g: 6, b: 3)),
+        Rect(id: "sky",    colour: (r: 3, g: 0, b: 2)),
+        Rect(id: "ground", colour: (r: 0, g: 2, b: 1)),
+        Circle(id: "sun",  colour: (r: 7, g: 5, b: 0)),
+        Triangle(id: "ml", colour: (r: 1, g: 0, b: 1)),
+        Triangle(id: "mr", colour: (r: 1, g: 0, b: 1)),
+        Line(id: "gh0",    colour: (r: 0, g: 7, b: 3)),
+        Line(id: "gh1",    colour: (r: 0, g: 7, b: 3)),
+        Line(id: "gv0",    colour: (r: 0, g: 7, b: 3)),
+        Line(id: "gv1",    colour: (r: 0, g: 7, b: 3)),
+        Line(id: "gv2",    colour: (r: 0, g: 7, b: 3)),
     ],
     keyframes: [
-        At(frame: 0, id: "sq", x0: 10, y0: 235, x1: 20, y1: 245),
-        At(frame: 299, id: "sq", x0: 110, y0: 408, x1: 120, y1: 418),
-        AtTriangle(
-            frame: 0,
-            id: "tri",
-            x0: 500,
-            y0: 80,
-            x1: 540,
-            y1: 120,
-            x2: 460,
-            y2: 125,
-        ),
-        AtTriangle(
-            frame: 299,
-            id: "tri",
-            x0: 390,
-            y0: 120,
-            x1: 430,
-            y1: 165,
-            x2: 350,
-            y2: 165,
-        ),
-        AtCircle(frame: 0, id: "sun", cx: 150, cy: 90, r: 18),
-        AtCircle(frame: 299, id: "sun", cx: 520, cy: 330, r: 34),
+        At(frame: 0,   id: "sky",    x0: 0, y0: 0,   x1: 639, y1: 270),
+        At(frame: 299, id: "sky",    x0: 0, y0: 0,   x1: 639, y1: 270),
+
+        At(frame: 0,   id: "ground", x0: 0, y0: 270, x1: 639, y1: 479),
+        At(frame: 299, id: "ground", x0: 0, y0: 270, x1: 639, y1: 479),
+
+        // Sun rises and grows
+        AtCircle(frame: 0,   id: "sun", cx: 320, cy: 360, r: 30),
+        AtCircle(frame: 299, id: "sun", cx: 320, cy: 270, r: 90),
+
+        AtTriangle(frame: 0,   id: "ml", x0:   0, y0: 270, x1: 180, y1: 270, x2:  80, y2: 170),
+        AtTriangle(frame: 299, id: "ml", x0:   0, y0: 270, x1: 180, y1: 270, x2:  80, y2: 170),
+        AtTriangle(frame: 0,   id: "mr", x0: 460, y0: 270, x1: 639, y1: 270, x2: 550, y2: 155),
+        AtTriangle(frame: 299, id: "mr", x0: 460, y0: 270, x1: 639, y1: 270, x2: 550, y2: 155),
+
+        // Two ground grid horizontals
+        AtLine(frame: 0,   id: "gh0", x0: 0, y0: 340, x1: 639, y1: 340, thickness: 1),
+        AtLine(frame: 299, id: "gh0", x0: 0, y0: 340, x1: 639, y1: 340, thickness: 1),
+        AtLine(frame: 0,   id: "gh1", x0: 0, y0: 410, x1: 639, y1: 410, thickness: 1),
+        AtLine(frame: 299, id: "gh1", x0: 0, y0: 410, x1: 639, y1: 410, thickness: 1),
+
+        // Three converging verticals
+        AtLine(frame: 0,   id: "gv0", x0: 320, y0: 270, x1: 160, y1: 479, thickness: 1),
+        AtLine(frame: 299, id: "gv0", x0: 320, y0: 270, x1: 160, y1: 479, thickness: 1),
+        AtLine(frame: 0,   id: "gv1", x0: 320, y0: 270, x1: 320, y1: 479, thickness: 1),
+        AtLine(frame: 299, id: "gv1", x0: 320, y0: 270, x1: 320, y1: 479, thickness: 1),
+        AtLine(frame: 0,   id: "gv2", x0: 320, y0: 270, x1: 480, y1: 479, thickness: 1),
+        AtLine(frame: 299, id: "gv2", x0: 320, y0: 270, x1: 480, y1: 479, thickness: 1),
     ],
 )
