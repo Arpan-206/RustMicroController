@@ -2,45 +2,111 @@
     background: (r: 0, g: 0, b: 0),
     fps: 30,
     objects: [
-        Rect(id: "sky",    colour: (r: 3, g: 0, b: 2)),
+        // Sky bands
+        Rect(id: "sky0",  colour: (r: 0, g: 0, b: 1)),
+        Rect(id: "sky1",  colour: (r: 1, g: 0, b: 1)),
+        Rect(id: "sky2",  colour: (r: 2, g: 0, b: 2)),
+        Rect(id: "sky3",  colour: (r: 4, g: 1, b: 2)),
+
+        // Ground
         Rect(id: "ground", colour: (r: 0, g: 2, b: 1)),
+
+        // Sun
         Circle(id: "sun",  colour: (r: 7, g: 5, b: 0)),
-        Triangle(id: "ml", colour: (r: 1, g: 0, b: 1)),
-        Triangle(id: "mr", colour: (r: 1, g: 0, b: 1)),
-        Line(id: "gh0",    colour: (r: 0, g: 7, b: 3)),
-        Line(id: "gh1",    colour: (r: 0, g: 7, b: 3)),
-        Line(id: "gv0",    colour: (r: 0, g: 7, b: 3)),
-        Line(id: "gv1",    colour: (r: 0, g: 7, b: 3)),
-        Line(id: "gv2",    colour: (r: 0, g: 7, b: 3)),
+
+        // Sun scan lines
+        Line(id: "sl0", colour: (r: 0, g: 0, b: 0)),
+        Line(id: "sl1", colour: (r: 0, g: 0, b: 0)),
+        Line(id: "sl2", colour: (r: 0, g: 0, b: 0)),
+        Line(id: "sl3", colour: (r: 0, g: 0, b: 0)),
+
+        // Mountains
+        Triangle(id: "ml0", colour: (r: 1, g: 0, b: 2)),
+        Triangle(id: "ml1", colour: (r: 0, g: 0, b: 2)),
+        Triangle(id: "mr0", colour: (r: 1, g: 0, b: 2)),
+        Triangle(id: "mr1", colour: (r: 0, g: 0, b: 2)),
+
+        // Grid horizontals
+        Line(id: "gh0", colour: (r: 0, g: 7, b: 3)),
+        Line(id: "gh1", colour: (r: 0, g: 7, b: 3)),
+        Line(id: "gh2", colour: (r: 0, g: 7, b: 3)),
+        Line(id: "gh3", colour: (r: 0, g: 7, b: 3)),
+
+        // Grid verticals
+        Line(id: "gv0", colour: (r: 0, g: 7, b: 3)),
+        Line(id: "gv1", colour: (r: 0, g: 7, b: 3)),
+        Line(id: "gv2", colour: (r: 0, g: 7, b: 3)),
+        Line(id: "gv3", colour: (r: 0, g: 7, b: 3)),
+        Line(id: "gv4", colour: (r: 0, g: 7, b: 3)),
+        Line(id: "gv5", colour: (r: 0, g: 7, b: 3)),
+
+        // Planet + ring
+        Circle(id: "planet", colour: (r: 7, g: 3, b: 0)),
+        Circle(id: "ring",   colour: (r: 7, g: 7, b: 3)),
+
+        // Stars
+        Circle(id: "st0", colour: (r: 7, g: 7, b: 3)),
+        Circle(id: "st1", colour: (r: 7, g: 7, b: 3)),
+        Circle(id: "st2", colour: (r: 7, g: 7, b: 3)),
+        Circle(id: "st3", colour: (r: 7, g: 7, b: 3)),
+        Circle(id: "st4", colour: (r: 7, g: 7, b: 3)),
+        Circle(id: "st5", colour: (r: 7, g: 7, b: 3)),
+        Circle(id: "st6", colour: (r: 7, g: 7, b: 3)),
+        Circle(id: "st7", colour: (r: 7, g: 7, b: 3)),
     ],
     keyframes: [
-        At(frame: 0,   id: "sky",    x0: 0, y0: 0,   x1: 639, y1: 270),
-        At(frame: 299, id: "sky",    x0: 0, y0: 0,   x1: 639, y1: 270),
+        // Sky bands
+        At(frame: 0, id: "sky0", x0:   0, y0:   0, x1: 639, y1:  60),
+        At(frame: 0, id: "sky1", x0:   0, y0:  60, x1: 639, y1: 140),
+        At(frame: 0, id: "sky2", x0:   0, y0: 140, x1: 639, y1: 210),
+        At(frame: 0, id: "sky3", x0:   0, y0: 210, x1: 639, y1: 270),
 
-        At(frame: 0,   id: "ground", x0: 0, y0: 270, x1: 639, y1: 479),
-        At(frame: 299, id: "ground", x0: 0, y0: 270, x1: 639, y1: 479),
+        // Ground
+        At(frame: 0, id: "ground", x0: 0, y0: 270, x1: 639, y1: 479),
 
-        // Sun rises and grows
-        AtCircle(frame: 0,   id: "sun", cx: 320, cy: 360, r: 30),
-        AtCircle(frame: 299, id: "sun", cx: 320, cy: 270, r: 90),
+        // Sun sitting on horizon
+        AtCircle(frame: 0, id: "sun", cx: 320, cy: 270, r: 85),
 
-        AtTriangle(frame: 0,   id: "ml", x0:   0, y0: 270, x1: 180, y1: 270, x2:  80, y2: 170),
-        AtTriangle(frame: 299, id: "ml", x0:   0, y0: 270, x1: 180, y1: 270, x2:  80, y2: 170),
-        AtTriangle(frame: 0,   id: "mr", x0: 460, y0: 270, x1: 639, y1: 270, x2: 550, y2: 155),
-        AtTriangle(frame: 299, id: "mr", x0: 460, y0: 270, x1: 639, y1: 270, x2: 550, y2: 155),
+        // Sun scan lines
+        AtLine(frame: 0, id: "sl0", x0: 240, y0: 290, x1: 400, y1: 290, thickness: 4),
+        AtLine(frame: 0, id: "sl1", x0: 235, y0: 312, x1: 405, y1: 312, thickness: 5),
+        AtLine(frame: 0, id: "sl2", x0: 228, y0: 336, x1: 412, y1: 336, thickness: 6),
+        AtLine(frame: 0, id: "sl3", x0: 220, y0: 352, x1: 420, y1: 352, thickness: 4),
 
-        // Two ground grid horizontals
-        AtLine(frame: 0,   id: "gh0", x0: 0, y0: 340, x1: 639, y1: 340, thickness: 1),
-        AtLine(frame: 299, id: "gh0", x0: 0, y0: 340, x1: 639, y1: 340, thickness: 1),
-        AtLine(frame: 0,   id: "gh1", x0: 0, y0: 410, x1: 639, y1: 410, thickness: 1),
-        AtLine(frame: 299, id: "gh1", x0: 0, y0: 410, x1: 639, y1: 410, thickness: 1),
+        // Left mountains — layered depth
+        AtTriangle(frame: 0, id: "ml0", x0:   0, y0: 270, x1: 220, y1: 270, x2: 100, y2: 150),
+        AtTriangle(frame: 0, id: "ml1", x0:  30, y0: 270, x1: 170, y1: 270, x2:  90, y2: 190),
 
-        // Three converging verticals
-        AtLine(frame: 0,   id: "gv0", x0: 320, y0: 270, x1: 160, y1: 479, thickness: 1),
-        AtLine(frame: 299, id: "gv0", x0: 320, y0: 270, x1: 160, y1: 479, thickness: 1),
-        AtLine(frame: 0,   id: "gv1", x0: 320, y0: 270, x1: 320, y1: 479, thickness: 1),
-        AtLine(frame: 299, id: "gv1", x0: 320, y0: 270, x1: 320, y1: 479, thickness: 1),
-        AtLine(frame: 0,   id: "gv2", x0: 320, y0: 270, x1: 480, y1: 479, thickness: 1),
-        AtLine(frame: 299, id: "gv2", x0: 320, y0: 270, x1: 480, y1: 479, thickness: 1),
+        // Right mountains — layered depth
+        AtTriangle(frame: 0, id: "mr0", x0: 420, y0: 270, x1: 639, y1: 270, x2: 540, y2: 140),
+        AtTriangle(frame: 0, id: "mr1", x0: 460, y0: 270, x1: 620, y1: 270, x2: 545, y2: 185),
+
+        // Grid horizontals
+        AtLine(frame: 0, id: "gh0", x0: 0, y0: 305, x1: 639, y1: 305, thickness: 1),
+        AtLine(frame: 0, id: "gh1", x0: 0, y0: 345, x1: 639, y1: 345, thickness: 1),
+        AtLine(frame: 0, id: "gh2", x0: 0, y0: 395, x1: 639, y1: 395, thickness: 1),
+        AtLine(frame: 0, id: "gh3", x0: 0, y0: 450, x1: 639, y1: 450, thickness: 1),
+
+        // Grid verticals converging to (320, 270)
+        AtLine(frame: 0, id: "gv0", x0: 320, y0: 270, x1:   0, y1: 479, thickness: 1),
+        AtLine(frame: 0, id: "gv1", x0: 320, y0: 270, x1: 110, y1: 479, thickness: 1),
+        AtLine(frame: 0, id: "gv2", x0: 320, y0: 270, x1: 220, y1: 479, thickness: 1),
+        AtLine(frame: 0, id: "gv3", x0: 320, y0: 270, x1: 420, y1: 479, thickness: 1),
+        AtLine(frame: 0, id: "gv4", x0: 320, y0: 270, x1: 530, y1: 479, thickness: 1),
+        AtLine(frame: 0, id: "gv5", x0: 320, y0: 270, x1: 639, y1: 479, thickness: 1),
+
+        // Planet
+        AtCircle(frame: 0, id: "planet", cx: 530, cy: 75, r: 32),
+        AtCircle(frame: 0, id: "ring",   cx: 530, cy: 75, r: 32),
+
+        // Stars
+        AtCircle(frame: 0, id: "st0", cx:  35, cy:  25, r: 2),
+        AtCircle(frame: 0, id: "st1", cx: 110, cy:  50, r: 2),
+        AtCircle(frame: 0, id: "st2", cx: 195, cy:  18, r: 2),
+        AtCircle(frame: 0, id: "st3", cx: 275, cy:  65, r: 2),
+        AtCircle(frame: 0, id: "st4", cx: 390, cy:  35, r: 2),
+        AtCircle(frame: 0, id: "st5", cx: 455, cy:  80, r: 2),
+        AtCircle(frame: 0, id: "st6", cx: 580, cy:  30, r: 2),
+        AtCircle(frame: 0, id: "st7", cx:  80, cy: 115, r: 2),
     ],
 )
