@@ -1,5 +1,5 @@
 0x0 : 00001117 ; auipc	sp,0x1
-0x4 : cb810113 ; addi	sp,sp,-840 # cb8 <_bss_end>
+0x4 : db810113 ; addi	sp,sp,-584 # db8 <_bss_end>
 0x8 : 34011073 ; csrw	mscratch,sp
 0xc : 00000297 ; auipc	t0,0x0
 0x10 : 09428293 ; addi	t0,t0,148 # a0 <trap_entry>
@@ -35,7 +35,7 @@
 0x88 : 80028293 ; addi	t0,t0,-2048 # 1800 <MPP_MASK>
 0x8c : 3002b073 ; csrc	mstatus,t0
 0x90 : 00040297 ; auipc	t0,0x40
-0x94 : 57028293 ; addi	t0,t0,1392 # 40600 <USER_CODE>
+0x94 : 77028293 ; addi	t0,t0,1904 # 40800 <USER_CODE>
 0x98 : 34129073 ; csrw	mepc,t0
 0x9c : 30200073 ; mret
 0xa0 : 34011173 ; csrrw	sp,mscratch,sp
@@ -987,363 +987,1111 @@
 0x405f4 : 00 00 00 00
 0x405f8 : 00 00 00 00
 0x405fc : 00 00 00 00
-0x40600 : 00000117 ; auipc	sp,0x0
-0x40604 : 00010113 ; mv	sp,sp
-0x40608 : 00000097 ; auipc	ra,0x0
-0x4060c : 038080e7 ; jalr	56(ra) # 40640 <user_main>
-0x40610 : 00000893 ; li	a7,0
-0x40614 : 00000073 ; ecall
-0x40618 : 0000006f ; j	40618 <USER_CODE+0x18>
-0x4061c : 00050893 ; mv	a7,a0
-0x40620 : 00000513 ; li	a0,0
-0x40624 : 00000073 ; ecall
-0x40628 : 00008067 ; ret
-0x4062c : 00000317 ; auipc	t1,0x0
-0x40630 : ff030067 ; jr	-16(t1) # 4061c <_ZN9rv32_bare7syscall10ecall1_ret17ha281bc63eca30e89E>
-0x40634 : 00900893 ; li	a7,9
-0x40638 : 00000073 ; ecall
-0x4063c : 00008067 ; ret
-0x40640 : fb010113 ; addi	sp,sp,-80 # 405b0 <HALT_PORT+0x2feb0>
-0x40644 : 04112623 ; sw	ra,76(sp)
-0x40648 : 04812423 ; sw	s0,72(sp)
-0x4064c : 04912223 ; sw	s1,68(sp)
-0x40650 : 05212023 ; sw	s2,64(sp)
-0x40654 : 03312e23 ; sw	s3,60(sp)
-0x40658 : 03412c23 ; sw	s4,56(sp)
-0x4065c : 03512a23 ; sw	s5,52(sp)
-0x40660 : 03612823 ; sw	s6,48(sp)
-0x40664 : 03712623 ; sw	s7,44(sp)
-0x40668 : 03812423 ; sw	s8,40(sp)
-0x4066c : 03912223 ; sw	s9,36(sp)
-0x40670 : 03a12023 ; sw	s10,32(sp)
-0x40674 : 01b12e23 ; sw	s11,28(sp)
-0x40678 : 00800513 ; li	a0,8
-0x4067c : 00000097 ; auipc	ra,0x0
-0x40680 : fb0080e7 ; jalr	-80(ra) # 4062c <_ZN9rv32_bare7syscall6ecall117hc80cb022fd4900e1E>
-0x40684 : 00a00513 ; li	a0,10
-0x40688 : 00000097 ; auipc	ra,0x0
-0x4068c : fa4080e7 ; jalr	-92(ra) # 4062c <_ZN9rv32_bare7syscall6ecall117hc80cb022fd4900e1E>
-0x40690 : 00000c13 ; li	s8,0
-0x40694 : 00041cb7 ; lui	s9,0x41
-0x40698 : b58c8c93 ; addi	s9,s9,-1192 # 40b58 <user_main+0x518>
-0x4069c : 00200413 ; li	s0,2
-0x406a0 : 00010537 ; lui	a0,0x10
-0x406a4 : 1df00d93 ; li	s11,479
-0x406a8 : 27f00d13 ; li	s10,639
-0x406ac : 04500493 ; li	s1,69
-0x406b0 : fff50913 ; addi	s2,a0,-1 # ffff <PIO_DIR_VAL+0xf00>
-0x406b4 : 01212423 ; sw	s2,8(sp)
-0x406b8 : 018c8633 ; add	a2,s9,s8
-0x406bc : 00064503 ; lbu	a0,0(a2)
-0x406c0 : 14a44463 ; blt	s0,a0,40808 <user_main+0x1c8>
-0x406c4 : 00100593 ; li	a1,1
-0x406c8 : 34b50263 ; beq	a0,a1,40a0c <user_main+0x3cc>
-0x406cc : 48851463 ; bne	a0,s0,40b54 <user_main+0x514>
-0x406d0 : 03b00513 ; li	a0,59
-0x406d4 : 49856063 ; bltu	a0,s8,40b54 <user_main+0x514>
-0x406d8 : 00264503 ; lbu	a0,2(a2)
-0x406dc : 00164583 ; lbu	a1,1(a2)
-0x406e0 : 00851513 ; slli	a0,a0,0x8
-0x406e4 : 00b56533 ; or	a0,a0,a1
-0x406e8 : 01257533 ; and	a0,a0,s2
-0x406ec : 27f00693 ; li	a3,639
-0x406f0 : 00050413 ; mv	s0,a0
-0x406f4 : 00d56463 ; bltu	a0,a3,406fc <user_main+0xbc>
-0x406f8 : 27f00413 ; li	s0,639
-0x406fc : 00464583 ; lbu	a1,4(a2)
-0x40700 : 00364703 ; lbu	a4,3(a2)
-0x40704 : 00859593 ; slli	a1,a1,0x8
-0x40708 : 00e5e5b3 ; or	a1,a1,a4
-0x4070c : 0125f5b3 ; and	a1,a1,s2
-0x40710 : 1df00713 ; li	a4,479
-0x40714 : 00058493 ; mv	s1,a1
-0x40718 : 00e5e463 ; bltu	a1,a4,40720 <user_main+0xe0>
-0x4071c : 1df00493 ; li	s1,479
-0x40720 : 00664783 ; lbu	a5,6(a2)
-0x40724 : 00564803 ; lbu	a6,5(a2)
-0x40728 : 00879793 ; slli	a5,a5,0x8
-0x4072c : 0107e7b3 ; or	a5,a5,a6
-0x40730 : 0127f9b3 ; and	s3,a5,s2
-0x40734 : 00d9e463 ; bltu	s3,a3,4073c <user_main+0xfc>
-0x40738 : 27f00993 ; li	s3,639
-0x4073c : 00864683 ; lbu	a3,8(a2)
-0x40740 : 00764783 ; lbu	a5,7(a2)
-0x40744 : 00869693 ; slli	a3,a3,0x8
-0x40748 : 00f6e6b3 ; or	a3,a3,a5
-0x4074c : 0126fa33 ; and	s4,a3,s2
-0x40750 : 00ea6463 ; bltu	s4,a4,40758 <user_main+0x118>
-0x40754 : 1df00a13 ; li	s4,479
-0x40758 : 00ac0c13 ; addi	s8,s8,10
-0x4075c : 01812623 ; sw	s8,12(sp)
-0x40760 : 00964603 ; lbu	a2,9(a2)
-0x40764 : 00c12c23 ; sw	a2,24(sp)
-0x40768 : 40898633 ; sub	a2,s3,s0
-0x4076c : 01353533 ; sltu	a0,a0,s3
-0x40770 : 409a06b3 ; sub	a3,s4,s1
-0x40774 : 0145b5b3 ; sltu	a1,a1,s4
-0x40778 : 41f65713 ; srai	a4,a2,0x1f
-0x4077c : fff50513 ; addi	a0,a0,-1
-0x40780 : 41f6d793 ; srai	a5,a3,0x1f
-0x40784 : fff58593 ; addi	a1,a1,-1
-0x40788 : 00e64633 ; xor	a2,a2,a4
-0x4078c : 00156a93 ; ori	s5,a0,1
-0x40790 : 00f6c6b3 ; xor	a3,a3,a5
-0x40794 : 0015eb13 ; ori	s6,a1,1
-0x40798 : 40e60bb3 ; sub	s7,a2,a4
-0x4079c : 40f68c33 ; sub	s8,a3,a5
-0x407a0 : 41800cb3 ; neg	s9,s8
-0x407a4 : 418b8933 ; sub	s2,s7,s8
-0x407a8 : 009dee63 ; bltu	s11,s1,407c4 <user_main+0x184>
-0x407ac : 008d6c63 ; bltu	s10,s0,407c4 <user_main+0x184>
-0x407b0 : 00040513 ; mv	a0,s0
-0x407b4 : 00048593 ; mv	a1,s1
-0x407b8 : 01812603 ; lw	a2,24(sp)
-0x407bc : 00000097 ; auipc	ra,0x0
-0x407c0 : e78080e7 ; jalr	-392(ra) # 40634 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
-0x407c4 : 01449463 ; bne	s1,s4,407cc <user_main+0x18c>
-0x407c8 : 23340a63 ; beq	s0,s3,409fc <user_main+0x3bc>
-0x407cc : 00191513 ; slli	a0,s2,0x1
-0x407d0 : 019525b3 ; slt	a1,a0,s9
-0x407d4 : 00aba533 ; slt	a0,s7,a0
-0x407d8 : fff58593 ; addi	a1,a1,-1
-0x407dc : fff50513 ; addi	a0,a0,-1
-0x407e0 : 0185f633 ; and	a2,a1,s8
-0x407e4 : 0155f5b3 ; and	a1,a1,s5
-0x407e8 : 40c90933 ; sub	s2,s2,a2
-0x407ec : 01757633 ; and	a2,a0,s7
-0x407f0 : 01657533 ; and	a0,a0,s6
-0x407f4 : 00858433 ; add	s0,a1,s0
-0x407f8 : 00c90933 ; add	s2,s2,a2
-0x407fc : 009504b3 ; add	s1,a0,s1
-0x40800 : fa9df6e3 ; bgeu	s11,s1,407ac <user_main+0x16c>
-0x40804 : fc1ff06f ; j	407c4 <user_main+0x184>
-0x40808 : 00300593 ; li	a1,3
-0x4080c : 24b50e63 ; beq	a0,a1,40a68 <user_main+0x428>
-0x40810 : 00400593 ; li	a1,4
-0x40814 : 34b51063 ; bne	a0,a1,40b54 <user_main+0x514>
-0x40818 : 03d00513 ; li	a0,61
-0x4081c : 33856c63 ; bltu	a0,s8,40b54 <user_main+0x514>
-0x40820 : 00264503 ; lbu	a0,2(a2)
-0x40824 : 00164583 ; lbu	a1,1(a2)
-0x40828 : 00851513 ; slli	a0,a0,0x8
-0x4082c : 00b56533 ; or	a0,a0,a1
-0x40830 : 012575b3 ; and	a1,a0,s2
-0x40834 : 27f00513 ; li	a0,639
-0x40838 : 00b12a23 ; sw	a1,20(sp)
-0x4083c : 00a5e663 ; bltu	a1,a0,40848 <user_main+0x208>
-0x40840 : 27f00513 ; li	a0,639
-0x40844 : 00a12a23 ; sw	a0,20(sp)
-0x40848 : 00464503 ; lbu	a0,4(a2)
-0x4084c : 00364583 ; lbu	a1,3(a2)
-0x40850 : 00851513 ; slli	a0,a0,0x8
-0x40854 : 00b56533 ; or	a0,a0,a1
-0x40858 : 01257b33 ; and	s6,a0,s2
-0x4085c : 1df00513 ; li	a0,479
-0x40860 : 00ab6463 ; bltu	s6,a0,40868 <user_main+0x228>
-0x40864 : 1df00b13 ; li	s6,479
-0x40868 : 00664503 ; lbu	a0,6(a2)
-0x4086c : 00564583 ; lbu	a1,5(a2)
-0x40870 : 00851513 ; slli	a0,a0,0x8
-0x40874 : 00b56533 ; or	a0,a0,a1
-0x40878 : 01051513 ; slli	a0,a0,0x10
-0x4087c : 008c0c13 ; addi	s8,s8,8
-0x40880 : 2c050863 ; beqz	a0,40b50 <user_main+0x510>
-0x40884 : 01812623 ; sw	s8,12(sp)
-0x40888 : 01055993 ; srli	s3,a0,0x10
-0x4088c : 1df00513 ; li	a0,479
-0x40890 : 00a9e463 ; bltu	s3,a0,40898 <user_main+0x258>
-0x40894 : 1df00993 ; li	s3,479
-0x40898 : 00000a13 ; li	s4,0
-0x4089c : 00764503 ; lbu	a0,7(a2)
-0x408a0 : 00a12c23 ; sw	a0,24(sp)
-0x408a4 : 00100513 ; li	a0,1
-0x408a8 : 41350c33 ; sub	s8,a0,s3
-0x408ac : 00300413 ; li	s0,3
-0x408b0 : 01412483 ; lw	s1,20(sp)
-0x408b4 : 000b0913 ; mv	s2,s6
-0x408b8 : 01612823 ; sw	s6,16(sp)
-0x408bc : 01412c83 ; lw	s9,20(sp)
-0x408c0 : 01998cb3 ; add	s9,s3,s9
-0x408c4 : 014b0ab3 ; add	s5,s6,s4
-0x408c8 : 019d6e63 ; bltu	s10,s9,408e4 <user_main+0x2a4>
-0x408cc : 015dec63 ; bltu	s11,s5,408e4 <user_main+0x2a4>
-0x408d0 : 000c8513 ; mv	a0,s9
-0x408d4 : 000a8593 ; mv	a1,s5
-0x408d8 : 01812603 ; lw	a2,24(sp)
-0x408dc : 00000097 ; auipc	ra,0x0
-0x408e0 : d58080e7 ; jalr	-680(ra) # 40634 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
-0x408e4 : 01698b33 ; add	s6,s3,s6
-0x408e8 : 01412b83 ; lw	s7,20(sp)
-0x408ec : 014b8bb3 ; add	s7,s7,s4
-0x408f0 : 016dee63 ; bltu	s11,s6,4090c <user_main+0x2cc>
-0x408f4 : 017d6c63 ; bltu	s10,s7,4090c <user_main+0x2cc>
-0x408f8 : 000b8513 ; mv	a0,s7
-0x408fc : 000b0593 ; mv	a1,s6
-0x40900 : 01812603 ; lw	a2,24(sp)
-0x40904 : 00000097 ; auipc	ra,0x0
-0x40908 : d30080e7 ; jalr	-720(ra) # 40634 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
-0x4090c : 016dee63 ; bltu	s11,s6,40928 <user_main+0x2e8>
-0x40910 : 009d6c63 ; bltu	s10,s1,40928 <user_main+0x2e8>
-0x40914 : 00048513 ; mv	a0,s1
-0x40918 : 000b0593 ; mv	a1,s6
-0x4091c : 01812603 ; lw	a2,24(sp)
-0x40920 : 00000097 ; auipc	ra,0x0
-0x40924 : d14080e7 ; jalr	-748(ra) # 40634 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
-0x40928 : 01412503 ; lw	a0,20(sp)
-0x4092c : 41350b33 ; sub	s6,a0,s3
-0x40930 : 016d6e63 ; bltu	s10,s6,4094c <user_main+0x30c>
-0x40934 : 015dec63 ; bltu	s11,s5,4094c <user_main+0x30c>
-0x40938 : 000b0513 ; mv	a0,s6
-0x4093c : 000a8593 ; mv	a1,s5
-0x40940 : 01812603 ; lw	a2,24(sp)
-0x40944 : 00000097 ; auipc	ra,0x0
-0x40948 : cf0080e7 ; jalr	-784(ra) # 40634 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
-0x4094c : 016d6e63 ; bltu	s10,s6,40968 <user_main+0x328>
-0x40950 : 012dec63 ; bltu	s11,s2,40968 <user_main+0x328>
-0x40954 : 000b0513 ; mv	a0,s6
-0x40958 : 00090593 ; mv	a1,s2
-0x4095c : 01812603 ; lw	a2,24(sp)
-0x40960 : 00000097 ; auipc	ra,0x0
-0x40964 : cd4080e7 ; jalr	-812(ra) # 40634 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
-0x40968 : 01012b03 ; lw	s6,16(sp)
-0x4096c : 413b0ab3 ; sub	s5,s6,s3
-0x40970 : 015dee63 ; bltu	s11,s5,4098c <user_main+0x34c>
-0x40974 : 009d6c63 ; bltu	s10,s1,4098c <user_main+0x34c>
-0x40978 : 00048513 ; mv	a0,s1
-0x4097c : 000a8593 ; mv	a1,s5
-0x40980 : 01812603 ; lw	a2,24(sp)
-0x40984 : 00000097 ; auipc	ra,0x0
-0x40988 : cb0080e7 ; jalr	-848(ra) # 40634 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
-0x4098c : 015dee63 ; bltu	s11,s5,409a8 <user_main+0x368>
-0x40990 : 017d6c63 ; bltu	s10,s7,409a8 <user_main+0x368>
-0x40994 : 000b8513 ; mv	a0,s7
-0x40998 : 000a8593 ; mv	a1,s5
-0x4099c : 01812603 ; lw	a2,24(sp)
-0x409a0 : 00000097 ; auipc	ra,0x0
-0x409a4 : c94080e7 ; jalr	-876(ra) # 40634 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
-0x409a8 : 019d6e63 ; bltu	s10,s9,409c4 <user_main+0x384>
-0x409ac : 012dec63 ; bltu	s11,s2,409c4 <user_main+0x384>
-0x409b0 : 000c8513 ; mv	a0,s9
-0x409b4 : 00090593 ; mv	a1,s2
-0x409b8 : 01812603 ; lw	a2,24(sp)
-0x409bc : 00000097 ; auipc	ra,0x0
-0x409c0 : c78080e7 ; jalr	-904(ra) # 40634 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
-0x409c4 : fff98513 ; addi	a0,s3,-1
-0x409c8 : 000c4463 ; bltz	s8,409d0 <user_main+0x390>
-0x409cc : 00050993 ; mv	s3,a0
-0x409d0 : 001a0a13 ; addi	s4,s4,1
-0x409d4 : 000c2593 ; slti	a1,s8,0
-0x409d8 : 01840c33 ; add	s8,s0,s8
-0x409dc : 00240413 ; addi	s0,s0,2
-0x409e0 : fff90913 ; addi	s2,s2,-1
-0x409e4 : fff58593 ; addi	a1,a1,-1
-0x409e8 : 00a5f533 ; and	a0,a1,a0
-0x409ec : 00151513 ; slli	a0,a0,0x1
-0x409f0 : 40ac0c33 ; sub	s8,s8,a0
-0x409f4 : fff48493 ; addi	s1,s1,-1
-0x409f8 : ed49d2e3 ; bge	s3,s4,408bc <user_main+0x27c>
-0x409fc : 00c12c03 ; lw	s8,12(sp)
-0x40a00 : 00041cb7 ; lui	s9,0x41
-0x40a04 : b58c8c93 ; addi	s9,s9,-1192 # 40b58 <user_main+0x518>
-0x40a08 : 13c0006f ; j	40b44 <user_main+0x504>
-0x40a0c : 03f00513 ; li	a0,63
-0x40a10 : 15856263 ; bltu	a0,s8,40b54 <user_main+0x514>
-0x40a14 : 00264503 ; lbu	a0,2(a2)
-0x40a18 : 00164583 ; lbu	a1,1(a2)
-0x40a1c : 00851513 ; slli	a0,a0,0x8
-0x40a20 : 00b56533 ; or	a0,a0,a1
-0x40a24 : 01257533 ; and	a0,a0,s2
-0x40a28 : 27f00593 ; li	a1,639
-0x40a2c : 00b56463 ; bltu	a0,a1,40a34 <user_main+0x3f4>
-0x40a30 : 27f00513 ; li	a0,639
-0x40a34 : 00464583 ; lbu	a1,4(a2)
-0x40a38 : 00364683 ; lbu	a3,3(a2)
-0x40a3c : 00859593 ; slli	a1,a1,0x8
-0x40a40 : 00d5e5b3 ; or	a1,a1,a3
-0x40a44 : 0125f5b3 ; and	a1,a1,s2
-0x40a48 : 1df00693 ; li	a3,479
-0x40a4c : 00d5e463 ; bltu	a1,a3,40a54 <user_main+0x414>
-0x40a50 : 1df00593 ; li	a1,479
-0x40a54 : 00564603 ; lbu	a2,5(a2)
-0x40a58 : 006c0c13 ; addi	s8,s8,6
-0x40a5c : 00000097 ; auipc	ra,0x0
-0x40a60 : bd8080e7 ; jalr	-1064(ra) # 40634 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
-0x40a64 : 0ec0006f ; j	40b50 <user_main+0x510>
-0x40a68 : 03b00513 ; li	a0,59
-0x40a6c : 0f856463 ; bltu	a0,s8,40b54 <user_main+0x514>
-0x40a70 : 00264503 ; lbu	a0,2(a2)
-0x40a74 : 00164583 ; lbu	a1,1(a2)
-0x40a78 : 00851513 ; slli	a0,a0,0x8
-0x40a7c : 00b56533 ; or	a0,a0,a1
-0x40a80 : 012579b3 ; and	s3,a0,s2
-0x40a84 : 27f00513 ; li	a0,639
-0x40a88 : 00a9e463 ; bltu	s3,a0,40a90 <user_main+0x450>
-0x40a8c : 27f00993 ; li	s3,639
-0x40a90 : 00464503 ; lbu	a0,4(a2)
-0x40a94 : 00364583 ; lbu	a1,3(a2)
-0x40a98 : 00851513 ; slli	a0,a0,0x8
-0x40a9c : 00b56533 ; or	a0,a0,a1
-0x40aa0 : 01257a33 ; and	s4,a0,s2
-0x40aa4 : 1df00513 ; li	a0,479
-0x40aa8 : 00aa6463 ; bltu	s4,a0,40ab0 <user_main+0x470>
-0x40aac : 1df00a13 ; li	s4,479
-0x40ab0 : 00664503 ; lbu	a0,6(a2)
-0x40ab4 : 00564583 ; lbu	a1,5(a2)
+0x40600 : 00 00 00 00
+0x40604 : 00 00 00 00
+0x40608 : 00 00 00 00
+0x4060c : 00 00 00 00
+0x40610 : 00 00 00 00
+0x40614 : 00 00 00 00
+0x40618 : 00 00 00 00
+0x4061c : 00 00 00 00
+0x40620 : 00 00 00 00
+0x40624 : 00 00 00 00
+0x40628 : 00 00 00 00
+0x4062c : 00 00 00 00
+0x40630 : 00 00 00 00
+0x40634 : 00 00 00 00
+0x40638 : 00 00 00 00
+0x4063c : 00 00 00 00
+0x40640 : 00 00 00 00
+0x40644 : 00 00 00 00
+0x40648 : 00 00 00 00
+0x4064c : 00 00 00 00
+0x40650 : 00 00 00 00
+0x40654 : 00 00 00 00
+0x40658 : 00 00 00 00
+0x4065c : 00 00 00 00
+0x40660 : 00 00 00 00
+0x40664 : 00 00 00 00
+0x40668 : 00 00 00 00
+0x4066c : 00 00 00 00
+0x40670 : 00 00 00 00
+0x40674 : 00 00 00 00
+0x40678 : 00 00 00 00
+0x4067c : 00 00 00 00
+0x40680 : 00 00 00 00
+0x40684 : 00 00 00 00
+0x40688 : 00 00 00 00
+0x4068c : 00 00 00 00
+0x40690 : 00 00 00 00
+0x40694 : 00 00 00 00
+0x40698 : 00 00 00 00
+0x4069c : 00 00 00 00
+0x406a0 : 00 00 00 00
+0x406a4 : 00 00 00 00
+0x406a8 : 00 00 00 00
+0x406ac : 00 00 00 00
+0x406b0 : 00 00 00 00
+0x406b4 : 00 00 00 00
+0x406b8 : 00 00 00 00
+0x406bc : 00 00 00 00
+0x406c0 : 00 00 00 00
+0x406c4 : 00 00 00 00
+0x406c8 : 00 00 00 00
+0x406cc : 00 00 00 00
+0x406d0 : 00 00 00 00
+0x406d4 : 00 00 00 00
+0x406d8 : 00 00 00 00
+0x406dc : 00 00 00 00
+0x406e0 : 00 00 00 00
+0x406e4 : 00 00 00 00
+0x406e8 : 00 00 00 00
+0x406ec : 00 00 00 00
+0x406f0 : 00 00 00 00
+0x406f4 : 00 00 00 00
+0x406f8 : 00 00 00 00
+0x406fc : 00 00 00 00
+0x40700 : 00 00 00 00
+0x40704 : 00 00 00 00
+0x40708 : 00 00 00 00
+0x4070c : 00 00 00 00
+0x40710 : 00 00 00 00
+0x40714 : 00 00 00 00
+0x40718 : 00 00 00 00
+0x4071c : 00 00 00 00
+0x40720 : 00 00 00 00
+0x40724 : 00 00 00 00
+0x40728 : 00 00 00 00
+0x4072c : 00 00 00 00
+0x40730 : 00 00 00 00
+0x40734 : 00 00 00 00
+0x40738 : 00 00 00 00
+0x4073c : 00 00 00 00
+0x40740 : 00 00 00 00
+0x40744 : 00 00 00 00
+0x40748 : 00 00 00 00
+0x4074c : 00 00 00 00
+0x40750 : 00 00 00 00
+0x40754 : 00 00 00 00
+0x40758 : 00 00 00 00
+0x4075c : 00 00 00 00
+0x40760 : 00 00 00 00
+0x40764 : 00 00 00 00
+0x40768 : 00 00 00 00
+0x4076c : 00 00 00 00
+0x40770 : 00 00 00 00
+0x40774 : 00 00 00 00
+0x40778 : 00 00 00 00
+0x4077c : 00 00 00 00
+0x40780 : 00 00 00 00
+0x40784 : 00 00 00 00
+0x40788 : 00 00 00 00
+0x4078c : 00 00 00 00
+0x40790 : 00 00 00 00
+0x40794 : 00 00 00 00
+0x40798 : 00 00 00 00
+0x4079c : 00 00 00 00
+0x407a0 : 00 00 00 00
+0x407a4 : 00 00 00 00
+0x407a8 : 00 00 00 00
+0x407ac : 00 00 00 00
+0x407b0 : 00 00 00 00
+0x407b4 : 00 00 00 00
+0x407b8 : 00 00 00 00
+0x407bc : 00 00 00 00
+0x407c0 : 00 00 00 00
+0x407c4 : 00 00 00 00
+0x407c8 : 00 00 00 00
+0x407cc : 00 00 00 00
+0x407d0 : 00 00 00 00
+0x407d4 : 00 00 00 00
+0x407d8 : 00 00 00 00
+0x407dc : 00 00 00 00
+0x407e0 : 00 00 00 00
+0x407e4 : 00 00 00 00
+0x407e8 : 00 00 00 00
+0x407ec : 00 00 00 00
+0x407f0 : 00 00 00 00
+0x407f4 : 00 00 00 00
+0x407f8 : 00 00 00 00
+0x407fc : 00 00 00 00
+0x40800 : 00000117 ; auipc	sp,0x0
+0x40804 : 00010113 ; mv	sp,sp
+0x40808 : 00000097 ; auipc	ra,0x0
+0x4080c : 04c080e7 ; jalr	76(ra) # 40854 <user_main>
+0x40810 : 00000893 ; li	a7,0
+0x40814 : 00000073 ; ecall
+0x40818 : 0000006f ; j	40818 <USER_CODE+0x18>
+0x4081c : 00b00893 ; li	a7,11
+0x40820 : 00000073 ; ecall
+0x40824 : 00008067 ; ret
+0x40828 : 00050893 ; mv	a7,a0
+0x4082c : 00000513 ; li	a0,0
+0x40830 : 00000073 ; ecall
+0x40834 : 00008067 ; ret
+0x40838 : 00000317 ; auipc	t1,0x0
+0x4083c : fe430067 ; jr	-28(t1) # 4081c <_ZN9rv32_bare7syscall10ecall0_ret17h924080f00493afa8E>
+0x40840 : 00000317 ; auipc	t1,0x0
+0x40844 : fe830067 ; jr	-24(t1) # 40828 <_ZN9rv32_bare7syscall10ecall1_ret17ha281bc63eca30e89E>
+0x40848 : 00900893 ; li	a7,9
+0x4084c : 00000073 ; ecall
+0x40850 : 00008067 ; ret
+0x40854 : fa010113 ; addi	sp,sp,-96 # 407a0 <HALT_PORT+0x300a0>
+0x40858 : 04112e23 ; sw	ra,92(sp)
+0x4085c : 04812c23 ; sw	s0,88(sp)
+0x40860 : 04912a23 ; sw	s1,84(sp)
+0x40864 : 05212823 ; sw	s2,80(sp)
+0x40868 : 05312623 ; sw	s3,76(sp)
+0x4086c : 05412423 ; sw	s4,72(sp)
+0x40870 : 05512223 ; sw	s5,68(sp)
+0x40874 : 05612023 ; sw	s6,64(sp)
+0x40878 : 03712e23 ; sw	s7,60(sp)
+0x4087c : 03812c23 ; sw	s8,56(sp)
+0x40880 : 03912a23 ; sw	s9,52(sp)
+0x40884 : 03a12823 ; sw	s10,48(sp)
+0x40888 : 03b12623 ; sw	s11,44(sp)
+0x4088c : 00800513 ; li	a0,8
+0x40890 : 00000097 ; auipc	ra,0x0
+0x40894 : fb0080e7 ; jalr	-80(ra) # 40840 <_ZN9rv32_bare7syscall6ecall117hc80cb022fd4900e1E>
+0x40898 : 00000c93 ; li	s9,0
+0x4089c : 00001537 ; lui	a0,0x1
+0x408a0 : 00200413 ; li	s0,2
+0x408a4 : 000105b7 ; lui	a1,0x10
+0x408a8 : 1df00d13 ; li	s10,479
+0x408ac : 27f00b93 ; li	s7,639
+0x408b0 : 81650513 ; addi	a0,a0,-2026 # 816 <MEIE_BIT+0x16>
+0x408b4 : 00a12623 ; sw	a0,12(sp)
+0x408b8 : fff58913 ; addi	s2,a1,-1 # ffff <PIO_DIR_VAL+0xf00>
+0x408bc : 01212a23 ; sw	s2,20(sp)
+0x408c0 : 00000097 ; auipc	ra,0x0
+0x408c4 : f78080e7 ; jalr	-136(ra) # 40838 <_ZN9rv32_bare7syscall6ecall017ha5f8d74aee59930fE>
+0x408c8 : 00a00513 ; li	a0,10
+0x408cc : 00000097 ; auipc	ra,0x0
+0x408d0 : f74080e7 ; jalr	-140(ra) # 40840 <_ZN9rv32_bare7syscall6ecall117hc80cb022fd4900e1E>
+0x408d4 : 01d00513 ; li	a0,29
+0x408d8 : 4f956c63 ; bltu	a0,s9,40dd0 <user_main+0x57c>
+0x408dc : 002c9513 ; slli	a0,s9,0x2
+0x408e0 : 000415b7 ; lui	a1,0x41
+0x408e4 : 60058593 ; addi	a1,a1,1536 # 41600 <user_main+0xdac>
+0x408e8 : 00a58533 ; add	a0,a1,a0
+0x408ec : 00052503 ; lw	a0,0(a0)
+0x408f0 : 00155593 ; srli	a1,a0,0x1
+0x408f4 : 40a00613 ; li	a2,1034
+0x408f8 : 4cb66c63 ; bltu	a2,a1,40dd0 <user_main+0x57c>
+0x408fc : 00000493 ; li	s1,0
+0x40900 : 00c12583 ; lw	a1,12(sp)
+0x40904 : 40a589b3 ; sub	s3,a1,a0
+0x40908 : 000415b7 ; lui	a1,0x41
+0x4090c : de858593 ; addi	a1,a1,-536 # 40de8 <user_main+0x594>
+0x40910 : 00a58533 ; add	a0,a1,a0
+0x40914 : 02a12023 ; sw	a0,32(sp)
+0x40918 : 01912823 ; sw	s9,16(sp)
+0x4091c : 01312c23 ; sw	s3,24(sp)
+0x40920 : 02012603 ; lw	a2,32(sp)
+0x40924 : 00960633 ; add	a2,a2,s1
+0x40928 : 00064503 ; lbu	a0,0(a2)
+0x4092c : 14a44263 ; blt	s0,a0,40a70 <user_main+0x21c>
+0x40930 : 00100593 ; li	a1,1
+0x40934 : 34b50a63 ; beq	a0,a1,40c88 <user_main+0x434>
+0x40938 : 48851c63 ; bne	a0,s0,40dd0 <user_main+0x57c>
+0x4093c : 00a48493 ; addi	s1,s1,10
+0x40940 : 4899e863 ; bltu	s3,s1,40dd0 <user_main+0x57c>
+0x40944 : 00912e23 ; sw	s1,28(sp)
+0x40948 : 00264503 ; lbu	a0,2(a2)
+0x4094c : 00164583 ; lbu	a1,1(a2)
+0x40950 : 00851513 ; slli	a0,a0,0x8
+0x40954 : 00b56533 ; or	a0,a0,a1
+0x40958 : 01257533 ; and	a0,a0,s2
+0x4095c : 27f00693 ; li	a3,639
+0x40960 : 00050413 ; mv	s0,a0
+0x40964 : 00d56463 ; bltu	a0,a3,4096c <user_main+0x118>
+0x40968 : 27f00413 ; li	s0,639
+0x4096c : 00464583 ; lbu	a1,4(a2)
+0x40970 : 00364703 ; lbu	a4,3(a2)
+0x40974 : 00859593 ; slli	a1,a1,0x8
+0x40978 : 00e5e5b3 ; or	a1,a1,a4
+0x4097c : 0125f5b3 ; and	a1,a1,s2
+0x40980 : 1df00713 ; li	a4,479
+0x40984 : 00058493 ; mv	s1,a1
+0x40988 : 00e5e463 ; bltu	a1,a4,40990 <user_main+0x13c>
+0x4098c : 1df00493 ; li	s1,479
+0x40990 : 00664783 ; lbu	a5,6(a2)
+0x40994 : 00564803 ; lbu	a6,5(a2)
+0x40998 : 00879793 ; slli	a5,a5,0x8
+0x4099c : 0107e7b3 ; or	a5,a5,a6
+0x409a0 : 0127f9b3 ; and	s3,a5,s2
+0x409a4 : 00d9e463 ; bltu	s3,a3,409ac <user_main+0x158>
+0x409a8 : 27f00993 ; li	s3,639
+0x409ac : 00864683 ; lbu	a3,8(a2)
+0x409b0 : 00764783 ; lbu	a5,7(a2)
+0x409b4 : 00869693 ; slli	a3,a3,0x8
+0x409b8 : 00f6e6b3 ; or	a3,a3,a5
+0x409bc : 0126fa33 ; and	s4,a3,s2
+0x409c0 : 00ea6463 ; bltu	s4,a4,409c8 <user_main+0x174>
+0x409c4 : 1df00a13 ; li	s4,479
+0x409c8 : 00964603 ; lbu	a2,9(a2)
+0x409cc : 02c12423 ; sw	a2,40(sp)
+0x409d0 : 40898633 ; sub	a2,s3,s0
+0x409d4 : 01353533 ; sltu	a0,a0,s3
+0x409d8 : 409a06b3 ; sub	a3,s4,s1
+0x409dc : 0145b5b3 ; sltu	a1,a1,s4
+0x409e0 : 41f65713 ; srai	a4,a2,0x1f
+0x409e4 : fff50513 ; addi	a0,a0,-1
+0x409e8 : 41f6d793 ; srai	a5,a3,0x1f
+0x409ec : fff58593 ; addi	a1,a1,-1
+0x409f0 : 00e64633 ; xor	a2,a2,a4
+0x409f4 : 00156a93 ; ori	s5,a0,1
+0x409f8 : 00f6c6b3 ; xor	a3,a3,a5
+0x409fc : 0015eb13 ; ori	s6,a1,1
+0x40a00 : 40e60c33 ; sub	s8,a2,a4
+0x40a04 : 40f68cb3 ; sub	s9,a3,a5
+0x40a08 : 41900db3 ; neg	s11,s9
+0x40a0c : 419c0933 ; sub	s2,s8,s9
+0x40a10 : 009d6e63 ; bltu	s10,s1,40a2c <user_main+0x1d8>
+0x40a14 : 008bec63 ; bltu	s7,s0,40a2c <user_main+0x1d8>
+0x40a18 : 00040513 ; mv	a0,s0
+0x40a1c : 00048593 ; mv	a1,s1
+0x40a20 : 02812603 ; lw	a2,40(sp)
+0x40a24 : 00000097 ; auipc	ra,0x0
+0x40a28 : e24080e7 ; jalr	-476(ra) # 40848 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
+0x40a2c : 01449463 ; bne	s1,s4,40a34 <user_main+0x1e0>
+0x40a30 : 25340263 ; beq	s0,s3,40c74 <user_main+0x420>
+0x40a34 : 00191513 ; slli	a0,s2,0x1
+0x40a38 : 01b525b3 ; slt	a1,a0,s11
+0x40a3c : 00ac2533 ; slt	a0,s8,a0
+0x40a40 : fff58593 ; addi	a1,a1,-1
+0x40a44 : fff50513 ; addi	a0,a0,-1
+0x40a48 : 0195f633 ; and	a2,a1,s9
+0x40a4c : 0155f5b3 ; and	a1,a1,s5
+0x40a50 : 40c90933 ; sub	s2,s2,a2
+0x40a54 : 01857633 ; and	a2,a0,s8
+0x40a58 : 01657533 ; and	a0,a0,s6
+0x40a5c : 00858433 ; add	s0,a1,s0
+0x40a60 : 00c90933 ; add	s2,s2,a2
+0x40a64 : 009504b3 ; add	s1,a0,s1
+0x40a68 : fa9d76e3 ; bgeu	s10,s1,40a14 <user_main+0x1c0>
+0x40a6c : fc1ff06f ; j	40a2c <user_main+0x1d8>
+0x40a70 : 00300593 ; li	a1,3
+0x40a74 : 26b50663 ; beq	a0,a1,40ce0 <user_main+0x48c>
+0x40a78 : 00400593 ; li	a1,4
+0x40a7c : 34b51a63 ; bne	a0,a1,40dd0 <user_main+0x57c>
+0x40a80 : 00848493 ; addi	s1,s1,8
+0x40a84 : 3499e663 ; bltu	s3,s1,40dd0 <user_main+0x57c>
+0x40a88 : 00264503 ; lbu	a0,2(a2)
+0x40a8c : 00164583 ; lbu	a1,1(a2)
+0x40a90 : 00851513 ; slli	a0,a0,0x8
+0x40a94 : 00b56533 ; or	a0,a0,a1
+0x40a98 : 012575b3 ; and	a1,a0,s2
+0x40a9c : 27f00513 ; li	a0,639
+0x40aa0 : 02b12223 ; sw	a1,36(sp)
+0x40aa4 : 00a5e663 ; bltu	a1,a0,40ab0 <user_main+0x25c>
+0x40aa8 : 27f00513 ; li	a0,639
+0x40aac : 02a12223 ; sw	a0,36(sp)
+0x40ab0 : 00464503 ; lbu	a0,4(a2)
+0x40ab4 : 00364583 ; lbu	a1,3(a2)
 0x40ab8 : 00851513 ; slli	a0,a0,0x8
 0x40abc : 00b56533 ; or	a0,a0,a1
-0x40ac0 : 01257533 ; and	a0,a0,s2
-0x40ac4 : 28000593 ; li	a1,640
-0x40ac8 : 00050b93 ; mv	s7,a0
-0x40acc : 00b56463 ; bltu	a0,a1,40ad4 <user_main+0x494>
-0x40ad0 : 28000b93 ; li	s7,640
-0x40ad4 : 00864583 ; lbu	a1,8(a2)
-0x40ad8 : 00764683 ; lbu	a3,7(a2)
-0x40adc : 00859593 ; slli	a1,a1,0x8
-0x40ae0 : 00d5e5b3 ; or	a1,a1,a3
-0x40ae4 : 0125fab3 ; and	s5,a1,s2
-0x40ae8 : 1e000693 ; li	a3,480
-0x40aec : 00dae463 ; bltu	s5,a3,40af4 <user_main+0x4b4>
-0x40af0 : 1e000a93 ; li	s5,480
-0x40af4 : 00ac0c13 ; addi	s8,s8,10
-0x40af8 : 04050c63 ; beqz	a0,40b50 <user_main+0x510>
-0x40afc : 01059593 ; slli	a1,a1,0x10
-0x40b00 : 04058863 ; beqz	a1,40b50 <user_main+0x510>
-0x40b04 : 00000b13 ; li	s6,0
-0x40b08 : 00964403 ; lbu	s0,9(a2)
-0x40b0c : 013b8bb3 ; add	s7,s7,s3
-0x40b10 : 014b04b3 ; add	s1,s6,s4
-0x40b14 : 00098913 ; mv	s2,s3
-0x40b18 : 009dee63 ; bltu	s11,s1,40b34 <user_main+0x4f4>
-0x40b1c : 012d6c63 ; bltu	s10,s2,40b34 <user_main+0x4f4>
-0x40b20 : 00090513 ; mv	a0,s2
-0x40b24 : 00048593 ; mv	a1,s1
-0x40b28 : 00040613 ; mv	a2,s0
-0x40b2c : 00000097 ; auipc	ra,0x0
-0x40b30 : b08080e7 ; jalr	-1272(ra) # 40634 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
-0x40b34 : 00190913 ; addi	s2,s2,1
-0x40b38 : ff7910e3 ; bne	s2,s7,40b18 <user_main+0x4d8>
-0x40b3c : 001b0b13 ; addi	s6,s6,1
-0x40b40 : fd5b18e3 ; bne	s6,s5,40b10 <user_main+0x4d0>
-0x40b44 : 00200413 ; li	s0,2
-0x40b48 : 04500493 ; li	s1,69
-0x40b4c : 00812903 ; lw	s2,8(sp)
-0x40b50 : b69c64e3 ; bltu	s8,s1,406b8 <user_main+0x78>
-0x40b54 : 0000006f ; j	40b54 <user_main+0x514>
-0x40b58 : 02 00 00 00
-0x40b5c : 00 7F 02 00
-0x40b60 : 00 FF 02 7F
-0x40b64 : 02 00 00 7F
-0x40b68 : 02 DF 01 FF
-0x40b6c : 02 7F 02 DF
-0x40b70 : 01 00 00 DF
-0x40b74 : 01 FF 02 00
-0x40b78 : 00 DF 01 00
-0x40b7c : 00 00 00 FF
-0x40b80 : 04 3F 01 F0
-0x40b84 : 00 8C 00 E0
-0x40b88 : 02 00 00 00
-0x40b8c : 00 7F 02 DF
-0x40b90 : 01 1C 02 7F
-0x40b94 : 02 00 00 00
-0x40b98 : 00 DF 01 03
-0x40b9c : 000000ff ; .byte	0xff
+0x40ac0 : 01257b33 ; and	s6,a0,s2
+0x40ac4 : 1df00513 ; li	a0,479
+0x40ac8 : 00ab6463 ; bltu	s6,a0,40ad0 <user_main+0x27c>
+0x40acc : 1df00b13 ; li	s6,479
+0x40ad0 : 00664503 ; lbu	a0,6(a2)
+0x40ad4 : 00564583 ; lbu	a1,5(a2)
+0x40ad8 : 00851513 ; slli	a0,a0,0x8
+0x40adc : 00b56533 ; or	a0,a0,a1
+0x40ae0 : 01051513 ; slli	a0,a0,0x10
+0x40ae4 : 2e050463 ; beqz	a0,40dcc <user_main+0x578>
+0x40ae8 : 00912e23 ; sw	s1,28(sp)
+0x40aec : 01055993 ; srli	s3,a0,0x10
+0x40af0 : 1df00513 ; li	a0,479
+0x40af4 : 00a9e463 ; bltu	s3,a0,40afc <user_main+0x2a8>
+0x40af8 : 1df00993 ; li	s3,479
+0x40afc : 00000a13 ; li	s4,0
+0x40b00 : 00764503 ; lbu	a0,7(a2)
+0x40b04 : 02a12423 ; sw	a0,40(sp)
+0x40b08 : 00100513 ; li	a0,1
+0x40b0c : 41350c33 ; sub	s8,a0,s3
+0x40b10 : 00300413 ; li	s0,3
+0x40b14 : 02412483 ; lw	s1,36(sp)
+0x40b18 : 000b0913 ; mv	s2,s6
+0x40b1c : 02412c83 ; lw	s9,36(sp)
+0x40b20 : 01998cb3 ; add	s9,s3,s9
+0x40b24 : 014b0ab3 ; add	s5,s6,s4
+0x40b28 : 019bee63 ; bltu	s7,s9,40b44 <user_main+0x2f0>
+0x40b2c : 015d6c63 ; bltu	s10,s5,40b44 <user_main+0x2f0>
+0x40b30 : 000c8513 ; mv	a0,s9
+0x40b34 : 000a8593 ; mv	a1,s5
+0x40b38 : 02812603 ; lw	a2,40(sp)
+0x40b3c : 00000097 ; auipc	ra,0x0
+0x40b40 : d0c080e7 ; jalr	-756(ra) # 40848 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
+0x40b44 : 000b0b93 ; mv	s7,s6
+0x40b48 : 01698b33 ; add	s6,s3,s6
+0x40b4c : 02412d83 ; lw	s11,36(sp)
+0x40b50 : 014d8db3 ; add	s11,s11,s4
+0x40b54 : 036d6063 ; bltu	s10,s6,40b74 <user_main+0x320>
+0x40b58 : 27f00513 ; li	a0,639
+0x40b5c : 01b56c63 ; bltu	a0,s11,40b74 <user_main+0x320>
+0x40b60 : 000d8513 ; mv	a0,s11
+0x40b64 : 000b0593 ; mv	a1,s6
+0x40b68 : 02812603 ; lw	a2,40(sp)
+0x40b6c : 00000097 ; auipc	ra,0x0
+0x40b70 : cdc080e7 ; jalr	-804(ra) # 40848 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
+0x40b74 : 036d6063 ; bltu	s10,s6,40b94 <user_main+0x340>
+0x40b78 : 27f00513 ; li	a0,639
+0x40b7c : 00956c63 ; bltu	a0,s1,40b94 <user_main+0x340>
+0x40b80 : 00048513 ; mv	a0,s1
+0x40b84 : 000b0593 ; mv	a1,s6
+0x40b88 : 02812603 ; lw	a2,40(sp)
+0x40b8c : 00000097 ; auipc	ra,0x0
+0x40b90 : cbc080e7 ; jalr	-836(ra) # 40848 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
+0x40b94 : 02412503 ; lw	a0,36(sp)
+0x40b98 : 41350b33 ; sub	s6,a0,s3
+0x40b9c : 27f00513 ; li	a0,639
+0x40ba0 : 01656e63 ; bltu	a0,s6,40bbc <user_main+0x368>
+0x40ba4 : 015d6c63 ; bltu	s10,s5,40bbc <user_main+0x368>
+0x40ba8 : 000b0513 ; mv	a0,s6
+0x40bac : 000a8593 ; mv	a1,s5
+0x40bb0 : 02812603 ; lw	a2,40(sp)
+0x40bb4 : 00000097 ; auipc	ra,0x0
+0x40bb8 : c94080e7 ; jalr	-876(ra) # 40848 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
+0x40bbc : 27f00513 ; li	a0,639
+0x40bc0 : 01656e63 ; bltu	a0,s6,40bdc <user_main+0x388>
+0x40bc4 : 012d6c63 ; bltu	s10,s2,40bdc <user_main+0x388>
+0x40bc8 : 000b0513 ; mv	a0,s6
+0x40bcc : 00090593 ; mv	a1,s2
+0x40bd0 : 02812603 ; lw	a2,40(sp)
+0x40bd4 : 00000097 ; auipc	ra,0x0
+0x40bd8 : c74080e7 ; jalr	-908(ra) # 40848 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
+0x40bdc : 000b8b13 ; mv	s6,s7
+0x40be0 : 413b8ab3 ; sub	s5,s7,s3
+0x40be4 : 27f00b93 ; li	s7,639
+0x40be8 : 015d6e63 ; bltu	s10,s5,40c04 <user_main+0x3b0>
+0x40bec : 009bec63 ; bltu	s7,s1,40c04 <user_main+0x3b0>
+0x40bf0 : 00048513 ; mv	a0,s1
+0x40bf4 : 000a8593 ; mv	a1,s5
+0x40bf8 : 02812603 ; lw	a2,40(sp)
+0x40bfc : 00000097 ; auipc	ra,0x0
+0x40c00 : c4c080e7 ; jalr	-948(ra) # 40848 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
+0x40c04 : 015d6e63 ; bltu	s10,s5,40c20 <user_main+0x3cc>
+0x40c08 : 01bbec63 ; bltu	s7,s11,40c20 <user_main+0x3cc>
+0x40c0c : 000d8513 ; mv	a0,s11
+0x40c10 : 000a8593 ; mv	a1,s5
+0x40c14 : 02812603 ; lw	a2,40(sp)
+0x40c18 : 00000097 ; auipc	ra,0x0
+0x40c1c : c30080e7 ; jalr	-976(ra) # 40848 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
+0x40c20 : 019bee63 ; bltu	s7,s9,40c3c <user_main+0x3e8>
+0x40c24 : 012d6c63 ; bltu	s10,s2,40c3c <user_main+0x3e8>
+0x40c28 : 000c8513 ; mv	a0,s9
+0x40c2c : 00090593 ; mv	a1,s2
+0x40c30 : 02812603 ; lw	a2,40(sp)
+0x40c34 : 00000097 ; auipc	ra,0x0
+0x40c38 : c14080e7 ; jalr	-1004(ra) # 40848 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
+0x40c3c : fff98513 ; addi	a0,s3,-1
+0x40c40 : 000c4463 ; bltz	s8,40c48 <user_main+0x3f4>
+0x40c44 : 00050993 ; mv	s3,a0
+0x40c48 : 001a0a13 ; addi	s4,s4,1
+0x40c4c : 000c2593 ; slti	a1,s8,0
+0x40c50 : 01840c33 ; add	s8,s0,s8
+0x40c54 : 00240413 ; addi	s0,s0,2
+0x40c58 : fff90913 ; addi	s2,s2,-1
+0x40c5c : fff58593 ; addi	a1,a1,-1
+0x40c60 : 00a5f533 ; and	a0,a1,a0
+0x40c64 : 00151513 ; slli	a0,a0,0x1
+0x40c68 : 40ac0c33 ; sub	s8,s8,a0
+0x40c6c : fff48493 ; addi	s1,s1,-1
+0x40c70 : eb49d6e3 ; bge	s3,s4,40b1c <user_main+0x2c8>
+0x40c74 : 01012c83 ; lw	s9,16(sp)
+0x40c78 : 00200413 ; li	s0,2
+0x40c7c : 01412903 ; lw	s2,20(sp)
+0x40c80 : 01c12483 ; lw	s1,28(sp)
+0x40c84 : 1440006f ; j	40dc8 <user_main+0x574>
+0x40c88 : 00648493 ; addi	s1,s1,6
+0x40c8c : 1499e263 ; bltu	s3,s1,40dd0 <user_main+0x57c>
+0x40c90 : 00264503 ; lbu	a0,2(a2)
+0x40c94 : 00164583 ; lbu	a1,1(a2)
+0x40c98 : 00851513 ; slli	a0,a0,0x8
+0x40c9c : 00b56533 ; or	a0,a0,a1
+0x40ca0 : 01257533 ; and	a0,a0,s2
+0x40ca4 : 27f00593 ; li	a1,639
+0x40ca8 : 00b56463 ; bltu	a0,a1,40cb0 <user_main+0x45c>
+0x40cac : 27f00513 ; li	a0,639
+0x40cb0 : 00464583 ; lbu	a1,4(a2)
+0x40cb4 : 00364683 ; lbu	a3,3(a2)
+0x40cb8 : 00859593 ; slli	a1,a1,0x8
+0x40cbc : 00d5e5b3 ; or	a1,a1,a3
+0x40cc0 : 0125f5b3 ; and	a1,a1,s2
+0x40cc4 : 1df00693 ; li	a3,479
+0x40cc8 : 00d5e463 ; bltu	a1,a3,40cd0 <user_main+0x47c>
+0x40ccc : 1df00593 ; li	a1,479
+0x40cd0 : 00564603 ; lbu	a2,5(a2)
+0x40cd4 : 00000097 ; auipc	ra,0x0
+0x40cd8 : b74080e7 ; jalr	-1164(ra) # 40848 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
+0x40cdc : 0f00006f ; j	40dcc <user_main+0x578>
+0x40ce0 : 00a48493 ; addi	s1,s1,10
+0x40ce4 : 0e99e663 ; bltu	s3,s1,40dd0 <user_main+0x57c>
+0x40ce8 : 00264503 ; lbu	a0,2(a2)
+0x40cec : 00164583 ; lbu	a1,1(a2)
+0x40cf0 : 00851513 ; slli	a0,a0,0x8
+0x40cf4 : 00b56533 ; or	a0,a0,a1
+0x40cf8 : 012579b3 ; and	s3,a0,s2
+0x40cfc : 27f00513 ; li	a0,639
+0x40d00 : 00a9e463 ; bltu	s3,a0,40d08 <user_main+0x4b4>
+0x40d04 : 27f00993 ; li	s3,639
+0x40d08 : 00464503 ; lbu	a0,4(a2)
+0x40d0c : 00364583 ; lbu	a1,3(a2)
+0x40d10 : 00851513 ; slli	a0,a0,0x8
+0x40d14 : 00b56533 ; or	a0,a0,a1
+0x40d18 : 01257a33 ; and	s4,a0,s2
+0x40d1c : 1df00513 ; li	a0,479
+0x40d20 : 00aa6463 ; bltu	s4,a0,40d28 <user_main+0x4d4>
+0x40d24 : 1df00a13 ; li	s4,479
+0x40d28 : 00664503 ; lbu	a0,6(a2)
+0x40d2c : 00564583 ; lbu	a1,5(a2)
+0x40d30 : 00851513 ; slli	a0,a0,0x8
+0x40d34 : 00b56533 ; or	a0,a0,a1
+0x40d38 : 01257533 ; and	a0,a0,s2
+0x40d3c : 28000593 ; li	a1,640
+0x40d40 : 00050c13 ; mv	s8,a0
+0x40d44 : 00b56463 ; bltu	a0,a1,40d4c <user_main+0x4f8>
+0x40d48 : 28000c13 ; li	s8,640
+0x40d4c : 00864583 ; lbu	a1,8(a2)
+0x40d50 : 00764683 ; lbu	a3,7(a2)
+0x40d54 : 00859593 ; slli	a1,a1,0x8
+0x40d58 : 00d5e5b3 ; or	a1,a1,a3
+0x40d5c : 0125fab3 ; and	s5,a1,s2
+0x40d60 : 1e000693 ; li	a3,480
+0x40d64 : 00dae463 ; bltu	s5,a3,40d6c <user_main+0x518>
+0x40d68 : 1e000a93 ; li	s5,480
+0x40d6c : 04050e63 ; beqz	a0,40dc8 <user_main+0x574>
+0x40d70 : 01059593 ; slli	a1,a1,0x10
+0x40d74 : 04058a63 ; beqz	a1,40dc8 <user_main+0x574>
+0x40d78 : 00048d93 ; mv	s11,s1
+0x40d7c : 00000b13 ; li	s6,0
+0x40d80 : 00964403 ; lbu	s0,9(a2)
+0x40d84 : 013c0c33 ; add	s8,s8,s3
+0x40d88 : 014b04b3 ; add	s1,s6,s4
+0x40d8c : 00098913 ; mv	s2,s3
+0x40d90 : 009d6e63 ; bltu	s10,s1,40dac <user_main+0x558>
+0x40d94 : 012bec63 ; bltu	s7,s2,40dac <user_main+0x558>
+0x40d98 : 00090513 ; mv	a0,s2
+0x40d9c : 00048593 ; mv	a1,s1
+0x40da0 : 00040613 ; mv	a2,s0
+0x40da4 : 00000097 ; auipc	ra,0x0
+0x40da8 : aa4080e7 ; jalr	-1372(ra) # 40848 <_ZN9rv32_bare7syscall6ecall317h910ab59dbf6994e7E>
+0x40dac : 00190913 ; addi	s2,s2,1
+0x40db0 : ff8910e3 ; bne	s2,s8,40d90 <user_main+0x53c>
+0x40db4 : 001b0b13 ; addi	s6,s6,1
+0x40db8 : fd5b18e3 ; bne	s6,s5,40d88 <user_main+0x534>
+0x40dbc : 00200413 ; li	s0,2
+0x40dc0 : 01412903 ; lw	s2,20(sp)
+0x40dc4 : 000d8493 ; mv	s1,s11
+0x40dc8 : 01812983 ; lw	s3,24(sp)
+0x40dcc : b534eae3 ; bltu	s1,s3,40920 <user_main+0xcc>
+0x40dd0 : 001c8513 ; addi	a0,s9,1
+0x40dd4 : fe250593 ; addi	a1,a0,-30
+0x40dd8 : 0015b593 ; seqz	a1,a1
+0x40ddc : fff58593 ; addi	a1,a1,-1
+0x40de0 : 00a5fcb3 ; and	s9,a1,a0
+0x40de4 : addff06f ; j	408c0 <user_main+0x6c>
+0x40de8 : 02 00 00 00
+0x40dec : 00 7F 02 00
+0x40df0 : 00 FF 02 7F
+0x40df4 : 02 00 00 7F
+0x40df8 : 02 DF 01 FF
+0x40dfc : 02 7F 02 DF
+0x40e00 : 01 00 00 DF
+0x40e04 : 01 FF 02 00
+0x40e08 : 00 DF 01 00
+0x40e0c : 00 00 00 FF
+0x40e10 : 02 00 00 00
+0x40e14 : 00 7F 02 DF
+0x40e18 : 01 1C 02 7F
+0x40e1c : 02 00 00 00
+0x40e20 : 00 DF 01 03
+0x40e24 : 04 28 00 F0
+0x40e28 : 00 28 00 E0
+0x40e2c : 000002ff ; 0000 0000 027f 	.insn	10, 0x027f0000000002ff
+0x40e2e : 00 00 00 00
+0x40e32 : 7F 02 00 00
+0x40e36 : 000002ff ; 027f 0000 027f 	.insn	10, 0x01df027f0000027f02ff
+0x40e38 : 7F 02 00 00
+0x40e3c : 7F 02 DF 01
+0x40e40 : 000002ff ; 027f 01df 0000 	.insn	10, 0x01df000001df027f02ff
+0x40e42 : 7F 02 DF 01
+0x40e46 : 00 00 DF 01
+0x40e4a : 000002ff ; 0000 01df 0000 	.insn	10, 0x01df000002ff
+0x40e4c : 00 00 DF 01
+0x40e50 : 00 00 00 00
+0x40e54 : 000002ff ; 0000 0000 027f 	.insn	10, 0x01df027f0000000002ff
+0x40e56 : 00 00 00 00
+0x40e5a : 7F 02 DF 01
+0x40e5e : 1C 02
+0x40e60 : 0000027f ; 0000 0000 01df 	.insn	10, 0x040301df00000000027f
+0x40e62 : 00 00 00 00
+0x40e66 : DF 01 03 04
+0x40e6a : 3B 00 F0 00
+0x40e6e : 28 00 E0 FF
+0x40e72 : 02 00 00 00
+0x40e76 : 00 7F 02 00
+0x40e7a : 00 FF 02 7F
+0x40e7e : 02 00 00 7F
+0x40e82 : 02 DF 01 FF
+0x40e86 : 02 7F 02 DF
+0x40e8a : 01 00 00 DF
+0x40e8e : 01 FF 02 00
+0x40e92 : 00 DF 01 00
+0x40e96 : 00 00 00 FF
+0x40e9a : 02 00 00 00
+0x40e9e : 00 7F 02 DF
+0x40ea2 : 01 1C 02 7F
+0x40ea6 : 02 00 00 00
+0x40eaa : 00 DF 01 03
+0x40eae : 04 4F 00 F0
+0x40eb2 : 00 28 00 E0
+0x40eb6 : 000002ff ; 0000 0000 027f 	.insn	10, 0x027f0000000002ff
+0x40eb8 : 00 00 00 00
+0x40ebc : 7F 02 00 00
+0x40ec0 : 000002ff ; 027f 0000 027f 	.insn	10, 0x01df027f0000027f02ff
+0x40ec2 : 7F 02 00 00
+0x40ec6 : 7F 02 DF 01
+0x40eca : 000002ff ; 027f 01df 0000 	.insn	10, 0x01df000001df027f02ff
+0x40ecc : 7F 02 DF 01
+0x40ed0 : 00 00 DF 01
+0x40ed4 : 000002ff ; 0000 01df 0000 	.insn	10, 0x01df000002ff
+0x40ed6 : 00 00 DF 01
+0x40eda : 00 00 00 00
+0x40ede : 000002ff ; 0000 0000 027f 	.insn	10, 0x01df027f0000000002ff
+0x40ee0 : 00 00 00 00
+0x40ee4 : 7F 02 DF 01
+0x40ee8 : 1C 02
+0x40eea : 0000027f ; 0000 0000 01df 	.insn	10, 0x040301df00000000027f
+0x40eec : 00 00 00 00
+0x40ef0 : DF 01 03 04
+0x40ef4 : 62 00 F0 00
+0x40ef8 : 28 00 E0 FF
+0x40efc : 02 00 00 00
+0x40f00 : 00 7F 02 00
+0x40f04 : 00 FF 02 7F
+0x40f08 : 02 00 00 7F
+0x40f0c : 02 DF 01 FF
+0x40f10 : 02 7F 02 DF
+0x40f14 : 01 00 00 DF
+0x40f18 : 01 FF 02 00
+0x40f1c : 00 DF 01 00
+0x40f20 : 00 00 00 FF
+0x40f24 : 02 00 00 00
+0x40f28 : 00 7F 02 DF
+0x40f2c : 01 1C 02 7F
+0x40f30 : 02 00 00 00
+0x40f34 : 00 DF 01 03
+0x40f38 : 04 75 00 F0
+0x40f3c : 00 28 00 E0
+0x40f40 : 000002ff ; 0000 0000 027f 	.insn	10, 0x027f0000000002ff
+0x40f42 : 00 00 00 00
+0x40f46 : 7F 02 00 00
+0x40f4a : 000002ff ; 027f 0000 027f 	.insn	10, 0x01df027f0000027f02ff
+0x40f4c : 7F 02 00 00
+0x40f50 : 7F 02 DF 01
+0x40f54 : 000002ff ; 027f 01df 0000 	.insn	10, 0x01df000001df027f02ff
+0x40f56 : 7F 02 DF 01
+0x40f5a : 00 00 DF 01
+0x40f5e : 000002ff ; 0000 01df 0000 	.insn	10, 0x01df000002ff
+0x40f60 : 00 00 DF 01
+0x40f64 : 00 00 00 00
+0x40f68 : 000002ff ; 0000 0000 027f 	.insn	10, 0x01df027f0000000002ff
+0x40f6a : 00 00 00 00
+0x40f6e : 7F 02 DF 01
+0x40f72 : 1C 02
+0x40f74 : 0000027f ; 0000 0000 01df 	.insn	10, 0x040301df00000000027f
+0x40f76 : 00 00 00 00
+0x40f7a : DF 01 03 04
+0x40f7e : 88 00 F0 00
+0x40f82 : 28 00 E0 FF
+0x40f86 : 02 00 00 00
+0x40f8a : 00 7F 02 00
+0x40f8e : 00 FF 02 7F
+0x40f92 : 02 00 00 7F
+0x40f96 : 02 DF 01 FF
+0x40f9a : 02 7F 02 DF
+0x40f9e : 01 00 00 DF
+0x40fa2 : 01 FF 02 00
+0x40fa6 : 00 DF 01 00
+0x40faa : 00 00 00 FF
+0x40fae : 02 00 00 00
+0x40fb2 : 00 7F 02 DF
+0x40fb6 : 01 1C 02 7F
+0x40fba : 02 00 00 00
+0x40fbe : 00 DF 01 03
+0x40fc2 : 04 9C 00 F0
+0x40fc6 : 00 28 00 E0
+0x40fca : 000002ff ; 0000 0000 027f 	.insn	10, 0x027f0000000002ff
+0x40fcc : 00 00 00 00
+0x40fd0 : 7F 02 00 00
+0x40fd4 : 000002ff ; 027f 0000 027f 	.insn	10, 0x01df027f0000027f02ff
+0x40fd6 : 7F 02 00 00
+0x40fda : 7F 02 DF 01
+0x40fde : 000002ff ; 027f 01df 0000 	.insn	10, 0x01df000001df027f02ff
+0x40fe0 : 7F 02 DF 01
+0x40fe4 : 00 00 DF 01
+0x40fe8 : 000002ff ; 0000 01df 0000 	.insn	10, 0x01df000002ff
+0x40fea : 00 00 DF 01
+0x40fee : 00 00 00 00
+0x40ff2 : 000002ff ; 0000 0000 027f 	.insn	10, 0x01df027f0000000002ff
+0x40ff4 : 00 00 00 00
+0x40ff8 : 7F 02 DF 01
+0x40ffc : 1C 02
+0x40ffe : 0000027f ; 0000 0000 01df 	.insn	10, 0x040301df00000000027f
+0x41000 : 00 00 00 00
+0x41004 : DF 01 03 04
+0x41008 : AF 00 F0 00
+0x4100c : 28 00 E0 FF
+0x41010 : 02 00 00 00
+0x41014 : 00 7F 02 00
+0x41018 : 00 FF 02 7F
+0x4101c : 02 00 00 7F
+0x41020 : 02 DF 01 FF
+0x41024 : 02 7F 02 DF
+0x41028 : 01 00 00 DF
+0x4102c : 01 FF 02 00
+0x41030 : 00 DF 01 00
+0x41034 : 00 00 00 FF
+0x41038 : 02 00 00 00
+0x4103c : 00 7F 02 DF
+0x41040 : 01 1C 02 7F
+0x41044 : 02 00 00 00
+0x41048 : 00 DF 01 03
+0x4104c : 04 C2 00 F0
+0x41050 : 00 28 00 E0
+0x41054 : 000002ff ; 0000 0000 027f 	.insn	10, 0x027f0000000002ff
+0x41056 : 00 00 00 00
+0x4105a : 7F 02 00 00
+0x4105e : 000002ff ; 027f 0000 027f 	.insn	10, 0x01df027f0000027f02ff
+0x41060 : 7F 02 00 00
+0x41064 : 7F 02 DF 01
+0x41068 : 000002ff ; 027f 01df 0000 	.insn	10, 0x01df000001df027f02ff
+0x4106a : 7F 02 DF 01
+0x4106e : 00 00 DF 01
+0x41072 : 000002ff ; 0000 01df 0000 	.insn	10, 0x01df000002ff
+0x41074 : 00 00 DF 01
+0x41078 : 00 00 00 00
+0x4107c : 000002ff ; 0000 0000 027f 	.insn	10, 0x01df027f0000000002ff
+0x4107e : 00 00 00 00
+0x41082 : 7F 02 DF 01
+0x41086 : 1C 02
+0x41088 : 0000027f ; 0000 0000 01df 	.insn	10, 0x040301df00000000027f
+0x4108a : 00 00 00 00
+0x4108e : DF 01 03 04
+0x41092 : D5 00 F0 00
+0x41096 : 28 00 E0 FF
+0x4109a : 02 00 00 00
+0x4109e : 00 7F 02 00
+0x410a2 : 00 FF 02 7F
+0x410a6 : 02 00 00 7F
+0x410aa : 02 DF 01 FF
+0x410ae : 02 7F 02 DF
+0x410b2 : 01 00 00 DF
+0x410b6 : 01 FF 02 00
+0x410ba : 00 DF 01 00
+0x410be : 00 00 00 FF
+0x410c2 : 02 00 00 00
+0x410c6 : 00 7F 02 DF
+0x410ca : 01 1C 02 7F
+0x410ce : 02 00 00 00
+0x410d2 : 00 DF 01 03
+0x410d6 : 04 E9 00 F0
+0x410da : 00 28 00 E0
+0x410de : 000002ff ; 0000 0000 027f 	.insn	10, 0x027f0000000002ff
+0x410e0 : 00 00 00 00
+0x410e4 : 7F 02 00 00
+0x410e8 : 000002ff ; 027f 0000 027f 	.insn	10, 0x01df027f0000027f02ff
+0x410ea : 7F 02 00 00
+0x410ee : 7F 02 DF 01
+0x410f2 : 000002ff ; 027f 01df 0000 	.insn	10, 0x01df000001df027f02ff
+0x410f4 : 7F 02 DF 01
+0x410f8 : 00 00 DF 01
+0x410fc : 000002ff ; 0000 01df 0000 	.insn	10, 0x01df000002ff
+0x410fe : 00 00 DF 01
+0x41102 : 00 00 00 00
+0x41106 : 000002ff ; 0000 0000 027f 	.insn	10, 0x01df027f0000000002ff
+0x41108 : 00 00 00 00
+0x4110c : 7F 02 DF 01
+0x41110 : 1C 02
+0x41112 : 0000027f ; 0000 0000 01df 	.insn	10, 0x040301df00000000027f
+0x41114 : 00 00 00 00
+0x41118 : DF 01 03 04
+0x4111c : FC 00 F0 00
+0x41120 : 28 00 E0 FF
+0x41124 : 02 00 00 00
+0x41128 : 00 7F 02 00
+0x4112c : 00 FF 02 7F
+0x41130 : 02 00 00 7F
+0x41134 : 02 DF 01 FF
+0x41138 : 02 7F 02 DF
+0x4113c : 01 00 00 DF
+0x41140 : 01 FF 02 00
+0x41144 : 00 DF 01 00
+0x41148 : 00 00 00 FF
+0x4114c : 02 00 00 00
+0x41150 : 00 7F 02 DF
+0x41154 : 01 1C 02 7F
+0x41158 : 02 00 00 00
+0x4115c : 00 DF 01 03
+0x41160 : 04 0F 01 F0
+0x41164 : 00 28 00 E0
+0x41168 : 000002ff ; 0000 0000 027f 	.insn	10, 0x027f0000000002ff
+0x4116a : 00 00 00 00
+0x4116e : 7F 02 00 00
+0x41172 : 000002ff ; 027f 0000 027f 	.insn	10, 0x01df027f0000027f02ff
+0x41174 : 7F 02 00 00
+0x41178 : 7F 02 DF 01
+0x4117c : 000002ff ; 027f 01df 0000 	.insn	10, 0x01df000001df027f02ff
+0x4117e : 7F 02 DF 01
+0x41182 : 00 00 DF 01
+0x41186 : 000002ff ; 0000 01df 0000 	.insn	10, 0x01df000002ff
+0x41188 : 00 00 DF 01
+0x4118c : 00 00 00 00
+0x41190 : 000002ff ; 0000 0000 027f 	.insn	10, 0x01df027f0000000002ff
+0x41192 : 00 00 00 00
+0x41196 : 7F 02 DF 01
+0x4119a : 1C 02
+0x4119c : 0000027f ; 0000 0000 01df 	.insn	10, 0x040301df00000000027f
+0x4119e : 00 00 00 00
+0x411a2 : DF 01 03 04
+0x411a6 : 00f00123 ; sb	a5,2(zero) # 2 <SYS_LCD_CLEAR>
+0x411aa : 28 00 E0 FF
+0x411ae : 02 00 00 00
+0x411b2 : 00 7F 02 00
+0x411b6 : 00 FF 02 7F
+0x411ba : 02 00 00 7F
+0x411be : 02 DF 01 FF
+0x411c2 : 02 7F 02 DF
+0x411c6 : 01 00 00 DF
+0x411ca : 01 FF 02 00
+0x411ce : 00 DF 01 00
+0x411d2 : 00 00 00 FF
+0x411d6 : 02 00 00 00
+0x411da : 00 7F 02 DF
+0x411de : 01 1C 02 7F
+0x411e2 : 02 00 00 00
+0x411e6 : 00 DF 01 03
+0x411ea : 04 36 01 F0
+0x411ee : 00 28 00 E0
+0x411f2 : 000002ff ; 0000 0000 027f 	.insn	10, 0x027f0000000002ff
+0x411f4 : 00 00 00 00
+0x411f8 : 7F 02 00 00
+0x411fc : 000002ff ; 027f 0000 027f 	.insn	10, 0x01df027f0000027f02ff
+0x411fe : 7F 02 00 00
+0x41202 : 7F 02 DF 01
+0x41206 : 000002ff ; 027f 01df 0000 	.insn	10, 0x01df000001df027f02ff
+0x41208 : 7F 02 DF 01
+0x4120c : 00 00 DF 01
+0x41210 : 000002ff ; 0000 01df 0000 	.insn	10, 0x01df000002ff
+0x41212 : 00 00 DF 01
+0x41216 : 00 00 00 00
+0x4121a : 000002ff ; 0000 0000 027f 	.insn	10, 0x01df027f0000000002ff
+0x4121c : 00 00 00 00
+0x41220 : 7F 02 DF 01
+0x41224 : 1C 02
+0x41226 : 0000027f ; 0000 0000 01df 	.insn	10, 0x040301df00000000027f
+0x41228 : 00 00 00 00
+0x4122c : DF 01 03 04
+0x41230 : 49 01 F0 00
+0x41234 : 28 00 E0 FF
+0x41238 : 02 00 00 00
+0x4123c : 00 7F 02 00
+0x41240 : 00 FF 02 7F
+0x41244 : 02 00 00 7F
+0x41248 : 02 DF 01 FF
+0x4124c : 02 7F 02 DF
+0x41250 : 01 00 00 DF
+0x41254 : 01 FF 02 00
+0x41258 : 00 DF 01 00
+0x4125c : 00 00 00 FF
+0x41260 : 02 00 00 00
+0x41264 : 00 7F 02 DF
+0x41268 : 01 1C 02 7F
+0x4126c : 02 00 00 00
+0x41270 : 00 DF 01 03
+0x41274 : 04 5C 01 F0
+0x41278 : 00 28 00 E0
+0x4127c : 000002ff ; 0000 0000 027f 	.insn	10, 0x027f0000000002ff
+0x4127e : 00 00 00 00
+0x41282 : 7F 02 00 00
+0x41286 : 000002ff ; 027f 0000 027f 	.insn	10, 0x01df027f0000027f02ff
+0x41288 : 7F 02 00 00
+0x4128c : 7F 02 DF 01
+0x41290 : 000002ff ; 027f 01df 0000 	.insn	10, 0x01df000001df027f02ff
+0x41292 : 7F 02 DF 01
+0x41296 : 00 00 DF 01
+0x4129a : 000002ff ; 0000 01df 0000 	.insn	10, 0x01df000002ff
+0x4129c : 00 00 DF 01
+0x412a0 : 00 00 00 00
+0x412a4 : 000002ff ; 0000 0000 027f 	.insn	10, 0x01df027f0000000002ff
+0x412a6 : 00 00 00 00
+0x412aa : 7F 02 DF 01
+0x412ae : 1C 02
+0x412b0 : 0000027f ; 0000 0000 01df 	.insn	10, 0x040301df00000000027f
+0x412b2 : 00 00 00 00
+0x412b6 : DF 01 03 04
+0x412ba : 70 01 F0 00
+0x412be : 28 00 E0 FF
+0x412c2 : 02 00 00 00
+0x412c6 : 00 7F 02 00
+0x412ca : 00 FF 02 7F
+0x412ce : 02 00 00 7F
+0x412d2 : 02 DF 01 FF
+0x412d6 : 02 7F 02 DF
+0x412da : 01 00 00 DF
+0x412de : 01 FF 02 00
+0x412e2 : 00 DF 01 00
+0x412e6 : 00 00 00 FF
+0x412ea : 02 00 00 00
+0x412ee : 00 7F 02 DF
+0x412f2 : 01 1C 02 7F
+0x412f6 : 02 00 00 00
+0x412fa : 00 DF 01 03
+0x412fe : 04 83 01 F0
+0x41302 : 00 28 00 E0
+0x41306 : 000002ff ; 0000 0000 027f 	.insn	10, 0x027f0000000002ff
+0x41308 : 00 00 00 00
+0x4130c : 7F 02 00 00
+0x41310 : 000002ff ; 027f 0000 027f 	.insn	10, 0x01df027f0000027f02ff
+0x41312 : 7F 02 00 00
+0x41316 : 7F 02 DF 01
+0x4131a : 000002ff ; 027f 01df 0000 	.insn	10, 0x01df000001df027f02ff
+0x4131c : 7F 02 DF 01
+0x41320 : 00 00 DF 01
+0x41324 : 000002ff ; 0000 01df 0000 	.insn	10, 0x01df000002ff
+0x41326 : 00 00 DF 01
+0x4132a : 00 00 00 00
+0x4132e : 000002ff ; 0000 0000 027f 	.insn	10, 0x01df027f0000000002ff
+0x41330 : 00 00 00 00
+0x41334 : 7F 02 DF 01
+0x41338 : 1C 02
+0x4133a : 0000027f ; 0000 0000 01df 	.insn	10, 0x040301df00000000027f
+0x4133c : 00 00 00 00
+0x41340 : DF 01 03 04
+0x41344 : 96 01 F0 00
+0x41348 : 28 00 E0 FF
+0x4134c : 02 00 00 00
+0x41350 : 00 7F 02 00
+0x41354 : 00 FF 02 7F
+0x41358 : 02 00 00 7F
+0x4135c : 02 DF 01 FF
+0x41360 : 02 7F 02 DF
+0x41364 : 01 00 00 DF
+0x41368 : 01 FF 02 00
+0x4136c : 00 DF 01 00
+0x41370 : 00 00 00 FF
+0x41374 : 02 00 00 00
+0x41378 : 00 7F 02 DF
+0x4137c : 01 1C 02 7F
+0x41380 : 02 00 00 00
+0x41384 : 00 DF 01 03
+0x41388 : 04 AA 01 F0
+0x4138c : 00 28 00 E0
+0x41390 : 000002ff ; 0000 0000 027f 	.insn	10, 0x027f0000000002ff
+0x41392 : 00 00 00 00
+0x41396 : 7F 02 00 00
+0x4139a : 000002ff ; 027f 0000 027f 	.insn	10, 0x01df027f0000027f02ff
+0x4139c : 7F 02 00 00
+0x413a0 : 7F 02 DF 01
+0x413a4 : 000002ff ; 027f 01df 0000 	.insn	10, 0x01df000001df027f02ff
+0x413a6 : 7F 02 DF 01
+0x413aa : 00 00 DF 01
+0x413ae : 000002ff ; 0000 01df 0000 	.insn	10, 0x01df000002ff
+0x413b0 : 00 00 DF 01
+0x413b4 : 00 00 00 00
+0x413b8 : 000002ff ; 0000 0000 027f 	.insn	10, 0x01df027f0000000002ff
+0x413ba : 00 00 00 00
+0x413be : 7F 02 DF 01
+0x413c2 : 1C 02
+0x413c4 : 0000027f ; 0000 0000 01df 	.insn	10, 0x040301df00000000027f
+0x413c6 : 00 00 00 00
+0x413ca : DF 01 03 04
+0x413ce : BD 01 F0 00
+0x413d2 : 28 00 E0 FF
+0x413d6 : 02 00 00 00
+0x413da : 00 7F 02 00
+0x413de : 00 FF 02 7F
+0x413e2 : 02 00 00 7F
+0x413e6 : 02 DF 01 FF
+0x413ea : 02 7F 02 DF
+0x413ee : 01 00 00 DF
+0x413f2 : 01 FF 02 00
+0x413f6 : 00 DF 01 00
+0x413fa : 00 00 00 FF
+0x413fe : 02 00 00 00
+0x41402 : 00 7F 02 DF
+0x41406 : 01 1C 02 7F
+0x4140a : 02 00 00 00
+0x4140e : 00 DF 01 03
+0x41412 : 04 D0 01 F0
+0x41416 : 00 28 00 E0
+0x4141a : 000002ff ; 0000 0000 027f 	.insn	10, 0x027f0000000002ff
+0x4141c : 00 00 00 00
+0x41420 : 7F 02 00 00
+0x41424 : 000002ff ; 027f 0000 027f 	.insn	10, 0x01df027f0000027f02ff
+0x41426 : 7F 02 00 00
+0x4142a : 7F 02 DF 01
+0x4142e : 000002ff ; 027f 01df 0000 	.insn	10, 0x01df000001df027f02ff
+0x41430 : 7F 02 DF 01
+0x41434 : 00 00 DF 01
+0x41438 : 000002ff ; 0000 01df 0000 	.insn	10, 0x01df000002ff
+0x4143a : 00 00 DF 01
+0x4143e : 00 00 00 00
+0x41442 : 000002ff ; 0000 0000 027f 	.insn	10, 0x01df027f0000000002ff
+0x41444 : 00 00 00 00
+0x41448 : 7F 02 DF 01
+0x4144c : 1C 02
+0x4144e : 0000027f ; 0000 0000 01df 	.insn	10, 0x040301df00000000027f
+0x41450 : 00 00 00 00
+0x41454 : DF 01 03 04
+0x41458 : 00f001e3 ; beq	zero,a5,41c5a <user_main+0x1406>
+0x4145c : 28 00 E0 FF
+0x41460 : 02 00 00 00
+0x41464 : 00 7F 02 00
+0x41468 : 00 FF 02 7F
+0x4146c : 02 00 00 7F
+0x41470 : 02 DF 01 FF
+0x41474 : 02 7F 02 DF
+0x41478 : 01 00 00 DF
+0x4147c : 01 FF 02 00
+0x41480 : 00 DF 01 00
+0x41484 : 00 00 00 FF
+0x41488 : 02 00 00 00
+0x4148c : 00 7F 02 DF
+0x41490 : 01 1C 02 7F
+0x41494 : 02 00 00 00
+0x41498 : 00 DF 01 03
+0x4149c : 04 F7 01 F0
+0x414a0 : 00 28 00 E0
+0x414a4 : 000002ff ; 0000 0000 027f 	.insn	10, 0x027f0000000002ff
+0x414a6 : 00 00 00 00
+0x414aa : 7F 02 00 00
+0x414ae : 000002ff ; 027f 0000 027f 	.insn	10, 0x01df027f0000027f02ff
+0x414b0 : 7F 02 00 00
+0x414b4 : 7F 02 DF 01
+0x414b8 : 000002ff ; 027f 01df 0000 	.insn	10, 0x01df000001df027f02ff
+0x414ba : 7F 02 DF 01
+0x414be : 00 00 DF 01
+0x414c2 : 000002ff ; 0000 01df 0000 	.insn	10, 0x01df000002ff
+0x414c4 : 00 00 DF 01
+0x414c8 : 00 00 00 00
+0x414cc : 000002ff ; 0000 0000 027f 	.insn	10, 0x01df027f0000000002ff
+0x414ce : 00 00 00 00
+0x414d2 : 7F 02 DF 01
+0x414d6 : 1C 02
+0x414d8 : 0000027f ; 0000 0000 01df 	.insn	10, 0x040301df00000000027f
+0x414da : 00 00 00 00
+0x414de : DF 01 03 04
+0x414e2 : 0A 02 F0 00
+0x414e6 : 28 00 E0 FF
+0x414ea : 02 00 00 00
+0x414ee : 00 7F 02 00
+0x414f2 : 00 FF 02 7F
+0x414f6 : 02 00 00 7F
+0x414fa : 02 DF 01 FF
+0x414fe : 02 7F 02 DF
+0x41502 : 01 00 00 DF
+0x41506 : 01 FF 02 00
+0x4150a : 00 DF 01 00
+0x4150e : 00 00 00 FF
+0x41512 : 02 00 00 00
+0x41516 : 00 7F 02 DF
+0x4151a : 01 1C 02 7F
+0x4151e : 02 00 00 00
+0x41522 : 00 DF 01 03
+0x41526 : 04 1D 02 F0
+0x4152a : 00 28 00 E0
+0x4152e : 000002ff ; 0000 0000 027f 	.insn	10, 0x027f0000000002ff
+0x41530 : 00 00 00 00
+0x41534 : 7F 02 00 00
+0x41538 : 000002ff ; 027f 0000 027f 	.insn	10, 0x01df027f0000027f02ff
+0x4153a : 7F 02 00 00
+0x4153e : 7F 02 DF 01
+0x41542 : 000002ff ; 027f 01df 0000 	.insn	10, 0x01df000001df027f02ff
+0x41544 : 7F 02 DF 01
+0x41548 : 00 00 DF 01
+0x4154c : 000002ff ; 0000 01df 0000 	.insn	10, 0x01df000002ff
+0x4154e : 00 00 DF 01
+0x41552 : 00 00 00 00
+0x41556 : 000002ff ; 0000 0000 027f 	.insn	10, 0x01df027f0000000002ff
+0x41558 : 00 00 00 00
+0x4155c : 7F 02 DF 01
+0x41560 : 1C 02
+0x41562 : 0000027f ; 0000 0000 01df 	.insn	10, 0x040301df00000000027f
+0x41564 : 00 00 00 00
+0x41568 : DF 01 03 04
+0x4156c : 30 02 F0 00
+0x41570 : 28 00 E0 FF
+0x41574 : 02 00 00 00
+0x41578 : 00 7F 02 00
+0x4157c : 00 FF 02 7F
+0x41580 : 02 00 00 7F
+0x41584 : 02 DF 01 FF
+0x41588 : 02 7F 02 DF
+0x4158c : 01 00 00 DF
+0x41590 : 01 FF 02 00
+0x41594 : 00 DF 01 00
+0x41598 : 00 00 00 FF
+0x4159c : 02 00 00 00
+0x415a0 : 00 7F 02 DF
+0x415a4 : 01 1C 02 7F
+0x415a8 : 02 00 00 00
+0x415ac : 00 DF 01 03
+0x415b0 : 04 44 02 F0
+0x415b4 : 00 28 00 E0
+0x415b8 : 000002ff ; 0000 0000 027f 	.insn	10, 0x027f0000000002ff
+0x415ba : 00 00 00 00
+0x415be : 7F 02 00 00
+0x415c2 : 000002ff ; 027f 0000 027f 	.insn	10, 0x01df027f0000027f02ff
+0x415c4 : 7F 02 00 00
+0x415c8 : 7F 02 DF 01
+0x415cc : 000002ff ; 027f 01df 0000 	.insn	10, 0x01df000001df027f02ff
+0x415ce : 7F 02 DF 01
+0x415d2 : 00 00 DF 01
+0x415d6 : 000002ff ; 0000 01df 0000 	.insn	10, 0x01df000002ff
+0x415d8 : 00 00 DF 01
+0x415dc : 00 00 00 00
+0x415e0 : 000002ff ; 0000 0000 027f 	.insn	10, 0x01df027f0000000002ff
+0x415e2 : 00 00 00 00
+0x415e6 : 7F 02 DF 01
+0x415ea : 1C 02
+0x415ec : 0000027f ; 0000 0000 01df 	.insn	10, 0x040301df00000000027f
+0x415ee : 00 00 00 00
+0x415f2 : DF 01 03 04
+0x415f6 : 57 02 F0 00
+0x415fa : 28 00 E0 FF
+0x415fe : 00 00 00 00
+0x41602 : 00 00 45 00
+0x41606 : 00 00 8A 00
+0x4160a : 00 00 CF 00
+0x4160e : 00 00 14 01
+0x41612 : 00 00 59 01
+0x41616 : 00 00 9E 01
+0x4161a : 00 00
+0x4161c : 000001e3 ; beqz	zero,41e1e <user_main+0x15ca>
+0x41620 : 28 02 00 00
+0x41624 : 6D 02 00 00
+0x41628 : B2 02 00 00
+0x4162c : F7 02 00 00
+0x41630 : 3C 03 00 00
+0x41634 : 81 03 00 00
+0x41638 : C6 03 00 00
+0x4163c : 0B 04 00 00
+0x41640 : 50 04 00 00
+0x41644 : 95 04 00 00
+0x41648 : DA 04 00 00
+0x4164c : 0000051f ; 0000 0564      	.insn	6, 0x05640000051f
+0x4164e : 00 00 64 05
+0x41652 : 00 00 A9 05
+0x41656 : 00 00 EE 05
+0x4165a : 00 00
+0x4165c : 00000633 ; add	a2,zero,zero
+0x41660 : 78 06 00 00
+0x41664 : BD 06 00 00
+0x41668 : 02 07 00 00
+0x4166c : 47 07 00 00
+0x41670 : 8C 07 00 00
+0x41674 : D1 07 00 00

@@ -1,4 +1,5 @@
 use crate::display;
+use crate::svg_data;
 
 const MAX_X: u16 = 639;
 const MAX_Y: u16 = 479;
@@ -122,4 +123,19 @@ pub fn render(bytecode: &[u8]) {
             }
         }
     }
+}
+
+pub fn render_frame(frame_index: usize) {
+    if frame_index >= svg_data::FRAME_COUNT {
+        return;
+    }
+    let start = match svg_data::FRAME_OFFSETS.get(frame_index) {
+        Some(offset) => *offset as usize,
+        None => return,
+    };
+    let data = svg_data::FRAMES_DATA;
+    if start >= data.len() {
+        return;
+    }
+    render(&data[start..]);
 }

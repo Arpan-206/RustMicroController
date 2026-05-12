@@ -5,8 +5,8 @@ MEMORY {
     UMODE (rwx) : ORIGIN = 0x00040000, LENGTH = 256K
 }
 
-PROVIDE(__os_stack_size = 768);
-PROVIDE(__user_stack_size = 1536);
+PROVIDE(__os_stack_size = 1024);
+PROVIDE(__user_stack_size = 2048);
 
 SECTIONS {
     . = 0x00000000;

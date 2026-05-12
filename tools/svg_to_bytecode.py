@@ -6,6 +6,12 @@ Supported elements:
   - line, rect, circle, polyline, polygon
   - path with M/L/Z commands only (absolute or relative)
 
+Multi-frame mode:
+  python svg_to_bytecode.py frame_000.svg frame_001.svg ...
+
+Test mode:
+  python svg_to_bytecode.py --test
+
 The output is written to src/svg_data.rs by default.
 """
 
@@ -32,6 +38,42 @@ NAMED_COLORS = {
     "cyan": (0, 255, 255),
     "magenta": (255, 0, 255),
 }
+
+
+class Bounds:
+    def __init__(self) -> None:
+        self.min_x: float | None = None
+        self.max_x: float | None = None
+        self.min_y: float | None = None
+        self.max_y: float | None = None
+
+    def update(self, x: float, y: float) -> None:
+        if self.min_x is None or x < self.min_x:
+            self.min_x = x
+        if self.max_x is None or x > self.max_x:
+            self.max_x = x
+        if self.min_y is None or y < self.min_y:
+            self.min_y = y
+        if self.max_y is None or y > self.max_y:
+            self.max_y = y
+
+    def finalize(self) -> tuple[float, float, float, float]:
+        if (
+            self.min_x is None
+            or self.max_x is None
+            or self.min_y is None
+            or self.max_y is None
+        ):
+            return 0.0, 1.0, 0.0, 1.0
+        min_x = self.min_x
+        max_x = self.max_x
+        min_y = self.min_y
+        max_y = self.max_y
+        if max_x - min_x <= 0.0:
+            max_x = min_x + 1.0
+        if max_y - min_y <= 0.0:
+            max_y = min_y + 1.0
+        return min_x, max_x, min_y, max_y
 
 
 def strip_ns(tag: str) -> str:
@@ -188,36 +230,12 @@ def emit_u16(out: list[int], val: int) -> None:
     out.append((val >> 8) & 0xFF)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Convert SVG to Rust bytecode")
-    parser.add_argument("input", help="Input SVG path")
-    parser.add_argument(
-        "-o",
-        "--output",
-        default=os.path.join("src", "svg_data.rs"),
-        help="Output Rust file (default: src/svg_data.rs)",
-    )
-    args = parser.parse_args()
-
-    tree = ET.parse(args.input)
+def parse_svg_to_ops(path: str) -> tuple[list[tuple], Bounds]:
+    tree = ET.parse(path)
     root = tree.getroot()
 
     ops: list[tuple] = []
-    min_x = None
-    max_x = None
-    min_y = None
-    max_y = None
-
-    def update_bounds(x: float, y: float) -> None:
-        nonlocal min_x, max_x, min_y, max_y
-        if min_x is None or x < min_x:
-            min_x = x
-        if max_x is None or x > max_x:
-            max_x = x
-        if min_y is None or y < min_y:
-            min_y = y
-        if max_y is None or y > max_y:
-            max_y = y
+    bounds = Bounds()
 
     for elem in root.iter():
         tag = strip_ns(elem.tag)
@@ -228,8 +246,8 @@ def main() -> int:
             y2 = parse_float(elem.get("y2"))
             col = pick_color(elem, "stroke")
             ops.append(("line", x1, y1, x2, y2, col))
-            update_bounds(x1, y1)
-            update_bounds(x2, y2)
+            bounds.update(x1, y1)
+            bounds.update(x2, y2)
         elif tag == "rect":
             x = parse_float(elem.get("x"))
             y = parse_float(elem.get("y"))
@@ -244,8 +262,8 @@ def main() -> int:
                 ops.append(("line", x + w, y, x + w, y + h, stroke_col))
                 ops.append(("line", x + w, y + h, x, y + h, stroke_col))
                 ops.append(("line", x, y + h, x, y, stroke_col))
-            update_bounds(x, y)
-            update_bounds(x + w, y + h)
+            bounds.update(x, y)
+            bounds.update(x + w, y + h)
         elif tag == "circle":
             cx = parse_float(elem.get("cx"))
             cy = parse_float(elem.get("cy"))
@@ -256,8 +274,8 @@ def main() -> int:
             if col is None:
                 col = DEFAULT_COL
             ops.append(("circle", cx, cy, r, col))
-            update_bounds(cx - r, cy - r)
-            update_bounds(cx + r, cy + r)
+            bounds.update(cx - r, cy - r)
+            bounds.update(cx + r, cy + r)
         elif tag in ("polyline", "polygon"):
             points = parse_points(elem.get("points"))
             if len(points) >= 2:
@@ -271,23 +289,45 @@ def main() -> int:
                     x2, y2 = points[0]
                     ops.append(("line", x1, y1, x2, y2, col))
                 for x, y in points:
-                    update_bounds(x, y)
+                    bounds.update(x, y)
         elif tag == "path":
             segments = parse_path(elem.get("d"))
             if segments:
                 col = pick_color(elem, "stroke")
                 for x1, y1, x2, y2 in segments:
                     ops.append(("line", x1, y1, x2, y2, col))
-                    update_bounds(x1, y1)
-                    update_bounds(x2, y2)
+                    bounds.update(x1, y1)
+                    bounds.update(x2, y2)
         else:
             continue
 
-    if min_x is None or max_x is None or min_y is None or max_y is None:
-        min_x = 0.0
-        min_y = 0.0
-        max_x = 1.0
-        max_y = 1.0
+    return ops, bounds
+
+
+def bounds_from_ops(ops: list[tuple]) -> Bounds:
+    bounds = Bounds()
+    for op in ops:
+        kind = op[0]
+        if kind == "line":
+            _, x1, y1, x2, y2, _ = op
+            bounds.update(x1, y1)
+            bounds.update(x2, y2)
+        elif kind == "rect":
+            _, x, y, w, h, _ = op
+            bounds.update(x, y)
+            bounds.update(x + w, y + h)
+        elif kind == "circle":
+            _, cx, cy, r, _ = op
+            bounds.update(cx - r, cy - r)
+            bounds.update(cx + r, cy + r)
+        elif kind == "pixel":
+            _, x, y, _ = op
+            bounds.update(x, y)
+    return bounds
+
+
+def ops_to_bytecode(ops: list[tuple], bounds: Bounds) -> list[int]:
+    min_x, max_x, min_y, max_y = bounds.finalize()
 
     width = max_x - min_x
     height = max_y - min_y
@@ -304,7 +344,15 @@ def main() -> int:
 
     for op in ops:
         kind = op[0]
-        if kind == "line":
+        if kind == "pixel":
+            _, x, y, col = op
+            sx = clamp_int((x - min_x) * scale, 0, 639)
+            sy = clamp_int((y - min_y) * scale, 0, 479)
+            bytecode.append(0x01)
+            emit_u16(bytecode, sx)
+            emit_u16(bytecode, sy)
+            bytecode.append(int(col) & 0xFF)
+        elif kind == "line":
             _, x1, y1, x2, y2, col = op
             sx1 = clamp_int((x1 - min_x) * scale, 0, 639)
             sy1 = clamp_int((y1 - min_y) * scale, 0, 479)
@@ -340,20 +388,123 @@ def main() -> int:
             bytecode.append(int(col) & 0xFF)
 
     bytecode.append(0xFF)
+    return bytecode
+
+
+def generate_test_frames(count: int) -> list[list[tuple]]:
+    frames: list[list[tuple]] = []
+    if count <= 0:
+        return frames
+
+    radius = 40.0
+    x_start = radius
+    x_end = 639.0 - radius
+    step = 0.0 if count <= 1 else (x_end - x_start) / float(count - 1)
+
+    for i in range(count):
+        cx = x_start + step * i
+        cy = 240.0
+
+        ops: list[tuple] = []
+        border_col = 0xFF
+        ops.append(("line", 0.0, 0.0, 639.0, 0.0, border_col))
+        ops.append(("line", 639.0, 0.0, 639.0, 479.0, border_col))
+        ops.append(("line", 639.0, 479.0, 0.0, 479.0, border_col))
+        ops.append(("line", 0.0, 479.0, 0.0, 0.0, border_col))
+        ops.append(("line", 0.0, 0.0, 639.0, 479.0, 0x1C))
+        ops.append(("line", 639.0, 0.0, 0.0, 479.0, 0x03))
+        ops.append(("circle", cx, cy, radius, 0xE0))
+
+        frames.append(ops)
+
+    return frames
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Convert SVG to Rust bytecode")
+    parser.add_argument(
+        "inputs",
+        nargs="*",
+        help="Input SVG frames in order",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default=os.path.join("src", "svg_data.rs"),
+        help="Output Rust file (default: src/svg_data.rs)",
+    )
+    parser.add_argument(
+        "--test",
+        action="store_true",
+        help="Generate 30 test frames programmatically",
+    )
+    args = parser.parse_args()
+
+    frames: list[tuple[list[tuple], Bounds]] = []
+    sources: list[str] = []
+
+    if args.test:
+        test_frames = generate_test_frames(30)
+        for ops in test_frames:
+            bounds = bounds_from_ops(ops)
+            frames.append((ops, bounds))
+        sources.append("<generated test frames>")
+    else:
+        if not args.inputs:
+            parser.error("No input SVG files provided")
+        for path in args.inputs:
+            ops, bounds = parse_svg_to_ops(path)
+            frames.append((ops, bounds))
+            sources.append(path)
+
+    if not frames:
+        parser.error("No frames to encode")
+
+    frames_bytecode: list[list[int]] = []
+    for ops, bounds in frames:
+        frames_bytecode.append(ops_to_bytecode(ops, bounds))
+
+    offsets: list[int] = []
+    cursor = 0
+    for bc in frames_bytecode:
+        offsets.append(cursor)
+        cursor += len(bc)
+
+    frames_data: list[int] = []
+    for bc in frames_bytecode:
+        frames_data.extend(bc)
 
     with open(args.output, "w", encoding="utf-8") as f:
         f.write("// Auto-generated by tools/svg_to_bytecode.py\n")
-        f.write(f"// Source: {args.input}\n")
-        f.write("pub static SVG_BYTECODE: &[u8] = &[\n")
-        for i, b in enumerate(bytecode):
+        if sources:
+            f.write("// Sources:\n")
+            for src in sources:
+                f.write(f"//   {src}\n")
+        f.write("// Byte offsets into FRAMES_DATA where each frame starts\n")
+        f.write("pub static FRAME_OFFSETS: &[u32] = &[\n")
+        for i, off in enumerate(offsets):
+            if i % 8 == 0:
+                f.write("    ")
+            f.write(f"{off}u32, ")
+            if i % 8 == 7:
+                f.write("\n")
+        if len(offsets) % 8 != 0:
+            f.write("\n")
+        f.write("];\n\n")
+
+        f.write("// All frames concatenated, each terminated with 0xFF\n")
+        f.write("pub static FRAMES_DATA: &[u8] = &[\n")
+        for i, b in enumerate(frames_data):
             if i % 12 == 0:
                 f.write("    ")
             f.write(f"0x{b:02X}, ")
             if i % 12 == 11:
                 f.write("\n")
-        if len(bytecode) % 12 != 0:
+        if len(frames_data) % 12 != 0:
             f.write("\n")
-        f.write("];\n")
+        f.write("];\n\n")
+
+        f.write(f"pub const FRAME_COUNT: usize = {len(frames_bytecode)};\n")
 
     return 0
 
