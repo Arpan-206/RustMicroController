@@ -2,32 +2,56 @@
 #![no_main]
 
 mod display;
+mod dsf;
+mod io;
+mod scene;
 mod syscall;
 
 use core::panic::PanicInfo;
 
-use display::{draw_circle, draw_line, draw_rect, draw_rect_outline, Colour};
+use display::draw_rect;
+
+mod scene_data {
+    include!(concat!(env!("OUT_DIR"), "/scene_gen.rs"));
+}
+
+use scene_data::SCENE;
 
 #[no_mangle]
 pub extern "C" fn user_main() {
     syscall::vdu_init(0); // 8bpp mode
 
-    syscall::vdu_vsync();
-    draw_rect(0, 0, 639, 479, Colour::BLACK);
+    let scene = &SCENE;
+    let mut state = scene::SceneState::from_scene(scene);
 
-    // Blue filled rectangle with green outline
-    draw_rect(80, 60, 300, 200, Colour::BLUE);
-    draw_rect_outline(80, 60, 300, 200, Colour::GREEN);
+    draw_rect(0, 0, 639, 479, state.background);
+    state.draw_all();
 
-    // Red-outlined triangle
-    draw_line(360, 80, 520, 220, Colour::RED);
-    draw_line(520, 220, 260, 220, Colour::RED);
-    draw_line(260, 220, 360, 80, Colour::RED);
+    io::timer_start(io::TIMER_1MS);
+    syscall::counter_clr();
 
-    // Small circle
-    draw_circle(500, 120, 20, Colour::WHITE);
+    let fps = if scene.timeline.fps == 0 {
+        1
+    } else {
+        scene.timeline.fps
+    };
+    let mut ticks_per_frame = 1000 / fps;
+    if ticks_per_frame == 0 {
+        ticks_per_frame = 1;
+    }
 
-    loop {}
+    let mut frame_index = 0usize;
+    loop {
+        let start = syscall::counter_get();
+
+        if scene.timeline.frame_count > 0 {
+            let frame = &scene.timeline.frames[frame_index];
+            state.apply_frame(frame);
+            frame_index = (frame_index + 1) % scene.timeline.frame_count;
+        }
+
+        while syscall::counter_get().wrapping_sub(start) < ticks_per_frame {}
+    }
 }
 
 #[panic_handler]
