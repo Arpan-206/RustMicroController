@@ -3,10 +3,6 @@
         .equ LCD_BASE,       0x00010100
         .equ VDU_BASE,       0x00010600
         .equ VDU_MODE,       0x04
-        .equ VDU_STATUS,     0x08
-        .equ VDU_WIDTH,      0x10
-        .equ VDU_HEIGHT,     0x14
-        .equ FRAME_BASE,     0x00100000
         .equ DRAW_BASE,      0x00020000
         .equ DRAW_X0,        0x00
         .equ DRAW_Y0,        0x04
@@ -19,7 +15,6 @@
         .equ DRAW_OP_RECT,   1
         .equ DRAW_OP_CIRCLE, 2
         .equ DRAW_OP_LINE,   3
-        .equ VDU_VBLANK_BIT, 0x04
         .equ MPP_MASK,       0x00001800
         .equ CAUSE_ECALL_U,  8
         .equ CAUSE_M_EXT,    0x8000000B
@@ -33,16 +28,9 @@
         .equ SYS_COUNTER_CLR, 5
         .equ SYS_TIMER_START, 6
         .equ SYS_KEY_READ,    7
-        .equ SYS_VDU_INIT,    8
-        .equ SYS_VDU_PIXEL,   9
         .equ SYS_DRAW_RECT,   10
         .equ SYS_DRAW_CIRCLE, 11
         .equ SYS_DRAW_LINE,   12
-        .equ SYS_VDU_FILL,    13
-        .equ SYS_VDU_VSYNC,   14
-        .equ SYS_VDU_GETW,    15
-        .equ SYS_VDU_GETH,    16
-        .equ SYS_VDU_HLINE_BUF, 17
         .equ SYS_MAX,         18
         .equ KEY_NONE,       0x00
         .equ DEBOUNCE_MAX,   5
@@ -120,6 +108,10 @@ init:
         li      t1, CLR_COL
         sw      t1, PIO_DATA(t0)
 
+        # VDU: fixed 8bpp mode for the draw engine.
+        li      t0, VDU_BASE
+        sw      zero, VDU_MODE(t0)
+
         # Default timer reload value
         la      t0, timer_reload
         li      t1, TIMER_1S
@@ -181,16 +173,16 @@ sys_table:
         .word   sys_counter_clr    # 5
         .word   sys_timer_start    # 6
         .word   sys_key_read       # 7
-        .word   sys_vdu_init       # 8
-        .word   sys_vdu_pixel      # 9
+        .word   trap_error         # 8
+        .word   trap_error         # 9
         .word   sys_draw_rect      # 10
         .word   sys_draw_circle    # 11
         .word   sys_draw_line      # 12
-        .word   sys_vdu_fill       # 13
-        .word   sys_vdu_vsync      # 14
-        .word   sys_vdu_getw       # 15
-        .word   sys_vdu_geth       # 16
-        .word   sys_vdu_hline_buf  # 17
+        .word   trap_error         # 13
+        .word   trap_error         # 14
+        .word   trap_error         # 15
+        .word   trap_error         # 16
+        .word   trap_error         # 17
 
 trap_error:
         li      t1, HALT_PORT
@@ -324,65 +316,6 @@ fifo_empty:
         li      a0, KEY_NONE
         j       trap_return
 
-        #;--- vdu syscalls ---
-sys_vdu_init:
-        addi    sp, sp, -16
-        sw      s0, 0(sp)
-        sw      s1, 4(sp)
-        sw      s2, 8(sp)
-        sw      s3, 12(sp)
-
-        la      s0, vdu_mode
-        sw      a0, 0(s0)
-        li      s0, VDU_BASE
-        sw      a0, VDU_MODE(s0)
-
-        li      a0, 0
-        jal     vdu_fill_impl
-
-        lw      s3, 12(sp)
-        lw      s2, 8(sp)
-        lw      s1, 4(sp)
-        lw      s0, 0(sp)
-        addi    sp, sp, 16
-        j       trap_return
-
-sys_vdu_pixel:
-        addi    sp, sp, -16
-        sw      s0, 0(sp)
-        sw      s1, 4(sp)
-        sw      s2, 8(sp)
-        sw      s3, 12(sp)
-
-        li      s0, VDU_BASE
-        lw      s1, VDU_WIDTH(s0)
-        bgeu    a0, s1, vdu_pixel_done
-        lw      s2, VDU_HEIGHT(s0)
-        bgeu    a1, s2, vdu_pixel_done
-        la      s3, vdu_mode
-        lw      s3, 0(s3)
-
-        mul     s2, a1, s1
-        add     s2, s2, a0
-        li      s0, FRAME_BASE
-        beqz    s3, vdu_pixel_8bpp
-        slli    s2, s2, 1
-        add     s0, s0, s2
-        sh      a2, 0(s0)
-        j       vdu_pixel_done
-
-vdu_pixel_8bpp:
-        add     s0, s0, s2
-        sb      a2, 0(s0)
-
-vdu_pixel_done:
-        lw      s3, 12(sp)
-        lw      s2, 8(sp)
-        lw      s1, 4(sp)
-        lw      s0, 0(sp)
-        addi    sp, sp, 16
-        j       trap_return
-
 sys_draw_rect:
         li      t0, DRAW_BASE
         sw      a0, DRAW_X0(t0)
@@ -438,170 +371,6 @@ sys_draw_line_busy:
         andi    t1, t1, 1
         bnez    t1, sys_draw_line_busy
         li      a0, 0
-        j       trap_return
-
-sys_vdu_fill:
-        addi    sp, sp, -16
-        sw      s0, 0(sp)
-        sw      s1, 4(sp)
-        sw      s2, 8(sp)
-        sw      s3, 12(sp)
-
-        jal     vdu_fill_impl
-
-        lw      s3, 12(sp)
-        lw      s2, 8(sp)
-        lw      s1, 4(sp)
-        lw      s0, 0(sp)
-        addi    sp, sp, 16
-        j       trap_return
-
-vdu_fill_impl:
-        li      s0, VDU_BASE
-        lw      s1, VDU_WIDTH(s0)
-        lw      s2, VDU_HEIGHT(s0)
-        mul     s1, s1, s2
-
-        la      s3, vdu_mode
-        lw      s3, 0(s3)
-
-        li      s0, FRAME_BASE
-        beqz    s3, vdu_fill_8bpp
-
-vdu_fill_16bpp:
-        li      s2, 0xffff
-        and     s2, a0, s2
-        slli    s3, s2, 16
-        or      s2, s2, s3
-        srli    s1, s1, 1
-vdu_fill_16_loop:
-        beqz    s1, vdu_fill_done
-        sw      s2, 0(s0)
-        addi    s0, s0, 4
-        addi    s1, s1, -1
-        bnez    s1, vdu_fill_16_loop
-        j       vdu_fill_done
-
-vdu_fill_8bpp:
-        andi    s2, a0, 0xff
-        slli    s3, s2, 8
-        or      s2, s2, s3
-        slli    s3, s2, 16
-        or      s2, s2, s3
-        srli    s1, s1, 2
-vdu_fill_8_loop:
-        beqz    s1, vdu_fill_done
-        sw      s2, 0(s0)
-        addi    s0, s0, 4
-        addi    s1, s1, -1
-        bnez    s1, vdu_fill_8_loop
-
-vdu_fill_done:
-        ret
-
-sys_vdu_vsync:
-        addi    sp, sp, -16
-        sw      s0, 0(sp)
-        sw      s1, 4(sp)
-        sw      s2, 8(sp)
-        sw      s3, 12(sp)
-
-        li      s0, VDU_BASE
-        li      s1, VDU_VBLANK_BIT
-
-vdu_vsync_wait_low1:
-        lw      s2, VDU_STATUS(s0)
-        and     s2, s2, s1
-        bnez    s2, vdu_vsync_wait_low1
-
-vdu_vsync_wait_high:
-        lw      s2, VDU_STATUS(s0)
-        and     s2, s2, s1
-        beqz    s2, vdu_vsync_wait_high
-
-vdu_vsync_wait_low2:
-        lw      s2, VDU_STATUS(s0)
-        and     s2, s2, s1
-        bnez    s2, vdu_vsync_wait_low2
-
-        lw      s3, 12(sp)
-        lw      s2, 8(sp)
-        lw      s1, 4(sp)
-        lw      s0, 0(sp)
-        addi    sp, sp, 16
-        j       trap_return
-
-sys_vdu_getw:
-        addi    sp, sp, -16
-        sw      s0, 0(sp)
-        sw      s1, 4(sp)
-        sw      s2, 8(sp)
-        sw      s3, 12(sp)
-
-        li      s0, VDU_BASE
-        lw      a0, VDU_WIDTH(s0)
-
-        lw      s3, 12(sp)
-        lw      s2, 8(sp)
-        lw      s1, 4(sp)
-        lw      s0, 0(sp)
-        addi    sp, sp, 16
-        j       trap_return
-
-sys_vdu_geth:
-        addi    sp, sp, -16
-        sw      s0, 0(sp)
-        sw      s1, 4(sp)
-        sw      s2, 8(sp)
-        sw      s3, 12(sp)
-
-        li      s0, VDU_BASE
-        lw      a0, VDU_HEIGHT(s0)
-
-        lw      s3, 12(sp)
-        lw      s2, 8(sp)
-        lw      s1, 4(sp)
-        lw      s0, 0(sp)
-        addi    sp, sp, 16
-        j       trap_return
-
-        # SYS_VDU_HLINE_BUF (17)
-        # a0 = y coordinate
-        # a1 = pointer to [u8; 640] colour buffer (user address)
-        # a2 = length (must be 640)
-        # Writes buf[0..len] to framebuffer row y in 8bpp mode.
-sys_vdu_hline_buf:
-        addi    sp, sp, -20
-        sw      s0, 0(sp)
-        sw      s1, 4(sp)
-        sw      s2, 8(sp)
-        sw      s3, 12(sp)
-        sw      s4, 16(sp)
-
-        # compute dst = FRAME_BASE + y*640
-        li      s0, 640
-        mul     s1, a0, s0
-        li      s0, FRAME_BASE
-        add     s0, s0, s1      # s0 = dst pointer
-        mv      s1, a1          # s1 = src pointer
-        mv      s2, a2          # s2 = remaining count
-
-hline_buf_loop:
-        beqz    s2, hline_buf_done
-        lbu     s3, 0(s1)
-        sb      s3, 0(s0)
-        addi    s0, s0, 1
-        addi    s1, s1, 1
-        addi    s2, s2, -1
-        j       hline_buf_loop
-
-hline_buf_done:
-        lw      s4, 16(sp)
-        lw      s3, 12(sp)
-        lw      s2, 8(sp)
-        lw      s1, 4(sp)
-        lw      s0, 0(sp)
-        addi    sp, sp, 20
         j       trap_return
 
         # ── keypad raw scan ──────────────────────────────────────────
@@ -904,7 +673,6 @@ delay:
         .balign 4
 tick_count:     .word 0
 timer_reload:   .word 0
-vdu_mode:       .word 0
 debounce_cnt:   .space 16
 stable_state:   .space 16
 fifo_buf:       .space FIFO_SIZE

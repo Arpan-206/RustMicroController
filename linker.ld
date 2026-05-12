@@ -1,8 +1,8 @@
 ENTRY(init)
 
 MEMORY {
-    MMODE (rwx) : ORIGIN = 0x00000000, LENGTH = 256K
-    UMODE (rwx) : ORIGIN = 0x00040000, LENGTH = 256K
+    MMODE (rwx) : ORIGIN = 0x00000000, LENGTH = 16K
+    UMODE (rwx) : ORIGIN = 0x00040000, LENGTH = 16K
 }
 
 PROVIDE(__os_stack_size = 1024);

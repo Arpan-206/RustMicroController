@@ -26,8 +26,6 @@ impl Rect {
 }
 
 pub fn run() -> ! {
-    syscall::vdu_init(0);
-
     let background = Colour(generated_scene::BG);
     let mut previous = [Rect::empty(); generated_scene::OBJECT_COUNT];
     let mut next = [Rect::empty(); generated_scene::OBJECT_COUNT];

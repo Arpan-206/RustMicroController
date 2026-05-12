@@ -7,8 +7,13 @@ rustflags = [
     "-C", "link-arg=-Tlinker.ld",
     "-C", "link-arg=-nostdlib",
     "-C", "link-arg=-mno-relax",
-    "-C", "link-arg=-Wl,--no-gc-sections",   # ← -Wl, prefix
     "-C", "target-feature=+zicsr",
     "-C", "link-arg=-march=rv32im_zicsr",
     "-C", "link-arg=-mabi=ilp32",
 ]
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
