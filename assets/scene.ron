@@ -1,12 +1,11 @@
 (
     background: (r: 0, g: 0, b: 0),
-    scene: [
-        Rect(id: "sq", x0: 10, y0: 235, x1: 20, y1: 245, colour: (r: 7, g: 7, b: 3)),
+    fps: 10,
+    objects: [
+        Rect(id: "sq", colour: (r: 7, g: 7, b: 3)),
     ],
-    timeline: Timeline(
-        fps: 10,
-        frames: [
-            Frame(changes: [Move(id: "sq", dx: 5, dy: 1, repeat: 20)]),
-        ],
-    ),
+    keyframes: [
+        At(frame: 0, id: "sq", x0: 10, y0: 235, x1: 20, y1: 245),
+        At(frame: 19, id: "sq", x0: 110, y0: 235, x1: 120, y1: 245),
+    ],
 )
