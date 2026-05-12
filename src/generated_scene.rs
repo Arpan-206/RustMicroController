@@ -21,7 +21,7 @@ pub struct Obj {
 pub const OBJ_SQ_COLOUR: u8 = 0xFF;
 pub const OBJ_SQ_KF: &[Kf] = &[
     Kf { frame: 0, x0: 10, y0: 235, x1: 20, y1: 245 },
-    Kf { frame: 19, x0: 110, y0: 235, x1: 120, y1: 245 },
+    Kf { frame: 19, x0: 110, y0: 235, x1: 120, y1: 150 },
 ];
 
 pub const OBJECT_COUNT: usize = 1;

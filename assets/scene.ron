@@ -6,6 +6,6 @@
     ],
     keyframes: [
         At(frame: 0, id: "sq", x0: 10, y0: 235, x1: 20, y1: 245),
-        At(frame: 19, id: "sq", x0: 110, y0: 235, x1: 120, y1: 245),
+        At(frame: 19, id: "sq", x0: 110, y0: 235, x1: 120, y1: 150),
     ],
 )
