@@ -21,6 +21,8 @@ struct SceneFile {
 #[derive(Deserialize)]
 enum Object {
     Rect { id: String, colour: Colour },
+    Triangle { id: String, colour: Colour },
+    Circle { id: String, colour: Colour },
 }
 
 #[derive(Deserialize)]
@@ -33,6 +35,34 @@ enum Keyframe {
         x1: u16,
         y1: u16,
     },
+    AtTriangle {
+        frame: u16,
+        id: String,
+        x0: u16,
+        y0: u16,
+        x1: u16,
+        y1: u16,
+        x2: u16,
+        y2: u16,
+    },
+    AtCircle {
+        frame: u16,
+        id: String,
+        cx: u16,
+        cy: u16,
+        r: u16,
+    },
+}
+
+#[derive(Copy, Clone)]
+struct GeneratedKf {
+    frame: u16,
+    x0: u16,
+    y0: u16,
+    x1: u16,
+    y1: u16,
+    x2: u16,
+    y2: u16,
 }
 
 fn main() {
@@ -70,9 +100,15 @@ fn generate_scene() {
     output.push_str("    pub y0: u16,\n");
     output.push_str("    pub x1: u16,\n");
     output.push_str("    pub y1: u16,\n");
+    output.push_str("    pub x2: u16,\n");
+    output.push_str("    pub y2: u16,\n");
     output.push_str("}\n\n");
+    output.push_str("pub const KIND_RECT: u8 = 0;\n");
+    output.push_str("pub const KIND_TRIANGLE: u8 = 1;\n");
+    output.push_str("pub const KIND_CIRCLE: u8 = 2;\n\n");
     output.push_str("#[derive(Copy, Clone)]\n");
     output.push_str("pub struct Obj {\n");
+    output.push_str("    pub kind: u8,\n");
     output.push_str("    pub colour: u8,\n");
     output.push_str("    pub keyframes: &'static [Kf],\n");
     output.push_str("}\n\n");
@@ -81,31 +117,22 @@ fn generate_scene() {
     let mut last_frame = 0u16;
 
     for object in &scene.objects {
-        let (id, colour) = match object {
-            Object::Rect { id, colour } => (id, colour),
-        };
+        let id = object_id(object);
         let const_name = const_name(id);
-        if object_names.iter().any(|(name, _)| name == &const_name) {
+        if object_names
+            .iter()
+            .any(|(name, _, _): &(String, &str, &str)| name == &const_name)
+        {
             panic!("duplicate object const name OBJ_{const_name}");
         }
 
         let mut keyframes = Vec::new();
         for keyframe in &scene.keyframes {
-            match keyframe {
-                Keyframe::At {
-                    frame,
-                    id: key_id,
-                    x0,
-                    y0,
-                    x1,
-                    y1,
-                } if key_id == id => {
-                    keyframes.push((*frame, *x0, *y0, *x1, *y1));
-                    if *frame > last_frame {
-                        last_frame = *frame;
-                    }
+            if let Some(kf) = keyframe_for_object(object, keyframe) {
+                keyframes.push(kf);
+                if kf.frame > last_frame {
+                    last_frame = kf.frame;
                 }
-                _ => {}
             }
         }
 
@@ -113,11 +140,11 @@ fn generate_scene() {
             panic!("object {id} has no keyframes");
         }
 
-        keyframes.sort_by_key(|kf| kf.0);
+        keyframes.sort_by_key(|kf| kf.frame);
         let mut i = 1;
         while i < keyframes.len() {
-            if keyframes[i - 1].0 == keyframes[i].0 {
-                panic!("object {id} has duplicate keyframe {}", keyframes[i].0);
+            if keyframes[i - 1].frame == keyframes[i].frame {
+                panic!("object {id} has duplicate keyframe {}", keyframes[i].frame);
             }
             i += 1;
         }
@@ -125,23 +152,26 @@ fn generate_scene() {
         output.push_str(&format!(
             "pub const OBJ_{}_COLOUR: u8 = 0x{:02X};\n",
             const_name,
-            pack_colour(colour)
+            pack_colour(object_colour(object))
         ));
         output.push_str(&format!("pub const OBJ_{}_KF: &[Kf] = &[\n", const_name));
-        for (frame, x0, y0, x1, y1) in &keyframes {
+        for kf in &keyframes {
             output.push_str(&format!(
-                "    Kf {{ frame: {}, x0: {}, y0: {}, x1: {}, y1: {} }},\n",
-                frame, x0, y0, x1, y1
+                "    Kf {{ frame: {}, x0: {}, y0: {}, x1: {}, y1: {}, x2: {}, y2: {} }},\n",
+                kf.frame, kf.x0, kf.y0, kf.x1, kf.y1, kf.x2, kf.y2
             ));
         }
         output.push_str("];\n\n");
-        object_names.push((const_name, id));
+        object_names.push((const_name, id, object_kind_name(object)));
     }
 
     for keyframe in &scene.keyframes {
-        let Keyframe::At { id, .. } = keyframe;
-        if !object_names.iter().any(|(_, object_id)| *object_id == id) {
+        let id = keyframe_id(keyframe);
+        let Some(object) = scene.objects.iter().find(|object| object_id(object) == id) else {
             panic!("keyframe references unknown object {id}");
+        };
+        if !keyframe_matches_object(object, keyframe) {
+            panic!("keyframe kind does not match object {id}");
         }
     }
 
@@ -151,15 +181,118 @@ fn generate_scene() {
     ));
     output.push_str(&format!("pub const LAST_FRAME: u16 = {};\n", last_frame));
     output.push_str("pub const OBJECTS: &[Obj] = &[\n");
-    for (const_name, _) in &object_names {
+    for (const_name, _, kind_name) in &object_names {
         output.push_str(&format!(
-            "    Obj {{ colour: OBJ_{}_COLOUR, keyframes: OBJ_{}_KF }},\n",
-            const_name, const_name
+            "    Obj {{ kind: {}, colour: OBJ_{}_COLOUR, keyframes: OBJ_{}_KF }},\n",
+            kind_name, const_name, const_name
         ));
     }
     output.push_str("];\n");
 
     write_if_changed(Path::new("src/generated_scene.rs"), &output);
+}
+
+fn keyframe_for_object(object: &Object, keyframe: &Keyframe) -> Option<GeneratedKf> {
+    match (object, keyframe) {
+        (
+            Object::Rect { id, .. },
+            Keyframe::At {
+                frame,
+                id: key_id,
+                x0,
+                y0,
+                x1,
+                y1,
+            },
+        ) if key_id == id => Some(GeneratedKf {
+            frame: *frame,
+            x0: *x0,
+            y0: *y0,
+            x1: *x1,
+            y1: *y1,
+            x2: 0,
+            y2: 0,
+        }),
+        (
+            Object::Triangle { id, .. },
+            Keyframe::AtTriangle {
+                frame,
+                id: key_id,
+                x0,
+                y0,
+                x1,
+                y1,
+                x2,
+                y2,
+            },
+        ) if key_id == id => Some(GeneratedKf {
+            frame: *frame,
+            x0: *x0,
+            y0: *y0,
+            x1: *x1,
+            y1: *y1,
+            x2: *x2,
+            y2: *y2,
+        }),
+        (
+            Object::Circle { id, .. },
+            Keyframe::AtCircle {
+                frame,
+                id: key_id,
+                cx,
+                cy,
+                r,
+            },
+        ) if key_id == id => Some(GeneratedKf {
+            frame: *frame,
+            x0: *cx,
+            y0: *cy,
+            x1: *r,
+            y1: 0,
+            x2: 0,
+            y2: 0,
+        }),
+        _ => None,
+    }
+}
+
+fn keyframe_matches_object(object: &Object, keyframe: &Keyframe) -> bool {
+    match (object, keyframe) {
+        (Object::Rect { id, .. }, Keyframe::At { id: key_id, .. })
+        | (Object::Triangle { id, .. }, Keyframe::AtTriangle { id: key_id, .. })
+        | (Object::Circle { id, .. }, Keyframe::AtCircle { id: key_id, .. }) => key_id == id,
+        _ => false,
+    }
+}
+
+fn keyframe_id(keyframe: &Keyframe) -> &str {
+    match keyframe {
+        Keyframe::At { id, .. }
+        | Keyframe::AtTriangle { id, .. }
+        | Keyframe::AtCircle { id, .. } => id,
+    }
+}
+
+fn object_id(object: &Object) -> &str {
+    match object {
+        Object::Rect { id, .. } | Object::Triangle { id, .. } | Object::Circle { id, .. } => id,
+    }
+}
+
+fn object_colour(object: &Object) -> &Colour {
+    match object {
+        Object::Rect { colour, .. }
+        | Object::Triangle { colour, .. }
+        | Object::Circle { colour, .. } => colour,
+    }
+}
+
+fn object_kind_name(object: &Object) -> &'static str {
+    match object {
+        Object::Rect { .. } => "KIND_RECT",
+        Object::Triangle { .. } => "KIND_TRIANGLE",
+        Object::Circle { .. } => "KIND_CIRCLE",
+    }
 }
 
 fn pack_colour(colour: &Colour) -> u8 {

@@ -27,8 +27,31 @@ fn draw_circle_syscall(cx: u16, cy: u16, radius: u16, colour: Colour) {
 }
 
 #[inline(always)]
-fn draw_line_syscall(x0: u16, y0: u16, x1: u16, y1: u16, colour: Colour) {
-    syscall::draw_line(x0 as u32, y0 as u32, x1 as u32, y1 as u32, colour.0 as u32);
+fn draw_line_syscall(x0: u16, y0: u16, x1: u16, y1: u16, thickness: u16, colour: Colour) {
+    syscall::draw_line(
+        x0 as u32,
+        y0 as u32,
+        x1 as u32,
+        y1 as u32,
+        colour.0 as u32,
+        thickness as u32,
+    );
+}
+
+pub fn fill_triangle(x0: u16, y0: u16, x1: u16, y1: u16, x2: u16, y2: u16, colour: u8) {
+    syscall::fill_triangle(
+        x0 as u32,
+        y0 as u32,
+        x1 as u32,
+        y1 as u32,
+        x2 as u32,
+        y2 as u32,
+        colour as u32,
+    );
+}
+
+pub fn fill_circle(cx: u16, cy: u16, radius: u16, colour: u8) {
+    syscall::fill_circle(cx as u32, cy as u32, radius as u32, colour as u32);
 }
 
 pub fn draw_rect(x0: u16, y0: u16, x1: u16, y1: u16, colour: Colour) {
@@ -39,14 +62,14 @@ pub fn draw_circle(cx: u16, cy: u16, radius: u16, colour: Colour) {
     draw_circle_syscall(cx, cy, radius, colour);
 }
 
-pub fn draw_line(x0: u16, y0: u16, x1: u16, y1: u16, colour: Colour) {
-    draw_line_syscall(x0, y0, x1, y1, colour);
+pub fn draw_line(x0: u16, y0: u16, x1: u16, y1: u16, thickness: u16, colour: Colour) {
+    draw_line_syscall(x0, y0, x1, y1, thickness, colour);
 }
 
 // Convenience: 4 draw_line calls for top/bottom/left/right edges
 pub fn draw_rect_outline(x0: u16, y0: u16, x1: u16, y1: u16, colour: Colour) {
-    draw_line(x0, y0, x1, y0, colour);
-    draw_line(x0, y1, x1, y1, colour);
-    draw_line(x0, y0, x0, y1, colour);
-    draw_line(x1, y0, x1, y1, colour);
+    draw_line(x0, y0, x1, y0, 1, colour);
+    draw_line(x0, y1, x1, y1, 1, colour);
+    draw_line(x0, y0, x0, y1, 1, colour);
+    draw_line(x1, y0, x1, y1, 1, colour);
 }

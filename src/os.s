@@ -12,9 +12,14 @@
         .equ DRAW_OPCODE,    0x14
         .equ DRAW_CONTROL,   0x18
         .equ DRAW_STATUS,    0x1C
+        .equ DRAW_X2,        0x20
+        .equ DRAW_Y2,        0x24
+        .equ DRAW_PARAM,     0x28
         .equ DRAW_OP_RECT,   1
         .equ DRAW_OP_CIRCLE, 2
         .equ DRAW_OP_LINE,   3
+        .equ DRAW_OP_TRIANGLE, 4
+        .equ DRAW_OP_FILL_CIRCLE, 5
         .equ MPP_MASK,       0x00001800
         .equ CAUSE_ECALL_U,  8
         .equ CAUSE_M_EXT,    0x8000000B
@@ -31,6 +36,8 @@
         .equ SYS_DRAW_RECT,   10
         .equ SYS_DRAW_CIRCLE, 11
         .equ SYS_DRAW_LINE,   12
+        .equ SYS_FILL_TRIANGLE, 13
+        .equ SYS_FILL_CIRCLE, 14
         .equ SYS_MAX,         18
         .equ KEY_NONE,       0x00
         .equ DEBOUNCE_MAX,   5
@@ -178,8 +185,8 @@ sys_table:
         .word   sys_draw_rect      # 10
         .word   sys_draw_circle    # 11
         .word   sys_draw_line      # 12
-        .word   trap_error         # 13
-        .word   trap_error         # 14
+        .word   sys_fill_triangle  # 13
+        .word   sys_fill_circle    # 14
         .word   trap_error         # 15
         .word   trap_error         # 16
         .word   trap_error         # 17
@@ -361,6 +368,11 @@ sys_draw_line:
         sw      a2, DRAW_X1(t0)
         sw      a3, DRAW_Y1(t0)
         sw      a4, DRAW_COLOUR(t0)
+        mv      t1, a5
+        bnez    t1, sys_draw_line_thickness_ok
+        li      t1, 1
+sys_draw_line_thickness_ok:
+        sw      t1, DRAW_PARAM(t0)
         li      t1, DRAW_OP_LINE
         sw      t1, DRAW_OPCODE(t0)
         li      t1, 1
@@ -370,6 +382,46 @@ sys_draw_line_busy:
         lw      t1, DRAW_STATUS(t0)
         andi    t1, t1, 1
         bnez    t1, sys_draw_line_busy
+        li      a0, 0
+        j       trap_return
+
+sys_fill_triangle:
+        li      t0, DRAW_BASE
+        sw      a0, DRAW_X0(t0)
+        sw      a1, DRAW_Y0(t0)
+        sw      a2, DRAW_X1(t0)
+        sw      a3, DRAW_Y1(t0)
+        sw      a4, DRAW_X2(t0)
+        sw      a5, DRAW_Y2(t0)
+        sw      a6, DRAW_COLOUR(t0)
+        li      t1, DRAW_OP_TRIANGLE
+        sw      t1, DRAW_OPCODE(t0)
+        li      t1, 1
+        sw      t1, DRAW_CONTROL(t0)
+
+sys_fill_triangle_busy:
+        lw      t1, DRAW_STATUS(t0)
+        andi    t1, t1, 1
+        bnez    t1, sys_fill_triangle_busy
+        li      a0, 0
+        j       trap_return
+
+sys_fill_circle:
+        li      t0, DRAW_BASE
+        sw      a0, DRAW_X0(t0)
+        sw      a1, DRAW_Y0(t0)
+        sw      a2, DRAW_X1(t0)
+        sw      a3, DRAW_Y1(t0)
+        sw      a4, DRAW_COLOUR(t0)
+        li      t1, DRAW_OP_FILL_CIRCLE
+        sw      t1, DRAW_OPCODE(t0)
+        li      t1, 1
+        sw      t1, DRAW_CONTROL(t0)
+
+sys_fill_circle_busy:
+        lw      t1, DRAW_STATUS(t0)
+        andi    t1, t1, 1
+        bnez    t1, sys_fill_circle_busy
         li      a0, 0
         j       trap_return
 

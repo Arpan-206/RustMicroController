@@ -14,6 +14,8 @@ enum Syscall {
     DrawRect = 10,
     DrawCircle = 11,
     DrawLine = 12,
+    FillTriangle = 13,
+    FillCircle = 14,
 }
 
 // ── raw ecall primitives ────────────────────────────────────────────
@@ -39,6 +41,50 @@ fn ecall5(nr: Syscall, arg0: u32, arg1: u32, arg2: u32, arg3: u32, arg4: u32) {
             in("a2") arg2,
             in("a3") arg3,
             in("a4") arg4,
+            options(nostack)
+        );
+    }
+}
+
+#[inline(never)]
+fn ecall6(nr: Syscall, arg0: u32, arg1: u32, arg2: u32, arg3: u32, arg4: u32, arg5: u32) {
+    unsafe {
+        core::arch::asm!(
+            "ecall",
+            in("a7") nr as u32,
+            in("a0") arg0,
+            in("a1") arg1,
+            in("a2") arg2,
+            in("a3") arg3,
+            in("a4") arg4,
+            in("a5") arg5,
+            options(nostack)
+        );
+    }
+}
+
+#[inline(never)]
+fn ecall7(
+    nr: Syscall,
+    arg0: u32,
+    arg1: u32,
+    arg2: u32,
+    arg3: u32,
+    arg4: u32,
+    arg5: u32,
+    arg6: u32,
+) {
+    unsafe {
+        core::arch::asm!(
+            "ecall",
+            in("a7") nr as u32,
+            in("a0") arg0,
+            in("a1") arg1,
+            in("a2") arg2,
+            in("a3") arg3,
+            in("a4") arg4,
+            in("a5") arg5,
+            in("a6") arg6,
             options(nostack)
         );
     }
@@ -120,6 +166,14 @@ pub fn draw_circle(cx: u32, cy: u32, radius: u32, y1: u32, colour: u32) {
     ecall5(Syscall::DrawCircle, cx, cy, radius, y1, colour);
 }
 
-pub fn draw_line(x0: u32, y0: u32, x1: u32, y1: u32, colour: u32) {
-    ecall5(Syscall::DrawLine, x0, y0, x1, y1, colour);
+pub fn draw_line(x0: u32, y0: u32, x1: u32, y1: u32, colour: u32, thickness: u32) {
+    ecall6(Syscall::DrawLine, x0, y0, x1, y1, colour, thickness);
+}
+
+pub fn fill_triangle(x0: u32, y0: u32, x1: u32, y1: u32, x2: u32, y2: u32, colour: u32) {
+    ecall7(Syscall::FillTriangle, x0, y0, x1, y1, x2, y2, colour);
+}
+
+pub fn fill_circle(cx: u32, cy: u32, radius: u32, colour: u32) {
+    ecall5(Syscall::FillCircle, cx, cy, radius, 0, colour);
 }
