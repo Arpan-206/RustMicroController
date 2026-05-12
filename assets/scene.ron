@@ -8,7 +8,7 @@
     ],
     keyframes: [
         At(frame: 0, id: "sq", x0: 10, y0: 235, x1: 20, y1: 245),
-        At(frame: 89, id: "sq", x0: 110, y0: 408, x1: 120, y1: 418),
+        At(frame: 299, id: "sq", x0: 110, y0: 408, x1: 120, y1: 418),
         AtTriangle(
             frame: 0,
             id: "tri",
@@ -20,7 +20,7 @@
             y2: 125,
         ),
         AtTriangle(
-            frame: 89,
+            frame: 299,
             id: "tri",
             x0: 390,
             y0: 120,
@@ -30,6 +30,6 @@
             y2: 165,
         ),
         AtCircle(frame: 0, id: "sun", cx: 150, cy: 90, r: 18),
-        AtCircle(frame: 89, id: "sun", cx: 520, cy: 330, r: 34),
+        AtCircle(frame: 299, id: "sun", cx: 520, cy: 330, r: 34),
     ],
 )
