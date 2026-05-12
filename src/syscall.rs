@@ -13,11 +13,14 @@ enum Syscall {
     KeyScan = 7,
     VduInit = 8,
     VduPixel = 9,
-    VduFill = 10,
-    VduVsync = 11,
-    VduGetW = 12,
-    VduGetH = 13,
-    VduHlineBuf = 14,
+    DrawRect = 10,
+    DrawCircle = 11,
+    DrawLine = 12,
+    VduFill = 13,
+    VduVsync = 14,
+    VduGetW = 15,
+    VduGetH = 16,
+    VduHlineBuf = 17,
 }
 
 // ── raw ecall primitives ────────────────────────────────────────────
@@ -41,6 +44,22 @@ fn ecall3(nr: Syscall, arg0: u32, arg1: u32, arg2: u32) {
             in("a0") arg0,
             in("a1") arg1,
             in("a2") arg2,
+            options(nostack)
+        );
+    }
+}
+
+#[inline(never)]
+fn ecall5(nr: Syscall, arg0: u32, arg1: u32, arg2: u32, arg3: u32, arg4: u32) {
+    unsafe {
+        core::arch::asm!(
+            "ecall",
+            in("a7") nr as u32,
+            in("a0") arg0,
+            in("a1") arg1,
+            in("a2") arg2,
+            in("a3") arg3,
+            in("a4") arg4,
             options(nostack)
         );
     }
@@ -120,6 +139,18 @@ pub fn vdu_init(mode: u32) {
 
 pub fn vdu_pixel(x: u32, y: u32, colour: u32) {
     ecall3(Syscall::VduPixel, x, y, colour);
+}
+
+pub fn draw_rect(x0: u32, y0: u32, x1: u32, y1: u32, colour: u32) {
+    ecall5(Syscall::DrawRect, x0, y0, x1, y1, colour);
+}
+
+pub fn draw_circle(cx: u32, cy: u32, radius: u32, y1: u32, colour: u32) {
+    ecall5(Syscall::DrawCircle, cx, cy, radius, y1, colour);
+}
+
+pub fn draw_line(x0: u32, y0: u32, x1: u32, y1: u32, colour: u32) {
+    ecall5(Syscall::DrawLine, x0, y0, x1, y1, colour);
 }
 
 pub fn vdu_fill(colour: u32) {

@@ -7,6 +7,18 @@
         .equ VDU_WIDTH,      0x10
         .equ VDU_HEIGHT,     0x14
         .equ FRAME_BASE,     0x00100000
+        .equ DRAW_BASE,      0x00020000
+        .equ DRAW_X0,        0x00
+        .equ DRAW_Y0,        0x04
+        .equ DRAW_X1,        0x08
+        .equ DRAW_Y1,        0x0C
+        .equ DRAW_COLOUR,    0x10
+        .equ DRAW_OPCODE,    0x14
+        .equ DRAW_CONTROL,   0x18
+        .equ DRAW_STATUS,    0x1C
+        .equ DRAW_OP_RECT,   1
+        .equ DRAW_OP_CIRCLE, 2
+        .equ DRAW_OP_LINE,   3
         .equ VDU_VBLANK_BIT, 0x04
         .equ MPP_MASK,       0x00001800
         .equ CAUSE_ECALL_U,  8
@@ -23,12 +35,15 @@
         .equ SYS_KEY_READ,    7
         .equ SYS_VDU_INIT,    8
         .equ SYS_VDU_PIXEL,   9
-        .equ SYS_VDU_FILL,    10
-        .equ SYS_VDU_VSYNC,   11
-        .equ SYS_VDU_GETW,    12
-        .equ SYS_VDU_GETH,    13
-        .equ SYS_VDU_HLINE_BUF, 14
-        .equ SYS_MAX,         15
+        .equ SYS_DRAW_RECT,   10
+        .equ SYS_DRAW_CIRCLE, 11
+        .equ SYS_DRAW_LINE,   12
+        .equ SYS_VDU_FILL,    13
+        .equ SYS_VDU_VSYNC,   14
+        .equ SYS_VDU_GETW,    15
+        .equ SYS_VDU_GETH,    16
+        .equ SYS_VDU_HLINE_BUF, 17
+        .equ SYS_MAX,         18
         .equ KEY_NONE,       0x00
         .equ DEBOUNCE_MAX,   5
         .equ FIFO_SIZE,      16
@@ -168,11 +183,14 @@ sys_table:
         .word   sys_key_read       # 7
         .word   sys_vdu_init       # 8
         .word   sys_vdu_pixel      # 9
-        .word   sys_vdu_fill       # 10
-        .word   sys_vdu_vsync      # 11
-        .word   sys_vdu_getw       # 12
-        .word   sys_vdu_geth       # 13
-        .word   sys_vdu_hline_buf  # 14
+        .word   sys_draw_rect      # 10
+        .word   sys_draw_circle    # 11
+        .word   sys_draw_line      # 12
+        .word   sys_vdu_fill       # 13
+        .word   sys_vdu_vsync      # 14
+        .word   sys_vdu_getw       # 15
+        .word   sys_vdu_geth       # 16
+        .word   sys_vdu_hline_buf  # 17
 
 trap_error:
         li      t1, HALT_PORT
@@ -365,6 +383,63 @@ vdu_pixel_done:
         addi    sp, sp, 16
         j       trap_return
 
+sys_draw_rect:
+        li      t0, DRAW_BASE
+        sw      a0, DRAW_X0(t0)
+        sw      a1, DRAW_Y0(t0)
+        sw      a2, DRAW_X1(t0)
+        sw      a3, DRAW_Y1(t0)
+        sw      a4, DRAW_COLOUR(t0)
+        li      t1, DRAW_OP_RECT
+        sw      t1, DRAW_OPCODE(t0)
+        li      t1, 1
+        sw      t1, DRAW_CONTROL(t0)
+
+sys_draw_rect_busy:
+        lw      t1, DRAW_STATUS(t0)
+        andi    t1, t1, 1
+        bnez    t1, sys_draw_rect_busy
+        li      a0, 0
+        j       trap_return
+
+sys_draw_circle:
+        li      t0, DRAW_BASE
+        sw      a0, DRAW_X0(t0)
+        sw      a1, DRAW_Y0(t0)
+        sw      a2, DRAW_X1(t0)
+        sw      a3, DRAW_Y1(t0)
+        sw      a4, DRAW_COLOUR(t0)
+        li      t1, DRAW_OP_CIRCLE
+        sw      t1, DRAW_OPCODE(t0)
+        li      t1, 1
+        sw      t1, DRAW_CONTROL(t0)
+
+sys_draw_circle_busy:
+        lw      t1, DRAW_STATUS(t0)
+        andi    t1, t1, 1
+        bnez    t1, sys_draw_circle_busy
+        li      a0, 0
+        j       trap_return
+
+sys_draw_line:
+        li      t0, DRAW_BASE
+        sw      a0, DRAW_X0(t0)
+        sw      a1, DRAW_Y0(t0)
+        sw      a2, DRAW_X1(t0)
+        sw      a3, DRAW_Y1(t0)
+        sw      a4, DRAW_COLOUR(t0)
+        li      t1, DRAW_OP_LINE
+        sw      t1, DRAW_OPCODE(t0)
+        li      t1, 1
+        sw      t1, DRAW_CONTROL(t0)
+
+sys_draw_line_busy:
+        lw      t1, DRAW_STATUS(t0)
+        andi    t1, t1, 1
+        bnez    t1, sys_draw_line_busy
+        li      a0, 0
+        j       trap_return
+
 sys_vdu_fill:
         addi    sp, sp, -16
         sw      s0, 0(sp)
@@ -490,7 +565,7 @@ sys_vdu_geth:
         addi    sp, sp, 16
         j       trap_return
 
-        # SYS_VDU_HLINE_BUF (14)
+        # SYS_VDU_HLINE_BUF (17)
         # a0 = y coordinate
         # a1 = pointer to [u8; 640] colour buffer (user address)
         # a2 = length (must be 640)

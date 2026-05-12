@@ -1,4 +1,4 @@
-use crate::display;
+use crate::display::{draw_circle, draw_line, draw_rect, Colour};
 use crate::svg_data;
 
 const MAX_X: u16 = 639;
@@ -77,7 +77,7 @@ pub fn render(bytecode: &[u8]) {
                 let x = clamp_x(read_u16_le(bytecode, idx + 1));
                 let y = clamp_y(read_u16_le(bytecode, idx + 3));
                 let col = bytecode[idx + 5];
-                display::pixel(x as i32, y as i32, col);
+                draw_rect(x, y, x, y, Colour(col));
                 idx = next;
             }
             0x02 => {
@@ -90,7 +90,7 @@ pub fn render(bytecode: &[u8]) {
                 let x2 = clamp_x(read_u16_le(bytecode, idx + 5));
                 let y2 = clamp_y(read_u16_le(bytecode, idx + 7));
                 let col = bytecode[idx + 9];
-                display::line(x1 as i32, y1 as i32, x2 as i32, y2 as i32, col);
+                draw_line(x1, y1, x2, y2, Colour(col));
                 idx = next;
             }
             0x03 => {
@@ -103,7 +103,9 @@ pub fn render(bytecode: &[u8]) {
                 let w = clamp_w(read_u16_le(bytecode, idx + 5));
                 let h = clamp_h(read_u16_le(bytecode, idx + 7));
                 let col = bytecode[idx + 9];
-                display::filled_rect(x as i32, y as i32, w as i32, h as i32, col);
+                let x2 = clamp_x(x.saturating_add(w.saturating_sub(1)));
+                let y2 = clamp_y(y.saturating_add(h.saturating_sub(1)));
+                draw_rect(x, y, x2, y2, Colour(col));
                 idx = next;
             }
             0x04 => {
@@ -115,7 +117,7 @@ pub fn render(bytecode: &[u8]) {
                 let y = clamp_y(read_u16_le(bytecode, idx + 3));
                 let r = clamp_r(read_u16_le(bytecode, idx + 5));
                 let col = bytecode[idx + 7];
-                display::circle(x as i32, y as i32, r as i32, col);
+                draw_circle(x, y, r, Colour(col));
                 idx = next;
             }
             _ => {
