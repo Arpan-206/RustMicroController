@@ -1,6 +1,6 @@
 // generated - do not edit
 
-pub const FPS: u32 = 30;
+pub const FPS: u32 = 10;
 pub const BG: u8 = 0x00;
 
 #[derive(Copy, Clone)]
@@ -27,211 +27,337 @@ pub struct Obj {
     pub keyframes: &'static [Kf],
 }
 
-pub const OBJ_SKY0_COLOUR: u8 = 0x01;
-pub const OBJ_SKY0_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 0, y0: 0, x1: 639, y1: 60, x2: 0, y2: 0 },
+pub const OBJ_BALL0_COLOUR: u8 = 0xE0;
+pub const OBJ_BALL0_KF: &[Kf] = &[
+    Kf { frame: 0, x0: 98, y0: 187, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 20, x0: 37, y0: 144, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 40, x0: 92, y0: 142, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 60, x0: 152, y0: 180, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 80, x0: 212, y0: 257, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 100, x0: 272, y0: 375, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 120, x0: 332, y0: 373, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 140, x0: 392, y0: 261, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 160, x0: 452, y0: 188, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 180, x0: 512, y0: 155, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 200, x0: 572, y0: 163, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 220, x0: 578, y0: 210, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 240, x0: 519, y0: 298, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 260, x0: 460, y0: 425, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 280, x0: 402, y0: 333, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 300, x0: 343, y0: 239, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 320, x0: 284, y0: 184, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 340, x0: 225, y0: 170, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 360, x0: 166, y0: 195, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 380, x0: 108, y0: 261, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 400, x0: 49, y0: 367, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 420, x0: 78, y0: 390, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 440, x0: 135, y0: 281, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 460, x0: 193, y0: 212, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 480, x0: 251, y0: 184, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 500, x0: 308, y0: 195, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 520, x0: 366, y0: 246, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 540, x0: 423, y0: 338, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 560, x0: 481, y0: 424, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 580, x0: 539, y0: 309, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 600, x0: 596, y0: 235, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 620, x0: 556, y0: 201, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 640, x0: 500, y0: 206, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 660, x0: 444, y0: 252, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 680, x0: 387, y0: 337, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 700, x0: 331, y0: 431, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 720, x0: 274, y0: 318, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 740, x0: 218, y0: 246, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 760, x0: 161, y0: 213, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 780, x0: 105, y0: 220, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 800, x0: 48, y0: 267, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 820, x0: 76, y0: 354, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 840, x0: 131, y0: 413, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 860, x0: 187, y0: 310, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 880, x0: 242, y0: 248, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 900, x0: 297, y0: 225, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 920, x0: 353, y0: 243, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 940, x0: 408, y0: 300, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 960, x0: 463, y0: 398, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 980, x0: 519, y0: 374, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1000, x0: 574, y0: 290, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1020, x0: 580, y0: 245, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1040, x0: 526, y0: 240, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1060, x0: 472, y0: 275, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1080, x0: 417, y0: 350, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1100, x0: 363, y0: 426, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1120, x0: 309, y0: 328, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1140, x0: 255, y0: 269, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1160, x0: 200, y0: 250, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1180, x0: 146, y0: 272, x1: 35, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1199, x0: 95, y0: 329, x1: 35, y1: 0, x2: 0, y2: 0 },
 ];
 
-pub const OBJ_SKY1_COLOUR: u8 = 0x21;
-pub const OBJ_SKY1_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 0, y0: 60, x1: 639, y1: 140, x2: 0, y2: 0 },
+pub const OBJ_BALL1_COLOUR: u8 = 0x1F;
+pub const OBJ_BALL1_KF: &[Kf] = &[
+    Kf { frame: 0, x0: 426, y0: 216, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 20, x0: 327, y0: 207, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 40, x0: 228, y0: 239, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 60, x0: 129, y0: 310, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 80, x0: 30, y0: 422, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 100, x0: 100, y0: 374, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 120, x0: 197, y0: 283, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 140, x0: 294, y0: 233, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 160, x0: 392, y0: 222, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 180, x0: 489, y0: 251, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 200, x0: 586, y0: 320, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 220, x0: 564, y0: 429, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 240, x0: 469, y0: 372, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 260, x0: 374, y0: 287, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 280, x0: 279, y0: 243, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 300, x0: 184, y0: 239, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 320, x0: 88, y0: 274, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 340, x0: 41, y0: 350, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 360, x0: 134, y0: 462, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 380, x0: 227, y0: 351, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 400, x0: 321, y0: 280, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 420, x0: 414, y0: 249, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 440, x0: 507, y0: 258, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 460, x0: 601, y0: 307, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 480, x0: 553, y0: 396, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 500, x0: 461, y0: 409, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 520, x0: 370, y0: 320, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 540, x0: 279, y0: 272, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 560, x0: 187, y0: 263, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 580, x0: 96, y0: 294, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 600, x0: 26, y0: 366, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 620, x0: 116, y0: 449, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 640, x0: 206, y0: 350, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 660, x0: 295, y0: 292, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 680, x0: 385, y0: 273, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 700, x0: 475, y0: 294, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 720, x0: 564, y0: 355, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 740, x0: 591, y0: 456, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 760, x0: 503, y0: 367, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 780, x0: 415, y0: 306, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 800, x0: 327, y0: 286, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 820, x0: 239, y0: 305, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 840, x0: 152, y0: 364, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 860, x0: 64, y0: 462, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 880, x0: 56, y0: 367, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 900, x0: 142, y0: 312, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 920, x0: 228, y0: 297, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 940, x0: 314, y0: 322, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 960, x0: 400, y0: 387, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 980, x0: 487, y0: 435, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1000, x0: 573, y0: 354, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1020, x0: 588, y0: 314, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1040, x0: 503, y0: 313, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1060, x0: 419, y0: 352, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1080, x0: 335, y0: 431, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1100, x0: 250, y0: 396, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1120, x0: 166, y0: 337, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1140, x0: 82, y0: 318, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1160, x0: 34, y0: 339, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1180, x0: 117, y0: 400, x1: 18, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1199, x0: 195, y0: 437, x1: 18, y1: 0, x2: 0, y2: 0 },
 ];
 
-pub const OBJ_SKY2_COLOUR: u8 = 0x42;
-pub const OBJ_SKY2_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 0, y0: 140, x1: 639, y1: 210, x2: 0, y2: 0 },
+pub const OBJ_BALL2_COLOUR: u8 = 0xFC;
+pub const OBJ_BALL2_KF: &[Kf] = &[
+    Kf { frame: 0, x0: 72, y0: 67, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 20, x0: 96, y0: 75, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 40, x0: 121, y0: 124, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 60, x0: 145, y0: 212, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 80, x0: 170, y0: 340, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 100, x0: 194, y0: 430, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 120, x0: 219, y0: 284, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 140, x0: 243, y0: 177, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 160, x0: 268, y0: 110, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 180, x0: 292, y0: 83, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 200, x0: 316, y0: 97, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 220, x0: 341, y0: 150, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 240, x0: 365, y0: 243, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 260, x0: 390, y0: 376, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 280, x0: 414, y0: 392, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 300, x0: 439, y0: 260, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 320, x0: 463, y0: 169, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 340, x0: 488, y0: 117, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 360, x0: 512, y0: 105, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 380, x0: 537, y0: 133, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 400, x0: 561, y0: 202, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 420, x0: 586, y0: 310, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 440, x0: 610, y0: 458, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 460, x0: 615, y0: 326, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 480, x0: 591, y0: 219, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 500, x0: 567, y0: 152, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 520, x0: 543, y0: 125, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 540, x0: 519, y0: 138, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 560, x0: 495, y0: 192, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 580, x0: 471, y0: 285, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 600, x0: 447, y0: 418, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 620, x0: 423, y0: 362, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 640, x0: 399, y0: 251, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 660, x0: 375, y0: 179, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 680, x0: 351, y0: 147, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 700, x0: 327, y0: 155, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 720, x0: 303, y0: 203, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 740, x0: 279, y0: 291, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 760, x0: 255, y0: 419, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 780, x0: 231, y0: 366, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 800, x0: 207, y0: 259, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 820, x0: 183, y0: 192, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 840, x0: 159, y0: 165, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 860, x0: 135, y0: 178, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 880, x0: 111, y0: 231, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 900, x0: 87, y0: 324, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 920, x0: 63, y0: 457, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 940, x0: 39, y0: 340, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 960, x0: 15, y0: 248, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 980, x0: 37, y0: 196, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1000, x0: 60, y0: 184, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1020, x0: 84, y0: 212, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1040, x0: 107, y0: 280, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1060, x0: 131, y0: 388, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1080, x0: 154, y0: 403, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1100, x0: 178, y0: 296, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1120, x0: 201, y0: 229, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1140, x0: 225, y0: 202, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1160, x0: 248, y0: 215, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1180, x0: 272, y0: 268, x1: 15, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1199, x0: 294, y0: 355, x1: 15, y1: 0, x2: 0, y2: 0 },
 ];
 
-pub const OBJ_SKY3_COLOUR: u8 = 0x86;
-pub const OBJ_SKY3_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 0, y0: 210, x1: 639, y1: 270, x2: 0, y2: 0 },
+pub const OBJ_BALL3_COLOUR: u8 = 0xA3;
+pub const OBJ_BALL3_KF: &[Kf] = &[
+    Kf { frame: 0, x0: 404, y0: 147, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 20, x0: 337, y0: 159, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 40, x0: 270, y0: 211, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 60, x0: 203, y0: 302, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 80, x0: 136, y0: 434, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 100, x0: 69, y0: 323, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 120, x0: 69, y0: 229, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 140, x0: 135, y0: 174, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 160, x0: 201, y0: 159, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 180, x0: 267, y0: 185, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 200, x0: 332, y0: 250, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 220, x0: 398, y0: 355, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 240, x0: 464, y0: 394, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 260, x0: 530, y0: 281, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 280, x0: 595, y0: 209, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 300, x0: 548, y0: 177, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 320, x0: 483, y0: 184, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 340, x0: 419, y0: 232, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 360, x0: 354, y0: 319, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 380, x0: 290, y0: 443, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 400, x0: 226, y0: 320, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 420, x0: 161, y0: 237, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 440, x0: 97, y0: 194, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 460, x0: 40, y0: 192, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 480, x0: 103, y0: 229, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 500, x0: 166, y0: 306, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 520, x0: 229, y0: 424, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 540, x0: 292, y0: 339, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 560, x0: 355, y0: 255, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 580, x0: 419, y0: 210, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 600, x0: 482, y0: 206, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 620, x0: 545, y0: 241, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 640, x0: 599, y0: 317, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 660, x0: 538, y0: 432, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 680, x0: 476, y0: 337, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 700, x0: 414, y0: 259, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 720, x0: 352, y0: 220, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 740, x0: 290, y0: 221, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 760, x0: 228, y0: 262, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 780, x0: 166, y0: 344, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 800, x0: 104, y0: 423, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 820, x0: 42, y0: 319, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 840, x0: 91, y0: 254, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 860, x0: 152, y0: 230, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 880, x0: 212, y0: 245, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 900, x0: 273, y0: 301, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 920, x0: 334, y0: 396, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 940, x0: 394, y0: 374, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 960, x0: 455, y0: 291, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 980, x0: 516, y0: 248, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1000, x0: 576, y0: 245, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1020, x0: 570, y0: 282, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1040, x0: 510, y0: 359, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1060, x0: 451, y0: 413, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1080, x0: 392, y0: 320, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1100, x0: 332, y0: 268, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1120, x0: 273, y0: 255, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1140, x0: 213, y0: 283, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1160, x0: 154, y0: 350, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1180, x0: 94, y0: 431, x1: 37, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1199, x0: 38, y0: 340, x1: 37, y1: 0, x2: 0, y2: 0 },
 ];
 
-pub const OBJ_GROUND_COLOUR: u8 = 0x09;
-pub const OBJ_GROUND_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 0, y0: 270, x1: 639, y1: 479, x2: 0, y2: 0 },
+pub const OBJ_BALL4_COLOUR: u8 = 0x1C;
+pub const OBJ_BALL4_KF: &[Kf] = &[
+    Kf { frame: 0, x0: 526, y0: 191, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 20, x0: 445, y0: 183, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 40, x0: 363, y0: 215, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 60, x0: 281, y0: 286, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 80, x0: 200, y0: 398, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 100, x0: 118, y0: 356, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 120, x0: 40, y0: 262, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 140, x0: 120, y0: 207, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 160, x0: 200, y0: 192, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 180, x0: 280, y0: 217, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 200, x0: 360, y0: 282, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 220, x0: 440, y0: 388, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 240, x0: 520, y0: 365, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 260, x0: 600, y0: 272, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 280, x0: 521, y0: 220, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 300, x0: 443, y0: 208, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 320, x0: 364, y0: 235, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 340, x0: 286, y0: 303, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 360, x0: 207, y0: 411, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 380, x0: 129, y0: 351, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 400, x0: 50, y0: 268, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 420, x0: 105, y0: 225, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 440, x0: 182, y0: 222, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 460, x0: 259, y0: 260, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 480, x0: 335, y0: 337, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 500, x0: 412, y0: 427, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 520, x0: 489, y0: 322, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 540, x0: 566, y0: 258, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 560, x0: 558, y0: 233, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 580, x0: 483, y0: 249, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 600, x0: 407, y0: 305, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 620, x0: 332, y0: 400, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 640, x0: 257, y0: 367, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 660, x0: 181, y0: 288, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 680, x0: 106, y0: 249, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 700, x0: 47, y0: 250, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 720, x0: 121, y0: 291, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 740, x0: 195, y0: 372, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 760, x0: 268, y0: 394, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 780, x0: 342, y0: 310, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 800, x0: 416, y0: 265, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 820, x0: 490, y0: 261, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 840, x0: 564, y0: 296, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 860, x0: 563, y0: 372, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 880, x0: 491, y0: 401, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 900, x0: 419, y0: 318, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 920, x0: 346, y0: 275, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 940, x0: 274, y0: 272, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 960, x0: 202, y0: 309, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 980, x0: 129, y0: 386, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1000, x0: 57, y0: 392, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1020, x0: 93, y0: 315, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1040, x0: 164, y0: 279, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1060, x0: 235, y0: 282, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1080, x0: 305, y0: 326, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1100, x0: 376, y0: 409, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1120, x0: 447, y0: 372, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1140, x0: 518, y0: 308, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1160, x0: 589, y0: 285, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1180, x0: 540, y0: 302, x1: 40, y1: 0, x2: 0, y2: 0 },
+    Kf { frame: 1199, x0: 474, y0: 355, x1: 40, y1: 0, x2: 0, y2: 0 },
 ];
 
-pub const OBJ_SUN_COLOUR: u8 = 0xF4;
-pub const OBJ_SUN_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 320, y0: 270, x1: 85, y1: 0, x2: 0, y2: 0 },
-];
-
-pub const OBJ_SL0_COLOUR: u8 = 0x00;
-pub const OBJ_SL0_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 240, y0: 290, x1: 400, y1: 290, x2: 4, y2: 0 },
-];
-
-pub const OBJ_SL1_COLOUR: u8 = 0x00;
-pub const OBJ_SL1_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 235, y0: 312, x1: 405, y1: 312, x2: 5, y2: 0 },
-];
-
-pub const OBJ_SL2_COLOUR: u8 = 0x00;
-pub const OBJ_SL2_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 228, y0: 336, x1: 412, y1: 336, x2: 6, y2: 0 },
-];
-
-pub const OBJ_SL3_COLOUR: u8 = 0x00;
-pub const OBJ_SL3_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 220, y0: 352, x1: 420, y1: 352, x2: 4, y2: 0 },
-];
-
-pub const OBJ_ML0_COLOUR: u8 = 0x22;
-pub const OBJ_ML0_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 0, y0: 270, x1: 220, y1: 270, x2: 100, y2: 150 },
-];
-
-pub const OBJ_ML1_COLOUR: u8 = 0x02;
-pub const OBJ_ML1_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 30, y0: 270, x1: 170, y1: 270, x2: 90, y2: 190 },
-];
-
-pub const OBJ_MR0_COLOUR: u8 = 0x22;
-pub const OBJ_MR0_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 420, y0: 270, x1: 639, y1: 270, x2: 540, y2: 140 },
-];
-
-pub const OBJ_MR1_COLOUR: u8 = 0x02;
-pub const OBJ_MR1_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 460, y0: 270, x1: 620, y1: 270, x2: 545, y2: 185 },
-];
-
-pub const OBJ_GH0_COLOUR: u8 = 0x1F;
-pub const OBJ_GH0_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 0, y0: 305, x1: 639, y1: 305, x2: 1, y2: 0 },
-];
-
-pub const OBJ_GH1_COLOUR: u8 = 0x1F;
-pub const OBJ_GH1_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 0, y0: 345, x1: 639, y1: 345, x2: 1, y2: 0 },
-];
-
-pub const OBJ_GH2_COLOUR: u8 = 0x1F;
-pub const OBJ_GH2_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 0, y0: 395, x1: 639, y1: 395, x2: 1, y2: 0 },
-];
-
-pub const OBJ_GH3_COLOUR: u8 = 0x1F;
-pub const OBJ_GH3_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 0, y0: 450, x1: 639, y1: 450, x2: 1, y2: 0 },
-];
-
-pub const OBJ_GV0_COLOUR: u8 = 0x1F;
-pub const OBJ_GV0_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 320, y0: 270, x1: 0, y1: 479, x2: 1, y2: 0 },
-];
-
-pub const OBJ_GV1_COLOUR: u8 = 0x1F;
-pub const OBJ_GV1_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 320, y0: 270, x1: 110, y1: 479, x2: 1, y2: 0 },
-];
-
-pub const OBJ_GV2_COLOUR: u8 = 0x1F;
-pub const OBJ_GV2_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 320, y0: 270, x1: 220, y1: 479, x2: 1, y2: 0 },
-];
-
-pub const OBJ_GV3_COLOUR: u8 = 0x1F;
-pub const OBJ_GV3_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 320, y0: 270, x1: 420, y1: 479, x2: 1, y2: 0 },
-];
-
-pub const OBJ_GV4_COLOUR: u8 = 0x1F;
-pub const OBJ_GV4_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 320, y0: 270, x1: 530, y1: 479, x2: 1, y2: 0 },
-];
-
-pub const OBJ_GV5_COLOUR: u8 = 0x1F;
-pub const OBJ_GV5_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 320, y0: 270, x1: 639, y1: 479, x2: 1, y2: 0 },
-];
-
-pub const OBJ_PLANET_COLOUR: u8 = 0xEC;
-pub const OBJ_PLANET_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 530, y0: 75, x1: 32, y1: 0, x2: 0, y2: 0 },
-];
-
-pub const OBJ_RING_COLOUR: u8 = 0xFF;
-pub const OBJ_RING_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 530, y0: 75, x1: 32, y1: 0, x2: 0, y2: 0 },
-];
-
-pub const OBJ_ST0_COLOUR: u8 = 0xFF;
-pub const OBJ_ST0_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 35, y0: 25, x1: 2, y1: 0, x2: 0, y2: 0 },
-];
-
-pub const OBJ_ST1_COLOUR: u8 = 0xFF;
-pub const OBJ_ST1_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 110, y0: 50, x1: 2, y1: 0, x2: 0, y2: 0 },
-];
-
-pub const OBJ_ST2_COLOUR: u8 = 0xFF;
-pub const OBJ_ST2_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 195, y0: 18, x1: 2, y1: 0, x2: 0, y2: 0 },
-];
-
-pub const OBJ_ST3_COLOUR: u8 = 0xFF;
-pub const OBJ_ST3_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 275, y0: 65, x1: 2, y1: 0, x2: 0, y2: 0 },
-];
-
-pub const OBJ_ST4_COLOUR: u8 = 0xFF;
-pub const OBJ_ST4_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 390, y0: 35, x1: 2, y1: 0, x2: 0, y2: 0 },
-];
-
-pub const OBJ_ST5_COLOUR: u8 = 0xFF;
-pub const OBJ_ST5_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 455, y0: 80, x1: 2, y1: 0, x2: 0, y2: 0 },
-];
-
-pub const OBJ_ST6_COLOUR: u8 = 0xFF;
-pub const OBJ_ST6_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 580, y0: 30, x1: 2, y1: 0, x2: 0, y2: 0 },
-];
-
-pub const OBJ_ST7_COLOUR: u8 = 0xFF;
-pub const OBJ_ST7_KF: &[Kf] = &[
-    Kf { frame: 0, x0: 80, y0: 115, x1: 2, y1: 0, x2: 0, y2: 0 },
-];
-
-pub const OBJECT_COUNT: usize = 34;
-pub const LAST_FRAME: u16 = 0;
+pub const OBJECT_COUNT: usize = 5;
+pub const LAST_FRAME: u16 = 1199;
 pub const OBJECTS: &[Obj] = &[
-    Obj { kind: KIND_RECT, colour: OBJ_SKY0_COLOUR, keyframes: OBJ_SKY0_KF },
-    Obj { kind: KIND_RECT, colour: OBJ_SKY1_COLOUR, keyframes: OBJ_SKY1_KF },
-    Obj { kind: KIND_RECT, colour: OBJ_SKY2_COLOUR, keyframes: OBJ_SKY2_KF },
-    Obj { kind: KIND_RECT, colour: OBJ_SKY3_COLOUR, keyframes: OBJ_SKY3_KF },
-    Obj { kind: KIND_RECT, colour: OBJ_GROUND_COLOUR, keyframes: OBJ_GROUND_KF },
-    Obj { kind: KIND_CIRCLE, colour: OBJ_SUN_COLOUR, keyframes: OBJ_SUN_KF },
-    Obj { kind: KIND_LINE, colour: OBJ_SL0_COLOUR, keyframes: OBJ_SL0_KF },
-    Obj { kind: KIND_LINE, colour: OBJ_SL1_COLOUR, keyframes: OBJ_SL1_KF },
-    Obj { kind: KIND_LINE, colour: OBJ_SL2_COLOUR, keyframes: OBJ_SL2_KF },
-    Obj { kind: KIND_LINE, colour: OBJ_SL3_COLOUR, keyframes: OBJ_SL3_KF },
-    Obj { kind: KIND_TRIANGLE, colour: OBJ_ML0_COLOUR, keyframes: OBJ_ML0_KF },
-    Obj { kind: KIND_TRIANGLE, colour: OBJ_ML1_COLOUR, keyframes: OBJ_ML1_KF },
-    Obj { kind: KIND_TRIANGLE, colour: OBJ_MR0_COLOUR, keyframes: OBJ_MR0_KF },
-    Obj { kind: KIND_TRIANGLE, colour: OBJ_MR1_COLOUR, keyframes: OBJ_MR1_KF },
-    Obj { kind: KIND_LINE, colour: OBJ_GH0_COLOUR, keyframes: OBJ_GH0_KF },
-    Obj { kind: KIND_LINE, colour: OBJ_GH1_COLOUR, keyframes: OBJ_GH1_KF },
-    Obj { kind: KIND_LINE, colour: OBJ_GH2_COLOUR, keyframes: OBJ_GH2_KF },
-    Obj { kind: KIND_LINE, colour: OBJ_GH3_COLOUR, keyframes: OBJ_GH3_KF },
-    Obj { kind: KIND_LINE, colour: OBJ_GV0_COLOUR, keyframes: OBJ_GV0_KF },
-    Obj { kind: KIND_LINE, colour: OBJ_GV1_COLOUR, keyframes: OBJ_GV1_KF },
-    Obj { kind: KIND_LINE, colour: OBJ_GV2_COLOUR, keyframes: OBJ_GV2_KF },
-    Obj { kind: KIND_LINE, colour: OBJ_GV3_COLOUR, keyframes: OBJ_GV3_KF },
-    Obj { kind: KIND_LINE, colour: OBJ_GV4_COLOUR, keyframes: OBJ_GV4_KF },
-    Obj { kind: KIND_LINE, colour: OBJ_GV5_COLOUR, keyframes: OBJ_GV5_KF },
-    Obj { kind: KIND_CIRCLE, colour: OBJ_PLANET_COLOUR, keyframes: OBJ_PLANET_KF },
-    Obj { kind: KIND_CIRCLE, colour: OBJ_RING_COLOUR, keyframes: OBJ_RING_KF },
-    Obj { kind: KIND_CIRCLE, colour: OBJ_ST0_COLOUR, keyframes: OBJ_ST0_KF },
-    Obj { kind: KIND_CIRCLE, colour: OBJ_ST1_COLOUR, keyframes: OBJ_ST1_KF },
-    Obj { kind: KIND_CIRCLE, colour: OBJ_ST2_COLOUR, keyframes: OBJ_ST2_KF },
-    Obj { kind: KIND_CIRCLE, colour: OBJ_ST3_COLOUR, keyframes: OBJ_ST3_KF },
-    Obj { kind: KIND_CIRCLE, colour: OBJ_ST4_COLOUR, keyframes: OBJ_ST4_KF },
-    Obj { kind: KIND_CIRCLE, colour: OBJ_ST5_COLOUR, keyframes: OBJ_ST5_KF },
-    Obj { kind: KIND_CIRCLE, colour: OBJ_ST6_COLOUR, keyframes: OBJ_ST6_KF },
-    Obj { kind: KIND_CIRCLE, colour: OBJ_ST7_COLOUR, keyframes: OBJ_ST7_KF },
+    Obj { kind: KIND_CIRCLE, colour: OBJ_BALL0_COLOUR, keyframes: OBJ_BALL0_KF },
+    Obj { kind: KIND_CIRCLE, colour: OBJ_BALL1_COLOUR, keyframes: OBJ_BALL1_KF },
+    Obj { kind: KIND_CIRCLE, colour: OBJ_BALL2_COLOUR, keyframes: OBJ_BALL2_KF },
+    Obj { kind: KIND_CIRCLE, colour: OBJ_BALL3_COLOUR, keyframes: OBJ_BALL3_KF },
+    Obj { kind: KIND_CIRCLE, colour: OBJ_BALL4_COLOUR, keyframes: OBJ_BALL4_KF },
 ];
