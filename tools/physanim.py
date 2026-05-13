@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
 physanim.py — bouncy ball physics previewer + RON exporter
+Uses pymunk for high-quality physics simulation.
 Usage:
   python3 physanim.py                        # run with defaults
-  python3 physanim.py --balls 4 --frames 300 --fps 30
+  python3 physanim.py --balls 4 --frames 1200 --fps 30
   python3 physanim.py --headless --export out.ron
 
 Controls:
@@ -20,9 +21,9 @@ import random
 import sys
 import tkinter as tk
 
+import pymunk
+
 W, H = 640, 480
-GRAVITY = 0.1
-DAMPEN = 0.98
 MIN_R, MAX_R = 15, 40
 
 # RGB332: r=0-7 (3 bits), g=0-7 (3 bits), b=0-3 (2 bits)
@@ -45,35 +46,14 @@ def r332_to_hex(r, g, b):
     return f"#{ri:02x}{gi:02x}{bi:02x}"
 
 
-class Ball:
+class BallDef:
+    """Stores initial configuration for a ball to allow re-simulation."""
+
     def __init__(self, x, y, r, vx, vy, colour):
         self.x, self.y = float(x), float(y)
         self.r = r
         self.vx, self.vy = float(vx), float(vy)
         self.colour = colour
-
-    def step(self):
-        self.vy += GRAVITY
-        self.x += self.vx
-        self.y += self.vy
-
-        if self.x - self.r < 0:
-            self.x = float(self.r)
-            self.vx = abs(self.vx) * DAMPEN
-        if self.x + self.r > W:
-            self.x = float(W - self.r)
-            self.vx = -abs(self.vx) * DAMPEN
-        if self.y - self.r < 0:
-            self.y = float(self.r)
-            self.vy = abs(self.vy) * DAMPEN
-        if self.y + self.r > H:
-            self.y = float(H - self.r)
-            self.vy = -abs(self.vy) * DAMPEN
-
-        if abs(self.vx) < 0.3:
-            self.vx = 0.0
-        if abs(self.vy) < 0.3 and abs(self.y + self.r - H) < 1:
-            self.vy = 0.0
 
 
 def make_balls(n, seed=42):
@@ -86,21 +66,51 @@ def make_balls(n, seed=42):
         vx = rng.uniform(-6, 6)
         vy = rng.uniform(-4, 2)
         col = BALL_COLOURS[i % len(BALL_COLOURS)]
-        balls.append(Ball(x, y, r, vx, vy, col))
+        balls.append(BallDef(x, y, r, vx, vy, col))
     return balls
 
 
-def simulate(balls, total_frames):
-    # snapshot initial state so we can re-simulate from scratch later
-    snapshots = [(b.x, b.y, b.r, b.vx, b.vy, b.colour) for b in balls]
+def simulate(balls, total_frames, fps=30):
+    space = pymunk.Space()
+    # Gravity tuned to be slow/floaty
+    space.gravity = (0, 90)
+
+    # Screen boundaries
+    static_lines = [
+        pymunk.Segment(space.static_body, (0, 0), (W, 0), 0.0),
+        pymunk.Segment(space.static_body, (0, H), (W, H), 0.0),
+        pymunk.Segment(space.static_body, (0, 0), (0, H), 0.0),
+        pymunk.Segment(space.static_body, (W, 0), (W, H), 0.0),
+    ]
+    for line in static_lines:
+        line.elasticity = 0.98
+        line.friction = 0.0
+    space.add(*static_lines)
+
+    bodies = []
+    for b in balls:
+        # Give mass proportional to area so they interact realistically
+        mass = (b.r**2) / 100.0
+        moment = pymunk.moment_for_circle(mass, 0, b.r)
+        body = pymunk.Body(mass, moment)
+        body.position = (b.x, b.y)
+        # Scale initial velocity to match per-second values
+        body.velocity = (b.vx * fps, b.vy * fps)
+
+        shape = pymunk.Circle(body, b.r)
+        shape.elasticity = 0.98
+        shape.friction = 0.01
+
+        space.add(body, shape)
+        bodies.append(body)
+
     states = [[] for _ in balls]
-    # reset to initial positions
-    for b, (x, y, r, vx, vy, col) in zip(balls, snapshots):
-        b.x, b.y, b.r, b.vx, b.vy = x, y, r, vx, vy
+    dt = 1.0 / fps
     for _ in range(total_frames):
-        for i, b in enumerate(balls):
-            states[i].append((int(b.x), int(b.y), b.r))
-            b.step()
+        space.step(dt)
+        for i, body in enumerate(bodies):
+            states[i].append((int(body.position.x), int(body.position.y), balls[i].r))
+
     return states
 
 
@@ -145,9 +155,9 @@ class App:
         self.export_path = export_path
         self.frame = 0
         self.playing = True
-        self.states = simulate(balls, total_frames)
+        self.states = simulate(balls, total_frames, fps)
 
-        root.title("FPGA Physics Animator")
+        root.title("FPGA Physics Animator (Pymunk)")
         root.resizable(False, False)
         root.bind("<KeyPress>", self.on_key)
 
@@ -215,8 +225,8 @@ class App:
         vx = rng.uniform(-5, 5)
         vy = rng.uniform(-8, -2)
         col = BALL_COLOURS[len(self.balls) % len(BALL_COLOURS)]
-        self.balls.append(Ball(float(e.x), float(e.y), r, vx, vy, col))
-        self.states = simulate(self.balls, self.total_frames)
+        self.balls.append(BallDef(float(e.x), float(e.y), r, vx, vy, col))
+        self.states = simulate(self.balls, self.total_frames, self.fps)
         self.draw()
 
 
@@ -232,7 +242,7 @@ def main():
     balls = make_balls(args.balls)
 
     if args.headless:
-        states = simulate(balls, args.frames)
+        states = simulate(balls, args.frames, args.fps)
         export_ron(args.export, balls, states, args.fps, args.frames)
         return
 
