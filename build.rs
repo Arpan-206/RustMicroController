@@ -77,6 +77,30 @@ struct GeneratedKf {
     y2: u16,
 }
 
+fn dedup_kfs(kfs: &[GeneratedKf]) -> Vec<GeneratedKf> {
+    let mut out = Vec::new();
+    if kfs.is_empty() {
+        return out;
+    }
+
+    let last_index = kfs.len() - 1;
+    let mut i = 0;
+    while i < kfs.len() {
+        let kf = kfs[i];
+        if i == 0 || i == last_index {
+            out.push(kf);
+        } else if !same_kf_position(out.last().unwrap(), &kf) {
+            out.push(kf);
+        }
+        i += 1;
+    }
+    out
+}
+
+fn same_kf_position(a: &GeneratedKf, b: &GeneratedKf) -> bool {
+    a.x0 == b.x0 && a.y0 == b.y0 && a.x1 == b.x1 && a.y1 == b.y1 && a.x2 == b.x2 && a.y2 == b.y2
+}
+
 fn main() {
     println!("cargo:rerun-if-changed=src/os.s");
     println!("cargo:rerun-if-changed=assets/scene.ron");
@@ -161,6 +185,8 @@ fn generate_scene() {
             }
             i += 1;
         }
+
+        let keyframes = dedup_kfs(&keyframes);
 
         output.push_str(&format!(
             "pub const OBJ_{}_COLOUR: u8 = 0x{:02X};\n",
