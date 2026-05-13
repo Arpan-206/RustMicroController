@@ -1,6 +1,6 @@
 // generated - do not edit
 
-pub const FPS: u32 = 10;
+pub const FPS: u32 = 30;
 pub const BG: u8 = 0x00;
 
 #[derive(Copy, Clone)]

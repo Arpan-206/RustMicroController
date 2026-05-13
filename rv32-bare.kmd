@@ -1147,7 +1147,7 @@
 0x409c8 : 00042a37 ; lui	s4,0x42
 0x409cc : f6ca0a13 ; addi	s4,s4,-148 # 41f6c <_ZN17compiler_builtins3mem6memcpy17hd47fd0133e47bdc6E+0x12b8>
 0x409d0 : 009a0a93 ; addi	s5,s4,9
-0x409d4 : 06400b93 ; li	s7,100
+0x409d4 : 02100b93 ; li	s7,33
 0x409d8 : 03c10913 ; addi	s2,sp,60
 0x409dc : 00500993 ; li	s3,5
 0x409e0 : 00000097 ; auipc	ra,0x0

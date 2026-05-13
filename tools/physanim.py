@@ -224,7 +224,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--balls", type=int, default=5)
     ap.add_argument("--frames", type=int, default=1200)
-    ap.add_argument("--fps", type=int, default=10)
+    ap.add_argument("--fps", type=int, default=30)
     ap.add_argument("--export", type=str, default="physics.ron")
     ap.add_argument("--headless", action="store_true")
     args = ap.parse_args()

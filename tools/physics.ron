@@ -1,6 +1,6 @@
 (
     background: (r: 0, g: 0, b: 0),
-    fps: 10,
+    fps: 30,
     objects: [
         Circle(id: "ball0", colour: (r: 7, g: 0, b: 0)),
         Circle(id: "ball1", colour: (r: 0, g: 7, b: 3)),
