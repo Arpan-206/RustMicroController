@@ -17,6 +17,8 @@ Controls:
 """
 
 import argparse
+import math
+import os
 import random
 import sys
 import tkinter as tk
@@ -49,22 +51,40 @@ def r332_to_hex(r, g, b):
 class BallDef:
     """Stores initial configuration for a ball to allow re-simulation."""
 
-    def __init__(self, x, y, r, vx, vy, colour):
+    def __init__(self, x, y, r, vx, vy, colour, is_static=False):
         self.x, self.y = float(x), float(y)
         self.r = r
         self.vx, self.vy = float(vx), float(vy)
         self.colour = colour
+        self.is_static = is_static
 
 
 def make_balls(n, seed=42):
     rng = random.Random(seed)
     balls = []
+
+    # Create a bowl out of static balls
+    bowl_center_x = W / 2
+    bowl_center_y = H / 2 - 50
+    bowl_radius = 200
+    num_bowl_balls = 45
+    bowl_ball_r = 10
+
+    for i in range(num_bowl_balls):
+        # Semi-circle from angle 0 to pi (bottom half)
+        # In screen coords, +y is down. So we want angles from 0 to pi.
+        a = math.pi * i / (num_bowl_balls - 1)
+        x = bowl_center_x - bowl_radius * math.cos(a)
+        y = bowl_center_y + bowl_radius * math.sin(a)
+        # Use a neutral grey-ish colour
+        balls.append(BallDef(x, y, bowl_ball_r, 0, 0, (4, 4, 2), is_static=True))
+
     for i in range(n):
         r = rng.randint(MIN_R, MAX_R)
-        x = rng.uniform(r, W - r)
-        y = rng.uniform(r, H // 2)
-        vx = rng.uniform(-6, 6)
-        vy = rng.uniform(-4, 2)
+        x = rng.uniform(W // 2 - 50, W // 2 + 50)
+        y = rng.uniform(20, H // 4)
+        vx = rng.uniform(-2, 2)
+        vy = rng.uniform(0, 2)
         col = BALL_COLOURS[i % len(BALL_COLOURS)]
         balls.append(BallDef(x, y, r, vx, vy, col))
     return balls
@@ -89,27 +109,39 @@ def simulate(balls, total_frames, fps=30):
 
     bodies = []
     for b in balls:
-        # Give mass proportional to area so they interact realistically
-        mass = (b.r**2) / 100.0
-        moment = pymunk.moment_for_circle(mass, 0, b.r)
-        body = pymunk.Body(mass, moment)
-        body.position = (b.x, b.y)
-        # Scale initial velocity to match per-second values
-        body.velocity = (b.vx * fps, b.vy * fps)
+        if b.is_static:
+            shape = pymunk.Circle(space.static_body, b.r, offset=(b.x, b.y))
+            shape.elasticity = 0.5
+            shape.friction = 0.5
+            space.add(shape)
+            bodies.append(None)
+        else:
+            # Give mass proportional to area so they interact realistically
+            mass = (b.r**2) / 100.0
+            moment = pymunk.moment_for_circle(mass, 0, b.r)
+            body = pymunk.Body(mass, moment)
+            body.position = (b.x, b.y)
+            # Scale initial velocity to match per-second values
+            body.velocity = (b.vx * fps, b.vy * fps)
 
-        shape = pymunk.Circle(body, b.r)
-        shape.elasticity = 0.98
-        shape.friction = 0.01
+            shape = pymunk.Circle(body, b.r)
+            shape.elasticity = 0.8
+            shape.friction = 0.5
 
-        space.add(body, shape)
-        bodies.append(body)
+            space.add(body, shape)
+            bodies.append(body)
 
     states = [[] for _ in balls]
     dt = 1.0 / fps
     for _ in range(total_frames):
         space.step(dt)
         for i, body in enumerate(bodies):
-            states[i].append((int(body.position.x), int(body.position.y), balls[i].r))
+            if body is None:
+                states[i].append((int(balls[i].x), int(balls[i].y), balls[i].r))
+            else:
+                states[i].append(
+                    (int(body.position.x), int(body.position.y), balls[i].r)
+                )
 
     return states
 
@@ -231,11 +263,14 @@ class App:
 
 
 def main():
+    default_export = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "physics.ron"
+    )
     ap = argparse.ArgumentParser()
-    ap.add_argument("--balls", type=int, default=5)
+    ap.add_argument("--balls", type=int, default=10)
     ap.add_argument("--frames", type=int, default=1200)
-    ap.add_argument("--fps", type=int, default=30)
-    ap.add_argument("--export", type=str, default="physics.ron")
+    ap.add_argument("--fps", type=int, default=20)
+    ap.add_argument("--export", type=str, default=default_export)
     ap.add_argument("--headless", action="store_true")
     args = ap.parse_args()
 
