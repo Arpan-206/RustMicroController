@@ -153,7 +153,10 @@ def export_ron(path, balls, states, fps, total_frames):
         f"    fps: {fps},",
         "    objects: [",
     ]
-    for i, b in enumerate(balls):
+    # Filter out static balls for the export
+    export_balls = [(i, b) for i, b in enumerate(balls) if not b.is_static]
+
+    for i, b in export_balls:
         r, g, bl = b.colour
         lines.append(
             f'        Circle(id: "ball{i}", colour: (r: {r}, g: {g}, b: {bl})),'
@@ -164,7 +167,7 @@ def export_ron(path, balls, states, fps, total_frames):
     STEP = max(1, total_frames // 60)
     frames_to_emit = sorted(set(range(0, total_frames, STEP)) | {total_frames - 1})
 
-    for i in range(len(balls)):
+    for i, _ in export_balls:
         for f in frames_to_emit:
             cx, cy, r = states[i][f]
             lines.append(
@@ -176,7 +179,7 @@ def export_ron(path, balls, states, fps, total_frames):
 
     with open(path, "w") as f:
         f.write("\n".join(lines) + "\n")
-    print(f"Exported {len(balls)} balls x {total_frames} frames -> {path}")
+    print(f"Exported {len(export_balls)} balls x {total_frames} frames -> {path}")
 
 
 class App:
