@@ -28,7 +28,7 @@ const H: u16 = 24;
 const T: u16 = 3;
 
 pub fn draw_digit(x: u16, y: u16, digit: u8, colour: u8) {
-    use crate::display::{draw_rect, Colour};
+    use crate::display::{fill_rect, Colour};
 
     let d = digit as usize;
     if d > 9 {
@@ -37,40 +37,39 @@ pub fn draw_digit(x: u16, y: u16, digit: u8, colour: u8) {
 
     let s = SEG[d];
     let c = Colour(colour);
-    let half_h = H / 2;
 
     // top bar
     if s & (1 << 0) != 0 {
-        draw_rect(x, y, x + W - 1, y + T - 1, c);
+        fill_rect(x, y, x + W, y + T, c);
     }
     // top-left
     if s & (1 << 1) != 0 {
-        draw_rect(x, y, x + T - 1, y + half_h - 1, c);
+        fill_rect(x, y, x + T, y + H / 2, c);
     }
     // top-right
     if s & (1 << 2) != 0 {
-        draw_rect(x + W - T, y, x + W - 1, y + half_h - 1, c);
+        fill_rect(x + W - T, y, x + W, y + H / 2, c);
     }
     // middle
     if s & (1 << 3) != 0 {
-        draw_rect(x, y + half_h - T / 2, x + W - 1, y + half_h + T / 2, c);
+        fill_rect(x, y + H / 2 - T / 2, x + W, y + H / 2 + T / 2, c);
     }
     // bot-left
     if s & (1 << 4) != 0 {
-        draw_rect(x, y + half_h, x + T - 1, y + H - 1, c);
+        fill_rect(x, y + H / 2, x + T, y + H, c);
     }
     // bot-right
     if s & (1 << 5) != 0 {
-        draw_rect(x + W - T, y + half_h, x + W - 1, y + H - 1, c);
+        fill_rect(x + W - T, y + H / 2, x + W, y + H, c);
     }
     // bottom
     if s & (1 << 6) != 0 {
-        draw_rect(x, y + H - T, x + W - 1, y + H - 1, c);
+        fill_rect(x, y + H - T, x + W, y + H, c);
     }
 }
 
 pub fn erase_digit(x: u16, y: u16) {
-    use crate::display::{draw_rect, Colour};
+    use crate::display::{fill_rect, Colour};
 
-    draw_rect(x, y, x + W - 1, y + H - 1, Colour(crate::pong::BG));
+    fill_rect(x, y, x + W, y + H, Colour(crate::pong::BG));
 }

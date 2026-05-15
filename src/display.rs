@@ -58,6 +58,10 @@ pub fn draw_rect(x0: u16, y0: u16, x1: u16, y1: u16, colour: Colour) {
     draw_rect_syscall(x0, y0, x1, y1, colour);
 }
 
+pub fn fill_rect(x0: u16, y0: u16, x1: u16, y1: u16, colour: Colour) {
+    draw_rect_syscall(x0, y0, x1, y1, colour);
+}
+
 pub fn draw_circle(cx: u16, cy: u16, radius: u16, colour: Colour) {
     draw_circle_syscall(cx, cy, radius, colour);
 }
