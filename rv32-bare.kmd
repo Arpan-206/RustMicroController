@@ -1167,13 +1167,13 @@
 0x40a18 : 00a686b3 ; add	a3,a3,a0
 0x40a1c : 00b888b3 ; add	a7,a7,a1
 0x40a20 : fff80813 ; addi	a6,a6,-1 # ffff <PIO_DIR_VAL+0xf00>
-0x40a24 : 00a70733 ; add	a4,a4,a0
-0x40a28 : 00c58633 ; add	a2,a1,a2
+0x40a24 : 00e50733 ; add	a4,a0,a4
+0x40a28 : 00b60633 ; add	a2,a2,a1
 0x40a2c : 0106f533 ; and	a0,a3,a6
 0x40a30 : 0108f5b3 ; and	a1,a7,a6
-0x40a34 : fff60693 ; addi	a3,a2,-1
-0x40a38 : 01077633 ; and	a2,a4,a6
-0x40a3c : 0106f6b3 ; and	a3,a3,a6
+0x40a34 : fff70713 ; addi	a4,a4,-1
+0x40a38 : 010676b3 ; and	a3,a2,a6
+0x40a3c : 01077633 ; and	a2,a4,a6
 0x40a40 : 00078713 ; mv	a4,a5
 0x40a44 : 00001317 ; auipc	t1,0x1
 0x40a48 : b5430067 ; jr	-1196(t1) # 41598 <_ZN9rv32_bare7display9fill_rect17hb9f19c7f08e7781cE>

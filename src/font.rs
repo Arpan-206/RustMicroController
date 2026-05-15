@@ -183,8 +183,8 @@ fn fill_scaled_span(
 ) {
     let x0 = x + start_col * scale;
     let y0 = y + row * scale;
-    let x1 = x + (end_col + 1) * scale;
-    let y1 = y + (row + 1) * scale - 1;
+    let x1 = x + (end_col + 1) * scale - 1;
+    let y1 = y + (row + 1) * scale;
     fill_rect(x0, y0, x1, y1, colour);
 }
 
