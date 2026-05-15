@@ -7,17 +7,25 @@
 //  | |
 //   -
 
+const TOP: u8 = 1 << 0;
+const TL: u8 = 1 << 1;
+const TR: u8 = 1 << 2;
+const MID: u8 = 1 << 3;
+const BL: u8 = 1 << 4;
+const BR: u8 = 1 << 5;
+const BOT: u8 = 1 << 6;
+
 const SEG: [u8; 10] = [
-    0b0111111, // 0
-    0b0000110, // 1
-    0b1011011, // 2
-    0b1001111, // 3
-    0b1100110, // 4
-    0b1101101, // 5
-    0b1111101, // 6
-    0b0000111, // 7
-    0b1111111, // 8
-    0b1101111, // 9
+    TOP | TL | TR | BL | BR | BOT,      // 0
+    TR | BR,                            // 1
+    TOP | TR | MID | BL | BOT,         // 2
+    TOP | TR | MID | BR | BOT,         // 3
+    TL | TR | MID | BR,                // 4
+    TOP | TL | MID | BR | BOT,         // 5
+    TOP | TL | MID | BL | BR | BOT,     // 6
+    TOP | TR | BR,                     // 7
+    TOP | TL | TR | MID | BL | BR | BOT,// 8
+    TOP | TL | TR | MID | BR | BOT,     // 9
 ];
 
 // Each segment as (dx0, dy0, dx1, dy1) relative to glyph top-left
