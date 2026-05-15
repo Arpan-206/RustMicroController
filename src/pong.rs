@@ -1,5 +1,6 @@
 use crate::display::{draw_rect, fill_circle, Colour};
 use crate::{font, io, keyboard, syscall};
+use crate::lcd;
 
 const SCREEN_W: u16 = 640;
 const SCREEN_H: u16 = 480;
@@ -40,6 +41,9 @@ pub fn run() -> ! {
         ticks_per_frame = 1;
     }
 
+    show_start_screen();
+    wait_for_start_key();
+
     let mut p1_y: i16 = ((SCREEN_H as i16) - (PADDLE_H as i16)) / 2;
     let mut p2_y: i16 = p1_y;
     let mut ball = Ball {
@@ -57,6 +61,7 @@ pub fn run() -> ! {
     let mut p2_repeat: u8 = 0;
 
     clear_and_draw_world(p1_y, p2_y, ball, p1_score, p2_score);
+    update_lcd_score(p1_score, p2_score);
 
     loop {
         let start = syscall::counter_get();
@@ -149,6 +154,7 @@ pub fn run() -> ! {
 
         if scored {
             clear_and_draw_world(p1_y, p2_y, ball, p1_score, p2_score);
+            update_lcd_score(p1_score, p2_score);
         } else {
             draw_paddle(old_p1_y, BG, P1_X);
             draw_paddle(old_p2_y, BG, P2_X);
@@ -160,6 +166,32 @@ pub fn run() -> ! {
         }
 
         while syscall::counter_get().wrapping_sub(start) < ticks_per_frame {}
+    }
+}
+
+fn show_start_screen() {
+    draw_rect(0, 0, SCREEN_W - 1, SCREEN_H - 1, Colour(BG));
+
+    let scale: u16 = 8;
+    let title = b"PONG";
+    let text_w = font::char_width(scale) * title.len() as u16;
+    let text_h = font::char_height(scale);
+    let x = (SCREEN_W - text_w) / 2;
+    let y = (SCREEN_H - text_h) / 2;
+
+    font::draw_str(x, y, title, BALL_COL, scale);
+}
+
+fn wait_for_start_key() {
+    loop {
+        while let Some(key) = keyboard::read_key_nonblocking() {
+            if key == b'1' {
+                return;
+            }
+        }
+
+        let start = syscall::counter_get();
+        while syscall::counter_get().wrapping_sub(start) < 10 {}
     }
 }
 
@@ -200,6 +232,17 @@ fn draw_scores(p1_score: u8, p2_score: u8) {
     font::draw_digit(P1_SCORE_X, SCORE_Y, p1_score, BALL_COL);
     font::erase_digit(P2_SCORE_X, SCORE_Y);
     font::draw_digit(P2_SCORE_X, SCORE_Y, p2_score, BALL_COL);
+}
+
+fn update_lcd_score(p1_score: u8, p2_score: u8) {
+    lcd::print_str(b"\nScore ");
+    lcd::print_str(score_digit(p1_score).as_slice());
+    lcd::print_str(b"-");
+    lcd::print_str(score_digit(p2_score).as_slice());
+}
+
+fn score_digit(score: u8) -> [u8; 1] {
+    [b'0' + (score % 10)]
 }
 
 fn clamp_paddle_y(y: i16) -> i16 {
