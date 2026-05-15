@@ -1,17 +1,17 @@
 #![no_std]
 #![no_main]
 
-mod animator;
 mod display;
-mod generated_scene;
 mod io;
+mod keyboard;
+mod pong;
 mod syscall;
 
 use core::panic::PanicInfo;
 
 #[no_mangle]
 pub extern "C" fn user_main() {
-    animator::run();
+    pong::run();
 }
 
 #[panic_handler]
