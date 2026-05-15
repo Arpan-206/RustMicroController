@@ -138,7 +138,7 @@ pub fn draw_char(x: u16, y: u16, ch: u8, colour: u8, scale: u16) {
         let mut span_start: Option<u16> = None;
         let mut col = 0u16;
         while col < 6 {
-            let lit = col < 5 && ((glyph[col as usize] >> row) & 1) != 0;
+            let lit = col < 5 && ((glyph[col as usize] >> (6 - row)) & 1) != 0;
             if lit {
                 if span_start.is_none() {
                     span_start = Some(col);
