@@ -19,6 +19,10 @@ def r332_to_hex(r, g, b):
     return f"#{int(r / 7 * 255):02x}{int(g / 7 * 255):02x}{int(b / 3 * 255):02x}"
 
 
+def clamp(v, lo, hi):
+    return max(lo, min(hi, v))
+
+
 def simulate(total_frames, fps):
     space = pymunk.Space()
     space.gravity = (0, 500)
@@ -115,6 +119,7 @@ def export_ron(path, states, fps, total_frames, pivot_x, pivot_y, arm_len):
         f"    fps: {fps},",
         "    objects: [",
         '        Rect(id: "ground",  colour: (r: 2, g: 2, b: 1)),',
+        '        Line(id: "arm",    colour: (r: 4, g: 4, b: 2)),',
         '        Circle(id: "pivot", colour: (r: 7, g: 7, b: 3)),',
         '        Circle(id: "bob",   colour: (r: 7, g: 3, b: 0)),',
         '        Circle(id: "ball1", colour: (r: 0, g: 7, b: 0)),',
@@ -129,7 +134,23 @@ def export_ron(path, states, fps, total_frames, pivot_x, pivot_y, arm_len):
         f'        AtCircle(frame: {total_frames - 1}, id: "pivot", cx: {pivot_x}, cy: {pivot_y}, r: 5),',
     ]
 
-    for label in ("bob", "ball1", "ball2"):
+    # arm + bob — both driven by bob_states
+    for f in frames_to_emit:
+        cx, cy, r = states["bob"][f]
+        cx = clamp(cx, 0, 639)
+        cy = clamp(cy, 0, 479)
+        # arm: pivot → bob centre
+        lines.append(
+            f'        AtLine(frame: {f}, id: "arm", '
+            f"x0: {pivot_x}, y0: {pivot_y}, x1: {cx}, y1: {cy}, thickness: 2),"
+        )
+        # bob circle
+        lines.append(
+            f'        AtCircle(frame: {f}, id: "bob", cx: {cx}, cy: {cy}, r: {r}),'
+        )
+
+    # ball1 and ball2 separately
+    for label in ("ball1", "ball2"):
         for f in frames_to_emit:
             cx, cy, r = states[label][f]
             cx = clamp(cx, 0, 639)
@@ -260,10 +281,6 @@ class App:
                 self.pivot_y,
                 160,
             )
-
-
-def clamp(v, lo, hi):
-    return max(lo, min(hi, v))
 
 
 def main():

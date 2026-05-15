@@ -48,6 +48,10 @@ def r332_to_hex(r, g, b):
     return f"#{ri:02x}{gi:02x}{bi:02x}"
 
 
+def clamp(v, lo, hi):
+    return max(lo, min(hi, v))
+
+
 class BallDef:
     """Stores initial configuration for a ball to allow re-simulation."""
 
@@ -170,6 +174,8 @@ def export_ron(path, balls, states, fps, total_frames):
     for i, _ in export_balls:
         for f in frames_to_emit:
             cx, cy, r = states[i][f]
+            cx = clamp(cx, 0, 639)
+            cy = clamp(cy, 0, 479)
             lines.append(
                 f'        AtCircle(frame: {f}, id: "ball{i}", cx: {cx}, cy: {cy}, r: {r}),'
             )
