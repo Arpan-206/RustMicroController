@@ -10,6 +10,7 @@ const PADDLE_SPD: i16 = 5;
 const BALL_SPD_X: i16 = 4;
 const BALL_SPD_Y: i16 = 3;
 const FPS: u32 = 30;
+const INPUT_REPEAT_FRAMES: u8 = 8;
 const BG: u8 = 0x00;
 const P1_COL: u8 = 0xE0;
 const P2_COL: u8 = 0x1C;
@@ -47,6 +48,10 @@ pub fn run() -> ! {
     let mut p1_score: u8 = 0;
     let mut p2_score: u8 = 0;
     let mut serve_left = false;
+    let mut p1_dir: i16 = 0;
+    let mut p2_dir: i16 = 0;
+    let mut p1_repeat: u8 = 0;
+    let mut p2_repeat: u8 = 0;
 
     clear_and_draw_world(p1_y, p2_y, ball);
 
@@ -59,15 +64,38 @@ pub fn run() -> ! {
 
         while let Some(key) = keyboard::read_key_nonblocking() {
             match key {
-                b'1' => p1_y -= PADDLE_SPD,
-                b'7' => p1_y += PADDLE_SPD,
-                b'3' => p2_y -= PADDLE_SPD,
-                b'9' => p2_y += PADDLE_SPD,
+                b'1' => {
+                    p1_dir = -1;
+                    p1_repeat = INPUT_REPEAT_FRAMES;
+                }
+                b'7' => {
+                    p1_dir = 1;
+                    p1_repeat = INPUT_REPEAT_FRAMES;
+                }
+                b'3' => {
+                    p2_dir = -1;
+                    p2_repeat = INPUT_REPEAT_FRAMES;
+                }
+                b'9' => {
+                    p2_dir = 1;
+                    p2_repeat = INPUT_REPEAT_FRAMES;
+                }
                 _ => {}
             }
-            p1_y = clamp_paddle_y(p1_y);
-            p2_y = clamp_paddle_y(p2_y);
         }
+
+        if p1_repeat > 0 && p1_dir != 0 {
+            p1_y += p1_dir * PADDLE_SPD;
+            p1_repeat -= 1;
+        }
+
+        if p2_repeat > 0 && p2_dir != 0 {
+            p2_y += p2_dir * PADDLE_SPD;
+            p2_repeat -= 1;
+        }
+
+        p1_y = clamp_paddle_y(p1_y);
+        p2_y = clamp_paddle_y(p2_y);
 
         ball.x += ball_vx;
         ball.y += ball_vy;
