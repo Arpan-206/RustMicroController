@@ -1,5 +1,5 @@
 use crate::display::{draw_rect, fill_circle, Colour};
-use crate::{io, keyboard, syscall};
+use crate::{font, io, keyboard, syscall};
 
 const SCREEN_W: u16 = 640;
 const SCREEN_H: u16 = 480;
@@ -11,11 +11,14 @@ const BALL_SPD_X: i16 = 4;
 const BALL_SPD_Y: i16 = 3;
 const FPS: u32 = 30;
 const INPUT_REPEAT_FRAMES: u8 = 8;
-const BG: u8 = 0x00;
+pub const BG: u8 = 0x00;
 const P1_COL: u8 = 0xE0;
 const P2_COL: u8 = 0x1C;
 const BALL_COL: u8 = 0xFF;
 const NET_COL: u8 = 0x24;
+const P1_SCORE_X: u16 = 260;
+const P2_SCORE_X: u16 = 364;
+const SCORE_Y: u16 = 10;
 
 const P1_X: i16 = 20;
 const P2_X: i16 = (SCREEN_W as i16) - 20 - (PADDLE_W as i16);
@@ -53,7 +56,7 @@ pub fn run() -> ! {
     let mut p1_repeat: u8 = 0;
     let mut p2_repeat: u8 = 0;
 
-    clear_and_draw_world(p1_y, p2_y, ball);
+    clear_and_draw_world(p1_y, p2_y, ball, p1_score, p2_score);
 
     loop {
         let start = syscall::counter_get();
@@ -145,7 +148,7 @@ pub fn run() -> ! {
         }
 
         if scored {
-            clear_and_draw_world(p1_y, p2_y, ball);
+            clear_and_draw_world(p1_y, p2_y, ball, p1_score, p2_score);
         } else {
             draw_paddle(old_p1_y, BG, P1_X);
             draw_paddle(old_p2_y, BG, P2_X);
@@ -160,12 +163,13 @@ pub fn run() -> ! {
     }
 }
 
-fn clear_and_draw_world(p1_y: i16, p2_y: i16, ball: Ball) {
+fn clear_and_draw_world(p1_y: i16, p2_y: i16, ball: Ball, p1_score: u8, p2_score: u8) {
     draw_rect(0, 0, SCREEN_W - 1, SCREEN_H - 1, Colour(BG));
     draw_net();
     draw_paddle(p1_y, P1_COL, P1_X);
     draw_paddle(p2_y, P2_COL, P2_X);
     draw_ball(ball.x, ball.y, BALL_COL);
+    draw_scores(p1_score, p2_score);
 }
 
 fn draw_net() {
@@ -189,6 +193,13 @@ fn draw_paddle(y: i16, colour: u8, x: i16) {
 
 fn draw_ball(x: i16, y: i16, colour: u8) {
     fill_circle(x as u16, y as u16, BALL_R, colour);
+}
+
+fn draw_scores(p1_score: u8, p2_score: u8) {
+    font::erase_digit(P1_SCORE_X, SCORE_Y);
+    font::draw_digit(P1_SCORE_X, SCORE_Y, p1_score, BALL_COL);
+    font::erase_digit(P2_SCORE_X, SCORE_Y);
+    font::draw_digit(P2_SCORE_X, SCORE_Y, p2_score, BALL_COL);
 }
 
 fn clamp_paddle_y(y: i16) -> i16 {
