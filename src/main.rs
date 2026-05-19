@@ -17,7 +17,7 @@ use crate::lcd::print_str;
 
 #[no_mangle]
 pub extern "C" fn user_main() {
-    print_str(b"Animator!");
+    print_str(b"Animator");
     animator::run();
 }
 

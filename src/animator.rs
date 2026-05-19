@@ -1,4 +1,4 @@
-use crate::display::{draw_line, draw_rect, fill_circle, fill_triangle, Colour};
+use crate::display::{draw_line, draw_rect, fill_circle, fill_rect, fill_triangle, Colour};
 use crate::generated_scene::{self, Kf};
 use crate::{io, syscall};
 
@@ -44,6 +44,21 @@ impl Shape {
             && self.x2 == other.x2
             && self.y2 == other.y2
     }
+
+    fn erase(self, kind: u8, bg: u8) {
+        if kind == generated_scene::KIND_CIRCLE {
+            let r = self.x1;
+            fill_rect(
+                self.x0.saturating_sub(r),
+                self.y0.saturating_sub(r),
+                self.x0.saturating_add(r),
+                self.y0.saturating_add(r),
+                Colour(bg),
+            );
+        } else {
+            self.draw(kind, bg);
+        }
+    }
 }
 
 pub fn run() -> ! {
@@ -86,7 +101,7 @@ pub fn run() -> ! {
         i = 0;
         while i < generated_scene::OBJECT_COUNT {
             if !previous[i].eq(next[i]) {
-                previous[i].draw(generated_scene::OBJECTS[i].kind, background.0);
+                previous[i].erase(generated_scene::OBJECTS[i].kind, background.0);
             }
             i += 1;
         }
@@ -166,17 +181,8 @@ fn lerp(a: u16, b: u16, t_num: u16, t_den: u16) -> u16 {
     if t_den == 0 {
         return a;
     }
-    let n = t_num as i64;
-    let d = t_den as i64;
-
-    // smoothstep: s = (3n²d - 2n³) / d³
-    // numerator of s scaled by d³
-    let s_num = 3 * n * n * d - 2 * n * n * n;
-    let s_den = d * d * d;
-
-    // lerp using smoothstepped t
     let a = a as i64;
     let b = b as i64;
-    let result = a * s_den + (b - a) * s_num;
-    (result / s_den).clamp(0, 65535) as u16
+    let result = a * t_den as i64 + (b - a) * t_num as i64;
+    (result / t_den as i64).clamp(0, 65535) as u16
 }
