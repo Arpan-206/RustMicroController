@@ -35,6 +35,15 @@ impl Shape {
             draw_line(self.x0, self.y0, self.x1, self.y1, self.x2, Colour(colour));
         }
     }
+
+    fn eq(self, other: Shape) -> bool {
+        self.x0 == other.x0
+            && self.y0 == other.y0
+            && self.x1 == other.x1
+            && self.y1 == other.y1
+            && self.x2 == other.x2
+            && self.y2 == other.y2
+    }
 }
 
 pub fn run() -> ! {
@@ -42,6 +51,7 @@ pub fn run() -> ! {
     let mut previous = [Shape::empty(); generated_scene::OBJECT_COUNT];
     let mut next = [Shape::empty(); generated_scene::OBJECT_COUNT];
 
+    // Draw background and initial frame
     draw_rect(0, 0, 639, 479, background);
 
     let mut i = 0;
@@ -61,27 +71,35 @@ pub fn run() -> ! {
     }
 
     let mut frame = next_frame(0);
+
     loop {
         let start = syscall::counter_get();
 
+        // Compute next shapes
         i = 0;
         while i < generated_scene::OBJECT_COUNT {
             next[i] = shape_at(generated_scene::OBJECTS[i].keyframes, frame);
             i += 1;
         }
 
+        // Pass 1: erase only shapes that changed (back-to-front order preserves Z)
         i = 0;
         while i < generated_scene::OBJECT_COUNT {
-            previous[i].draw(generated_scene::OBJECTS[i].kind, background.0);
+            if !previous[i].eq(next[i]) {
+                previous[i].draw(generated_scene::OBJECTS[i].kind, background.0);
+            }
             i += 1;
         }
 
+        // Pass 2: redraw only shapes that changed
         i = 0;
         while i < generated_scene::OBJECT_COUNT {
-            next[i].draw(
-                generated_scene::OBJECTS[i].kind,
-                generated_scene::OBJECTS[i].colour,
-            );
+            if !previous[i].eq(next[i]) {
+                next[i].draw(
+                    generated_scene::OBJECTS[i].kind,
+                    generated_scene::OBJECTS[i].colour,
+                );
+            }
             previous[i] = next[i];
             i += 1;
         }
@@ -131,23 +149,25 @@ fn shape_at(keyframes: &[Kf], frame: u16) -> Shape {
     shape_from_kf(&keyframes[keyframes.len() - 1])
 }
 
-fn shape_from_kf(keyframe: &Kf) -> Shape {
+fn shape_from_kf(kf: &Kf) -> Shape {
     Shape {
-        x0: keyframe.x0,
-        y0: keyframe.y0,
-        x1: keyframe.x1,
-        y1: keyframe.y1,
-        x2: keyframe.x2,
-        y2: keyframe.y2,
+        x0: kf.x0,
+        y0: kf.y0,
+        x1: kf.x1,
+        y1: kf.y1,
+        x2: kf.x2,
+        y2: kf.y2,
     }
 }
 
+/// Fixed-precision lerp: multiply before divide to avoid truncation jitter.
+/// Uses i64 to prevent overflow on u16 coordinate arithmetic.
 fn lerp(a: u16, b: u16, t_num: u16, t_den: u16) -> u16 {
     if t_den == 0 {
         return a;
     }
-
-    let a = a as i32;
-    let b = b as i32;
-    (a + (b - a) * t_num as i32 / t_den as i32) as u16
+    let a = a as i64;
+    let b = b as i64;
+    let result = a * t_den as i64 + (b - a) * t_num as i64;
+    (result / t_den as i64).clamp(0, 65535) as u16
 }
