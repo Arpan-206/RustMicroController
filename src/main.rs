@@ -1,10 +1,8 @@
 #![no_std]
 #![no_main]
 
-mod animator;
 mod display;
 mod font;
-mod generated_scene;
 mod io;
 mod keyboard;
 mod lcd;
@@ -17,8 +15,8 @@ use crate::lcd::print_str;
 
 #[no_mangle]
 pub extern "C" fn user_main() {
-    print_str(b"Animator");
-    animator::run();
+    print_str(b"Pong");
+    pong::run();
 }
 
 #[panic_handler]
