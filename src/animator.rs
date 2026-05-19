@@ -160,14 +160,23 @@ fn shape_from_kf(kf: &Kf) -> Shape {
     }
 }
 
-/// Fixed-precision lerp: multiply before divide to avoid truncation jitter.
-/// Uses i64 to prevent overflow on u16 coordinate arithmetic.
+/// Smoothstep easing: 3t² - 2t³, then lerp.
+/// All arithmetic in i64 to avoid overflow and truncation jitter.
 fn lerp(a: u16, b: u16, t_num: u16, t_den: u16) -> u16 {
     if t_den == 0 {
         return a;
     }
+    let n = t_num as i64;
+    let d = t_den as i64;
+
+    // smoothstep: s = (3n²d - 2n³) / d³
+    // numerator of s scaled by d³
+    let s_num = 3 * n * n * d - 2 * n * n * n;
+    let s_den = d * d * d;
+
+    // lerp using smoothstepped t
     let a = a as i64;
     let b = b as i64;
-    let result = a * t_den as i64 + (b - a) * t_num as i64;
-    (result / t_den as i64).clamp(0, 65535) as u16
+    let result = a * s_den + (b - a) * s_num;
+    (result / s_den).clamp(0, 65535) as u16
 }
