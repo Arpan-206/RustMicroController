@@ -22,7 +22,7 @@ const P2_SCORE_X: u16 = 364;
 const SCORE_Y: u16 = 10;
 const TITLE_SCALE: u16 = 8;
 const SUBTITLE_SCALE: u16 = 3;
-const START_SUBTITLE: &[u8] = b"Press 1 to start";
+const START_SUBTITLE: &[u8] = b"PRESS 1 TO START";
 const WIN_P1_SUBTITLE: &[u8] = b"P1 WINS";
 const WIN_P2_SUBTITLE: &[u8] = b"P2 WINS";
 
@@ -184,7 +184,6 @@ fn show_splash(kind: SplashKind) {
     let subtitle_y = title_y + title_h + 18;
 
     font::draw_str(subtitle_x, subtitle_y, subtitle_src, subtitle_colour, SUBTITLE_SCALE);
-    lcd::print_str(b"Pong\n");
     lcd::print_str(subtitle_src);
 }
 
