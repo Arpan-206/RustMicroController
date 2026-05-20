@@ -22,7 +22,7 @@ const P2_SCORE_X: u16 = 364;
 const SCORE_Y: u16 = 10;
 const TITLE_SCALE: u16 = 8;
 const SUBTITLE_SCALE: u16 = 3;
-const START_SUBTITLE: &[u8] = b"PRESS 1 TO START";
+const START_SUBTITLE: &[u8] = b"Press 1 to start";
 const WIN_P1_SUBTITLE: &[u8] = b"P1 WINS";
 const WIN_P2_SUBTITLE: &[u8] = b"P2 WINS";
 
@@ -174,33 +174,18 @@ fn show_splash(kind: SplashKind) {
 
     font::draw_str(title_x, title_y, title, BALL_COL, TITLE_SCALE);
 
-        let (subtitle_src, subtitle_colour) = match kind {
-            SplashKind::Start => (START_SUBTITLE, BALL_COL),
-            SplashKind::Winner { subtitle, colour } => (subtitle, colour),
-        };
+    let (subtitle_src, subtitle_colour) = match kind {
+        SplashKind::Start => (START_SUBTITLE, BALL_COL),
+        SplashKind::Winner { subtitle, colour } => (subtitle, colour),
+    };
 
-        // Normalize subtitle to uppercase ASCII for consistent on-screen and
-        // LCD rendering (prevents mixed-case or accidental lowercasing).
-        // Use a fixed stack buffer to avoid heap usage in no_std mode.
-        let mut subtitle_buf_arr: [u8; 64] = [0; 64];
-        let mut subtitle_len: usize = 0;
-        for &b in subtitle_src {
-            if subtitle_len >= subtitle_buf_arr.len() {
-                break;
-            }
-            let up = if b >= b'a' && b <= b'z' { b - 32 } else { b };
-            subtitle_buf_arr[subtitle_len] = up;
-            subtitle_len += 1;
-        }
-        let subtitle_buf = &subtitle_buf_arr[..subtitle_len];
+    let subtitle_w = font::char_width(SUBTITLE_SCALE) * subtitle_src.len() as u16;
+    let subtitle_x = (SCREEN_W - subtitle_w) / 2;
+    let subtitle_y = title_y + title_h + 18;
 
-        let subtitle_w = font::char_width(SUBTITLE_SCALE) * subtitle_buf.len() as u16;
-        let subtitle_x = (SCREEN_W - subtitle_w) / 2;
-        let subtitle_y = title_y + title_h + 18;
-
-        font::draw_str(subtitle_x, subtitle_y, &subtitle_buf, subtitle_colour, SUBTITLE_SCALE);
-        lcd::print_str(b"Pong\n");
-        lcd::print_str(&subtitle_buf);
+    font::draw_str(subtitle_x, subtitle_y, subtitle_src, subtitle_colour, SUBTITLE_SCALE);
+    lcd::print_str(b"Pong\n");
+    lcd::print_str(subtitle_src);
 }
 
 fn handle_play_input(game: &mut GameState) -> Option<SplashKind> {
