@@ -4,6 +4,15 @@ A mixed-language bare-metal project for a RISC-V RV32IM microcontroller.
 Machine-mode startup, trap handling, keypad debounce, and hardware access live in assembly.
 User-mode application logic lives in Rust.
 
+## GamePlay
+
+![Splash screen](assets/docs/SPLASH.HEIC)
+![Player 2 win screen](assets/docs/P2_WON.HEIC)
+
+<video controls width="100%" src="assets/docs/GAMEPLAY.MOV"></video>
+
+If your Markdown renderer does not display the video inline, open [GAMEPLAY.MOV](assets/docs/GAMEPLAY.MOV) directly.
+
 ---
 
 ## Current user application (Pong game)
