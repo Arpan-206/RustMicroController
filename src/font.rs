@@ -126,7 +126,7 @@ const H: u16 = 24;
 const T: u16 = 3;
 
 pub fn draw_char(x: u16, y: u16, ch: u8, colour: u8, scale: u16) {
-    if ch < 32 || ch > 126 || scale == 0 {
+    if !(32u8..=126u8).contains(&ch) || scale == 0 {
         return;
     }
 

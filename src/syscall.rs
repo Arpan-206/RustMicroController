@@ -46,6 +46,7 @@ fn ecall5(nr: Syscall, arg0: u32, arg1: u32, arg2: u32, arg3: u32, arg4: u32) {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 #[inline(never)]
 fn ecall6(nr: Syscall, arg0: u32, arg1: u32, arg2: u32, arg3: u32, arg4: u32, arg5: u32) {
     unsafe {
@@ -63,6 +64,7 @@ fn ecall6(nr: Syscall, arg0: u32, arg1: u32, arg2: u32, arg3: u32, arg4: u32, ar
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 #[inline(never)]
 fn ecall7(
     nr: Syscall,

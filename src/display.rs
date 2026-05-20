@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::syscall;
 
 // Colour type — RRRGGGBB 8bpp
