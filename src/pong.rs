@@ -174,24 +174,33 @@ fn show_splash(kind: SplashKind) {
 
     font::draw_str(title_x, title_y, title, BALL_COL, TITLE_SCALE);
 
-    let (subtitle, subtitle_colour) = match kind {
-        SplashKind::Start => (START_SUBTITLE, BALL_COL),
-        SplashKind::Winner { subtitle, colour } => (subtitle, colour),
-    };
+        let (subtitle_src, subtitle_colour) = match kind {
+            SplashKind::Start => (START_SUBTITLE, BALL_COL),
+            SplashKind::Winner { subtitle, colour } => (subtitle, colour),
+        };
 
-    let subtitle_w = font::char_width(SUBTITLE_SCALE) * subtitle.len() as u16;
-    let subtitle_x = (SCREEN_W - subtitle_w) / 2;
-    let subtitle_y = title_y + title_h + 18;
+        // Normalize subtitle to uppercase ASCII for consistent on-screen and
+        // LCD rendering (prevents mixed-case or accidental lowercasing).
+        // Use a fixed stack buffer to avoid heap usage in no_std mode.
+        let mut subtitle_buf_arr: [u8; 64] = [0; 64];
+        let mut subtitle_len: usize = 0;
+        for &b in subtitle_src {
+            if subtitle_len >= subtitle_buf_arr.len() {
+                break;
+            }
+            let up = if b >= b'a' && b <= b'z' { b - 32 } else { b };
+            subtitle_buf_arr[subtitle_len] = up;
+            subtitle_len += 1;
+        }
+        let subtitle_buf = &subtitle_buf_arr[..subtitle_len];
 
-    font::draw_str(
-        subtitle_x,
-        subtitle_y,
-        subtitle,
-        subtitle_colour,
-        SUBTITLE_SCALE,
-    );
-    lcd::print_str(b"Pong\n");
-    lcd::print_str(subtitle);
+        let subtitle_w = font::char_width(SUBTITLE_SCALE) * subtitle_buf.len() as u16;
+        let subtitle_x = (SCREEN_W - subtitle_w) / 2;
+        let subtitle_y = title_y + title_h + 18;
+
+        font::draw_str(subtitle_x, subtitle_y, &subtitle_buf, subtitle_colour, SUBTITLE_SCALE);
+        lcd::print_str(b"Pong\n");
+        lcd::print_str(&subtitle_buf);
 }
 
 fn handle_play_input(game: &mut GameState) -> Option<SplashKind> {
@@ -387,6 +396,7 @@ fn draw_scores(p1_score: u8, p2_score: u8) {
 }
 
 fn update_lcd_score(p1_score: u8, p2_score: u8) {
+    lcd::print_str(b"\n                           ");
     lcd::print_str(b"\nScore ");
     lcd::print_str(score_digit(p1_score).as_slice());
     lcd::print_str(b"-");
