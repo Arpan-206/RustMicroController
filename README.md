@@ -6,8 +6,8 @@ User-mode application logic lives in Rust.
 
 ## GamePlay
 
-![Splash screen](assets/docs/SPLASH.HEIC)
-![Player 2 win screen](assets/docs/P2_WON.HEIC)
+![Splash screen](assets/docs/SPLASH.png)
+![Player 2 win screen](assets/docs/P2_WON.png)
 
 <video controls width="100%" src="assets/docs/GAMEPLAY.MOV"></video>
 
