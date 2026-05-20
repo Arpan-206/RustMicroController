@@ -50,16 +50,3 @@ pub fn read_key_blocking() -> u8 {
     }
 }
 
-/// Return the raw debounced keycode (0xRC) if available.
-pub fn read_raw_key_nonblocking() -> Option<u8> {
-    let key = io::key_scan();
-    if key > 0x0f {
-        return Some(key as u8);
-    }
-    None
-}
-
-/// Expose keycode->ASCII mapping for debugging.
-pub fn keycode_to_ascii_pub(key: u8) -> Option<u8> {
-    keycode_to_ascii(key)
-}
