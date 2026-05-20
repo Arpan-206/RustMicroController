@@ -212,7 +212,7 @@ fn handle_play_input(game: &mut GameState) -> Option<SplashKind> {
                 game.p1_dir = -1;
                 game.p1_repeat = INPUT_REPEAT_FRAMES;
             }
-            b'7' => {
+            b'7' | b'4' => {
                 game.p1_dir = 1;
                 game.p1_repeat = INPUT_REPEAT_FRAMES;
             }
@@ -220,7 +220,7 @@ fn handle_play_input(game: &mut GameState) -> Option<SplashKind> {
                 game.p2_dir = -1;
                 game.p2_repeat = INPUT_REPEAT_FRAMES;
             }
-            b'9' => {
+            b'9' | b'6' => {
                 game.p2_dir = 1;
                 game.p2_repeat = INPUT_REPEAT_FRAMES;
             }
