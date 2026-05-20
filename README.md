@@ -6,20 +6,20 @@ User-mode application logic lives in Rust.
 
 ---
 
-## Current user application (keypad calculator)
+## Current user application (Pong game)
 
-- Enter **num1** on line 1 (digits only).
-- Choose operator:
-  - `+` → add
-  - `-` → subtract
-  - `*` → multiply
-  - `/` → integer division
-- Enter **num2** on line 2.
-- Press `=` to compute.
-- Result is shown on line 1, line 2 shows `C to reset`.
-- Press `C` to clear and start over. Input is locked after a result until reset.
+- A simple two-player Pong game rendered via the framebuffer draw syscalls.
+- Screen resolution: 640×480, 8bpp palette.
+- Controls (keypad):
+    - Player 1: `1` = paddle up, `7` = paddle down
+    - Player 2: `3` = paddle up, `9` = paddle down
+    - `1` also starts the game from the splash screen; `0` returns to the splash.
+- Game specifics:
+    - Paddle size: 12×80, ball radius: 10
+    - Default speeds: paddle `PADDLE_SPD = 5`, ball `BALL_SPD_X = 4`, `BALL_SPD_Y = 3`
+    - Input repeat uses `INPUT_REPEAT_FRAMES` to apply repeated small moves on a single key press.
 
-Numbers are constrained to signed 32-bit. Overflow or divide-by-zero displays `ERR`.
+Note: If controls behave unexpectedly, check `src/keyboard.rs` (keycode → ASCII mapping) and the keypad debounce/FIFO in `src/os.s`.
 
 ---
 
@@ -45,7 +45,10 @@ Numbers are constrained to signed 32-bit. Overflow or divide-by-zero displays `E
                          │  mret (MPP=00)
 ┌────────────────────────▼────────────────────────────┐
 │  User mode  (0x00040000 – 0x0007FFFF)               │
-│  src/main.rs  — keypad calculator flow              │
+│  src/main.rs  — entry + game loop (Pong)            │
+│  src/pong.rs  — game logic, rendering, input loop   │
+│  src/font.rs  — 8×8 glyph set + text rendering      │
+│  src/display.rs — high-level draw wrappers (colour) │
 │  src/keyboard.rs — keycode → ASCII mapping          │
 │  src/lcd.rs   — print_str/clear (via ecall)         │
 │  src/io.rs    — timer/key helpers (via ecall)       │
@@ -126,7 +129,7 @@ on each timer interrupt:
 - Multi-key scans are ignored to reduce ghosting.
 - `SYS_KEY_READ` pops the next keycode or returns `0` if none.
 
-`keyboard.rs` maps keycodes to ASCII:
+`keyboard.rs` maps keycodes to ASCII using the same 4×4 keypad layout:
 
 ```
 [1 2 3 +]
@@ -135,6 +138,8 @@ on each timer interrupt:
 [* 0 / C]
 ```
 
+The game expects ASCII digits/characters returned by `keyboard::read_key_nonblocking()`.
+
 ---
 
 ## Source files
@@ -142,7 +147,10 @@ on each timer interrupt:
 | File | Language | Responsibility |
 |---|---|---|
 | `src/os.s` | RISC-V asm | M-mode: init, trap, ISR, LCD driver, keypad scan + debounce |
-| `src/main.rs` | Rust | User-mode keypad calculator flow |
+| `src/main.rs` | Rust | User-mode entry + game loop |
+| `src/pong.rs` | Rust | Pong game logic and rendering |
+| `src/font.rs` | Rust | 8×8 glyphs and text rendering helpers |
+| `src/display.rs` | Rust | Display primitives / Colour wrapper |
 | `src/keyboard.rs` | Rust | Keycode → ASCII mapping |
 | `src/syscall.rs` | Rust | `ecall` wrappers for each syscall number |
 | `src/io.rs` | Rust | Timer/key helpers, constants |
@@ -154,9 +162,9 @@ on each timer interrupt:
 
 ## Animator (incomplete)
 
-- **Status**: Implementation started in `src/animator.rs` but not completed due to time constraints.
-- **Integration**: The animator is not currently integrated into the user application; `main.rs` runs the keypad calculator.
-- **Preview/export**: Use `tools/physanim.py` to preview physics animations and export `.ron` scenes which are consumed to generate `src/generated_scene.rs`.
+- **Status**: `src/animator.rs` contains a partial implementation and is marked as not completed due to time constraints.
+- **Integration**: Animator is not integrated into the running game; `main.rs` runs Pong.
+- **Preview/export**: Use `tools/physanim.py` to preview or author `.ron` scenes; `build.rs` consumes `assets/scene.ron` to produce `src/generated_scene.rs` when present.
 
 
 ### Syscall table
