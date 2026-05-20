@@ -4,7 +4,7 @@ use crate::display::Colour;
 // 8x8 font for ASCII 32..126.
 // Uppercase A..Z use the provided glyphs.
 // Lowercase letters map to uppercase so title-case text still renders.
-// Each byte is one row, with bit 0 as the leftmost pixel.
+// Each byte is one row, with bit 7 as the leftmost pixel.
 
 fn glyph(ch: u8) -> [u8; 8] {
     let ch = if ch >= b'a' && ch <= b'z' {
@@ -15,7 +15,7 @@ fn glyph(ch: u8) -> [u8; 8] {
 
     match ch {
         b' ' => [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-        b'!' => [0x18, 0x18, 0x18, 0x18, 0x18, 0x00, 0x18, 0x00],
+        b'!' => [0x18, 0x3C, 0x3C, 0x18, 0x18, 0x00, 0x18, 0x00],
         b'.' => [0x00, 0x00, 0x00, 0x00, 0x00, 0x18, 0x18, 0x00],
         b'0' => [0x3E, 0x63, 0x73, 0x7B, 0x6F, 0x67, 0x3E, 0x00],
         b'1' => [0x0C, 0x0E, 0x0C, 0x0C, 0x0C, 0x0C, 0x3F, 0x00],
@@ -68,7 +68,7 @@ pub fn draw_char(x: u16, y: u16, ch: u8, colour: u8, scale: u16) {
     for row in 0u16..8u16 {
         let row_byte = glyph[row as usize];
         for col in 0u16..8u16 {
-            let mask = 1u8 << col;
+            let mask = 1u8 << (7 - col);
             if row_byte & mask != 0 {
                 let x0 = x + col * scale;
                 let y0 = y + row * scale;
