@@ -6,10 +6,12 @@ User-mode application logic lives in Rust.
 
 ## GamePlay
 
-![Splash screen](assets/docs/SPLASH.png)
-![Player 2 win screen](assets/docs/P2_WON.png)
+| | |
+|---|---|
+| ![Splash screen](assets/docs/SPLASH.png) | ![Player 2 win screen](assets/docs/P2_WON.png) |
 
-<video controls width="100%" src="assets/docs/GAMEPLAY.MOV"></video>
+
+![Gameplay Video](assets/docs/GAMEPLAY.mp4)
 
 If your Markdown renderer does not display the video inline, open [GAMEPLAY.MOV](assets/docs/GAMEPLAY.MOV) directly.
 
@@ -27,6 +29,8 @@ If your Markdown renderer does not display the video inline, open [GAMEPLAY.MOV]
     - Paddle size: 12×80, ball radius: 10
     - Default speeds: paddle `PADDLE_SPD = 5`, ball `BALL_SPD_X = 4`, `BALL_SPD_Y = 3`
     - Input repeat uses `INPUT_REPEAT_FRAMES` to apply repeated small moves on a single key press.
+
+The paddles and ball are updated by erasing their previous positions and redrawing their current ones, which can make some text look like it is being erased; that effect was kept intentionally because it looked good in practice. Full-screen redraws only happen when the score changes.
 
 Note: If controls behave unexpectedly, check `src/keyboard.rs` (keycode → ASCII mapping) and the keypad debounce/FIFO in `src/os.s`.
 
