@@ -188,8 +188,25 @@ fn show_splash(kind: SplashKind) {
 }
 
 fn handle_play_input(game: &mut GameState) -> Option<SplashKind> {
-    while let Some(key) = keyboard::read_key_nonblocking() {
-        match key {
+    while let Some(raw) = keyboard::read_raw_key_nonblocking() {
+        // Debug: print raw keycode and ASCII translation to LCD
+        if let Some(ascii) = keyboard::keycode_to_ascii_pub(raw) {
+            let hex = b"0123456789ABCDEF";
+            let hi = hex[((raw >> 4) & 0x0f) as usize];
+            let lo = hex[(raw & 0x0f) as usize];
+            lcd::print_str(b"\n");
+            lcd::print_str(&[hi, lo, b':', ascii]);
+        } else {
+            let hex = b"0123456789ABCDEF";
+            let hi = hex[((raw >> 4) & 0x0f) as usize];
+            let lo = hex[(raw & 0x0f) as usize];
+            lcd::print_str(b"\n");
+            lcd::print_str(&[hi, lo, b':', b'?']);
+        }
+
+        let key = keyboard::keycode_to_ascii_pub(raw);
+        if let Some(key) = key {
+            match key {
             b'0' => return Some(SplashKind::Start),
             b'1' => {
                 game.p1_dir = -1;
@@ -208,6 +225,7 @@ fn handle_play_input(game: &mut GameState) -> Option<SplashKind> {
                 game.p2_repeat = INPUT_REPEAT_FRAMES;
             }
             _ => {}
+            }
         }
     }
 
