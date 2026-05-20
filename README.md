@@ -166,6 +166,15 @@ The game expects ASCII digits/characters returned by `keyboard::read_key_nonbloc
 - **Integration**: Animator is not integrated into the running game; `main.rs` runs Pong.
 - **Preview/export**: Use `tools/physanim.py` to preview or author `.ron` scenes; `build.rs` consumes `assets/scene.ron` to produce `src/generated_scene.rs` when present.
 
+## Hardware blocks
+
+The `riscv_system/rtl/user` directory contains the FPGA-side user graphics path:
+
+- `User_Peripheral.sv` is the CPU-facing peripheral wrapper. It exposes the draw register file, accepts a `GO` strobe from the processor, and sequences writes into the drawing engine. It also bridges the board peripherals such as LEDs, LCD control lines, switches, and the video timing inputs.
+- `drawing_engine.sv` is the rasterizer. It implements the actual shape drawing commands used by the Rust app: rectangles, circles, lines, filled triangles, and filled circles. The module keeps a small command FSM, tracks the active color, and writes pixels into video memory through the display interface.
+
+These blocks are the hardware side of the same drawing API that the Rust code reaches through syscalls.
+
 
 ### Syscall table
 
@@ -229,3 +238,13 @@ bash build.sh
 ```
 
 Output: `rv32-bare.kmd` — load this into the Bennett simulator.
+
+### Flashing the board
+
+To run on the FPGA board, flash the generated bitstream to the board before loading the software image. After building the hardware in `riscv_system`, use the provided Vivado helper script with the `top.bit` file from the `RISCV_Dual/RISCV_Dual.runs/impl_2` implementation directory:
+
+```bash
+bash riscv_system/download_bit_file.sh riscv_system/RISCV_Dual/RISCV_Dual.runs/impl_2/top.bit
+```
+
+After the board is flashed, you can build the Rust app and load the resulting `rv32-bare.kmd` into the simulator or run flow you are using.
