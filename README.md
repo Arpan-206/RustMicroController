@@ -22,8 +22,8 @@ If your Markdown renderer does not display the video inline, open [GAMEPLAY.MOV]
 - A simple two-player Pong game rendered via the framebuffer draw syscalls.
 - Screen resolution: 640×480, 8bpp palette.
 - Controls (keypad):
-    - Player 1: `1` = paddle up, `7` = paddle down
-    - Player 2: `3` = paddle up, `9` = paddle down
+    - Player 1: `1` = paddle up, `4` = paddle down
+    - Player 2: `3` = paddle up, `6` = paddle down
     - `1` also starts the game from the splash screen; `0` returns to the splash.
 - Game specifics:
     - Paddle size: 12×80, ball radius: 10
