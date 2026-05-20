@@ -133,11 +133,9 @@ pub fn draw_char(x: u16, y: u16, ch: u8, colour: u8, scale: u16) {
     let glyph = &FONT[(ch - 32) as usize];
     let c = Colour(colour);
 
-    let mut row = 0u16;
-    while row < 7 {
+    for row in 0u16..7u16 {
         let mut span_start: Option<u16> = None;
-        let mut col = 0u16;
-        while col < 6 {
+        for col in 0u16..6u16 {
             let lit = col < 5 && ((glyph[col as usize] >> row) & 1) != 0;
             if lit {
                 if span_start.is_none() {
@@ -147,12 +145,10 @@ pub fn draw_char(x: u16, y: u16, ch: u8, colour: u8, scale: u16) {
                 fill_scaled_span(x, y, row, start_col, col - 1, c, scale);
                 span_start = None;
             }
-            col += 1;
         }
         if let Some(start_col) = span_start {
             fill_scaled_span(x, y, row, start_col, 4, c, scale);
         }
-        row += 1;
     }
 }
 

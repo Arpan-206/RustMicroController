@@ -9,7 +9,7 @@ use crate::display::{draw_line, draw_rect, fill_circle, fill_rect, fill_triangle
 use crate::generated_scene::{self, Kf};
 use crate::{io, syscall};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 struct Shape {
     x0: u16,
     y0: u16,
@@ -43,14 +43,7 @@ impl Shape {
         }
     }
 
-    fn eq(self, other: Shape) -> bool {
-        self.x0 == other.x0
-            && self.y0 == other.y0
-            && self.x1 == other.x1
-            && self.y1 == other.y1
-            && self.x2 == other.x2
-            && self.y2 == other.y2
-    }
+    // equality provided by `PartialEq` derive
 
     fn erase(self, kind: u8, bg: u8) {
         if kind == generated_scene::KIND_CIRCLE {
@@ -76,12 +69,10 @@ pub fn run() -> ! {
     // Draw background and initial frame
     draw_rect(0, 0, 639, 479, background);
 
-    let mut i = 0;
-    while i < generated_scene::OBJECT_COUNT {
+    for i in 0..generated_scene::OBJECT_COUNT {
         let object = generated_scene::OBJECTS[i];
         previous[i] = shape_at(object.keyframes, 0);
         previous[i].draw(object.kind, object.colour);
-        i += 1;
     }
 
     io::timer_start(io::TIMER_1MS);
@@ -98,32 +89,26 @@ pub fn run() -> ! {
         let start = syscall::counter_get();
 
         // Compute next shapes
-        i = 0;
-        while i < generated_scene::OBJECT_COUNT {
+        for i in 0..generated_scene::OBJECT_COUNT {
             next[i] = shape_at(generated_scene::OBJECTS[i].keyframes, frame);
-            i += 1;
         }
 
         // Pass 1: erase only shapes that changed (back-to-front order preserves Z)
-        i = 0;
-        while i < generated_scene::OBJECT_COUNT {
-            if !previous[i].eq(next[i]) {
+        for i in 0..generated_scene::OBJECT_COUNT {
+            if previous[i] != next[i] {
                 previous[i].erase(generated_scene::OBJECTS[i].kind, background.0);
             }
-            i += 1;
         }
 
         // Pass 2: redraw only shapes that changed
-        i = 0;
-        while i < generated_scene::OBJECT_COUNT {
-            if !previous[i].eq(next[i]) {
+        for i in 0..generated_scene::OBJECT_COUNT {
+            if previous[i] != next[i] {
                 next[i].draw(
                     generated_scene::OBJECTS[i].kind,
                     generated_scene::OBJECTS[i].colour,
                 );
             }
             previous[i] = next[i];
-            i += 1;
         }
 
         frame = next_frame(frame);
@@ -149,8 +134,7 @@ fn shape_at(keyframes: &[Kf], frame: u16) -> Shape {
         return shape_from_kf(&keyframes[0]);
     }
 
-    let mut i = 0;
-    while i + 1 < keyframes.len() {
+    for i in 0..keyframes.len().saturating_sub(1) {
         let a = keyframes[i];
         let b = keyframes[i + 1];
         if frame <= b.frame {
@@ -165,7 +149,6 @@ fn shape_at(keyframes: &[Kf], frame: u16) -> Shape {
                 y2: lerp(a.y2, b.y2, t_num, t_den),
             };
         }
-        i += 1;
     }
 
     shape_from_kf(&keyframes[keyframes.len() - 1])

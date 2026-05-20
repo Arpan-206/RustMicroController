@@ -83,16 +83,13 @@ fn dedup_kfs(kfs: &[GeneratedKf]) -> Vec<GeneratedKf> {
         return out;
     }
 
-    let last_index = kfs.len() - 1;
-    let mut i = 0;
-    while i < kfs.len() {
-        let kf = kfs[i];
+    let last_index = kfs.len().saturating_sub(1);
+    for (i, &kf) in kfs.iter().enumerate() {
         if i == 0 || i == last_index {
             out.push(kf);
         } else if !same_kf_position(out.last().unwrap(), &kf) {
             out.push(kf);
         }
-        i += 1;
     }
     out
 }
@@ -178,12 +175,10 @@ fn generate_scene() {
         }
 
         keyframes.sort_by_key(|kf| kf.frame);
-        let mut i = 1;
-        while i < keyframes.len() {
+        for i in 1..keyframes.len() {
             if keyframes[i - 1].frame == keyframes[i].frame {
                 panic!("object {id} has duplicate keyframe {}", keyframes[i].frame);
             }
-            i += 1;
         }
 
         let keyframes = dedup_kfs(&keyframes);

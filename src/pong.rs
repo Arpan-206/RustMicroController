@@ -1,6 +1,6 @@
 use crate::display::{draw_rect, fill_circle, Colour};
-use crate::{font, io, keyboard, syscall};
 use crate::lcd;
+use crate::{font, io, keyboard, syscall};
 
 const SCREEN_W: u16 = 640;
 const SCREEN_H: u16 = 480;
@@ -183,7 +183,13 @@ fn show_splash(kind: SplashKind) {
     let subtitle_x = (SCREEN_W - subtitle_w) / 2;
     let subtitle_y = title_y + title_h + 18;
 
-    font::draw_str(subtitle_x, subtitle_y, subtitle, subtitle_colour, SUBTITLE_SCALE);
+    font::draw_str(
+        subtitle_x,
+        subtitle_y,
+        subtitle,
+        subtitle_colour,
+        SUBTITLE_SCALE,
+    );
     lcd::print_str(b"Pong\n");
     lcd::print_str(subtitle);
 }
@@ -281,8 +287,19 @@ fn update_and_render_game(game: &mut GameState) -> Option<SplashKind> {
         }
 
         game.serve_left = !game.serve_left;
-        reset_ball(&mut game.ball, game.serve_left, &mut game.ball_vx, &mut game.ball_vy);
-        clear_and_draw_world(game.p1_y, game.p2_y, game.ball, game.p1_score, game.p2_score);
+        reset_ball(
+            &mut game.ball,
+            game.serve_left,
+            &mut game.ball_vx,
+            &mut game.ball_vy,
+        );
+        clear_and_draw_world(
+            game.p1_y,
+            game.p2_y,
+            game.ball,
+            game.p1_score,
+            game.p2_score,
+        );
         update_lcd_score(game.p1_score, game.p2_score);
         return None;
     } else if game.ball.x > SCREEN_W as i16 {
@@ -299,8 +316,19 @@ fn update_and_render_game(game: &mut GameState) -> Option<SplashKind> {
         }
 
         game.serve_left = !game.serve_left;
-        reset_ball(&mut game.ball, game.serve_left, &mut game.ball_vx, &mut game.ball_vy);
-        clear_and_draw_world(game.p1_y, game.p2_y, game.ball, game.p1_score, game.p2_score);
+        reset_ball(
+            &mut game.ball,
+            game.serve_left,
+            &mut game.ball_vx,
+            &mut game.ball_vy,
+        );
+        clear_and_draw_world(
+            game.p1_y,
+            game.p2_y,
+            game.ball,
+            game.p1_score,
+            game.p2_score,
+        );
         update_lcd_score(game.p1_score, game.p2_score);
         return None;
     }
@@ -329,19 +357,22 @@ fn draw_net() {
     let segment_h: u16 = 20;
     let gap_h: u16 = 20;
     let mut y: u16 = 10;
-    let mut count = 0;
-
-    while count < 12 {
+    for _ in 0..12 {
         draw_rect(NET_X0, y, NET_X1, y + segment_h - 1, Colour(NET_COL));
         y += segment_h + gap_h;
-        count += 1;
     }
 }
 
 fn draw_paddle(y: i16, colour: u8, x: i16) {
     let y0 = y.max(0) as u16;
     let y1 = (y + (PADDLE_H as i16) - 1).min((SCREEN_H as i16) - 1) as u16;
-    draw_rect(x as u16, y0, (x + (PADDLE_W as i16) - 1) as u16, y1, Colour(colour));
+    draw_rect(
+        x as u16,
+        y0,
+        (x + (PADDLE_W as i16) - 1) as u16,
+        y1,
+        Colour(colour),
+    );
 }
 
 fn draw_ball(x: i16, y: i16, colour: u8) {
