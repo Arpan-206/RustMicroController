@@ -4,7 +4,7 @@ use crate::display::Colour;
 // 8x8 font for ASCII 32..126.
 // Uppercase A..Z use the provided glyphs.
 // Lowercase letters map to uppercase so title-case text still renders.
-// Each byte is one row, with bit 7 as the leftmost pixel.
+// Each byte is one row, with bit 0 as the leftmost pixel.
 
 fn glyph(ch: u8) -> [u8; 8] {
     let ch = if ch >= b'a' && ch <= b'z' {
@@ -68,7 +68,7 @@ pub fn draw_char(x: u16, y: u16, ch: u8, colour: u8, scale: u16) {
     for row in 0u16..8u16 {
         let row_byte = glyph[row as usize];
         for col in 0u16..8u16 {
-            let mask = 1u8 << (7 - col);
+            let mask = 1u8 << col;
             if row_byte & mask != 0 {
                 let x0 = x + col * scale;
                 let y0 = y + row * scale;
