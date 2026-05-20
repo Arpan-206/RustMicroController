@@ -1,4 +1,7 @@
 // generated - do not edit
+// NOTE: Animator integration incomplete — `src/animator.rs` was left
+// unfinished due to time constraints and is not currently wired into
+// the runtime user application.
 
 pub const FPS: u32 = 20;
 pub const BG: u8 = 0x00;

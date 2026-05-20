@@ -152,6 +152,13 @@ on each timer interrupt:
 | `elftokmd.py` | Python | Converts ELF to `.kmd` listing for the simulator |
 | `build.sh` | Shell | `cargo build --release` then `elftokmd.py` |
 
+## Animator (incomplete)
+
+- **Status**: Implementation started in `src/animator.rs` but not completed due to time constraints.
+- **Integration**: The animator is not currently integrated into the user application; `main.rs` runs the keypad calculator.
+- **Preview/export**: Use `tools/physanim.py` to preview physics animations and export `.ron` scenes which are consumed to generate `src/generated_scene.rs`.
+
+
 ### Syscall table
 
 | Number | Name | In | Out |

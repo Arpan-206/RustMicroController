@@ -1,4 +1,9 @@
-// This file was under-progress but I ran out of time to include it
+// NOTE: Animator incomplete — not finished due to time constraints.
+// The animator implementation in this file was started but not fully
+// integrated or validated. It remains here as a partial implementation
+// and is not wired into the current user application. Use
+// `tools/physanim.py` or the exported `assets/scene.ron` to preview
+// or regenerate keyframes until this module is completed.
 
 use crate::display::{draw_line, draw_rect, fill_circle, fill_rect, fill_triangle, Colour};
 use crate::generated_scene::{self, Kf};
